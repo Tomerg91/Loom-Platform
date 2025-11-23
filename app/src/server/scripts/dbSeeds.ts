@@ -15,7 +15,15 @@ type MockUserData = Omit<User, "id">;
  */
 export async function seedMockUsers(prismaClient: PrismaClient) {
   await Promise.all(
-    generateMockUsersData(50).map((data) => prismaClient.user.create({ data })),
+    generateMockUsersData(50).map((data) =>
+      prismaClient.user.create({
+        data: {
+          ...data,
+          // Auto-create CoachProfile for COACH users
+          coachProfile: data.role === "COACH" ? { create: {} } : undefined,
+        },
+      })
+    )
   );
 }
 

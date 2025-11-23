@@ -72,6 +72,8 @@ app OpenSaaS {
     seeds: [
       // Populates the database with a bunch of fake users to work with during development.
       import { seedMockUsers } from "@src/server/scripts/dbSeeds",
+      // Creates missing CoachProfile/ClientProfile for existing users
+      import { createMissingProfiles } from "@src/server/scripts/createMissingProfiles",
     ]
   },
 
