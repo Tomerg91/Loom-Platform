@@ -3,8 +3,8 @@ import { routes } from "wasp/client/router";
 
 export const userMenuItems = [
   {
-    name: "AI Scheduler (Demo App)",
-    to: routes.DemoAppRoute.to,
+    name: "Coach Dashboard",
+    to: routes.CoachDashboardRoute.to,
     icon: LayoutDashboard,
     isAdminOnly: false,
     isAuthRequired: true,

@@ -42,7 +42,11 @@ function generateMockUserData(): MockUserData {
     email: faker.internet.email({ firstName, lastName }),
     username: faker.internet.userName({ firstName, lastName }),
     createdAt,
+    role: "COACH", // All seed users are coaches
     isAdmin: false,
+    isEmailVerified: true,
+    emailVerificationToken: null,
+    passwordResetToken: null,
     credits,
     subscriptionStatus,
     lemonSqueezyCustomerPortalUrl: null,

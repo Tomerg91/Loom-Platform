@@ -3,31 +3,27 @@ app OpenSaaS {
     version: "^0.19.0"
   },
 
-  title: "My Open SaaS App",
+  title: "Loom Platform",
 
   head: [
     "<link rel='icon' href='/favicon.ico' />",
     "<meta charset='utf-8' />",
-    "<meta name='description' content='Your apps main description and features.' />",
-    "<meta name='author' content='Your (App) Name' />",
-    "<meta name='keywords' content='saas, solution, product, app, service' />",
+    "<meta name='description' content='Somatic coaching platform for the Satya Method.' />",
+    "<meta name='author' content='Loom Platform' />",
+    "<meta name='keywords' content='coaching, somatic, body mapping, Satya Method' />",
 
     "<meta property='og:type' content='website' />",
-    "<meta property='og:title' content='Your Open SaaS App' />",
-    "<meta property='og:site_name' content='Your Open SaaS App' />",
-    "<meta property='og:url' content='https://your-saas-app.com' />",
-    "<meta property='og:description' content='Your apps main description and features.' />",
-    "<meta property='og:image' content='https://your-saas-app.com/public-banner.webp' />",
-    "<meta name='twitter:image' content='https://your-saas-app.com/public-banner.webp' />",
+    "<meta property='og:title' content='Loom Platform' />",
+    "<meta property='og:site_name' content='Loom Platform' />",
+    "<meta property='og:url' content='https://loom-platform.com' />",
+    "<meta property='og:description' content='Somatic coaching platform for the Satya Method.' />",
+    "<meta property='og:image' content='https://loom-platform.com/public-banner.webp' />",
+    "<meta name='twitter:image' content='https://loom-platform.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
     "<meta name='twitter:image:height' content='400' />",
     "<meta name='twitter:card' content='summary_large_image' />",
-    // TODO: You can put your Plausible analytics scripts below (https://docs.opensaas.sh/guides/analytics/):
-    // NOTE: Plausible does not use Cookies, so you can simply add the scripts here.
-    // Google, on the other hand, does, so you must instead add the script dynamically
-    // via the Cookie Consent component after the user clicks the "Accept" cookies button.
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",  // for production
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>",  // for development
+    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",
+    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>",
   ],
 
   // 🔐 Auth out of the box! https://wasp.sh/docs/auth/overview
@@ -68,7 +64,7 @@ app OpenSaaS {
       // }
     },
     onAuthFailedRedirectTo: "/login",
-    onAuthSucceededRedirectTo: "/demo-app",
+    onAuthSucceededRedirectTo: "/coach",
   },
 
   db: {
@@ -128,11 +124,23 @@ page EmailVerificationPage {
 }
 //#endregion
 
-//#region User
+//#region User & Dashboards
 route AccountRoute { path: "/account", to: AccountPage }
 page AccountPage {
   authRequired: true,
   component: import Account from "@src/user/AccountPage"
+}
+
+route CoachDashboardRoute { path: "/coach", to: CoachDashboardPage }
+page CoachDashboardPage {
+  authRequired: true,
+  component: import CoachDashboard from "@src/coach/CoachDashboardPage"
+}
+
+route ClientDashboardRoute { path: "/client", to: ClientDashboardPage }
+page ClientDashboardPage {
+  authRequired: true,
+  component: import ClientDashboard from "@src/client/ClientDashboardPage"
 }
 
 query getPaginatedUsers {
@@ -146,41 +154,37 @@ action updateIsUserAdminById {
 }
 //#endregion
 
-//#region Demo AI App
-route DemoAppRoute { path: "/demo-app", to: DemoAppPage }
-page DemoAppPage {
-  authRequired: true,
-  component: import DemoAppPage from "@src/demo-ai-app/DemoAppPage"
+//#region Invitations
+action inviteClient {
+  fn: import { inviteClient } from "@src/invitation/operations",
+  entities: [User, CoachProfile, ClientInvitation]
 }
 
-action generateGptResponse {
-  fn: import { generateGptResponse } from "@src/demo-ai-app/operations",
-  entities: [User, Task, GptResponse]
+action acceptInvitation {
+  fn: import { acceptInvitation } from "@src/invitation/operations",
+  entities: [User, ClientProfile, ClientInvitation, CoachProfile]
 }
 
-action createTask {
-  fn: import { createTask } from "@src/demo-ai-app/operations",
-  entities: [Task]
+query getPendingInvitations {
+  fn: import { getPendingInvitations } from "@src/invitation/operations",
+  entities: [CoachProfile, ClientInvitation]
 }
 
-action deleteTask {
-  fn: import { deleteTask } from "@src/demo-ai-app/operations",
-  entities: [Task]
+route AcceptInviteRoute { path: "/accept-invite", to: AcceptInvitePage }
+page AcceptInvitePage {
+  component: import AcceptInvite from "@src/invitation/AcceptInvitePage"
+}
+//#endregion
+
+//#region Somatic Logs
+action createSomaticLog {
+  fn: import { createSomaticLog } from "@src/somatic-logs/operations",
+  entities: [User, ClientProfile, SomaticLog]
 }
 
-action updateTask {
-  fn: import { updateTask } from "@src/demo-ai-app/operations",
-  entities: [Task]
-}
-
-query getGptResponses {
-  fn: import { getGptResponses } from "@src/demo-ai-app/operations",
-  entities: [User, GptResponse]
-}
-
-query getAllTasksByUser {
-  fn: import { getAllTasksByUser } from "@src/demo-ai-app/operations",
-  entities: [Task]
+query getSomaticLogs {
+  fn: import { getSomaticLogs } from "@src/somatic-logs/operations",
+  entities: [User, ClientProfile, CoachProfile, SomaticLog]
 }
 //#endregion
 
@@ -302,7 +306,6 @@ route NotFoundRoute { path: "*", to: NotFoundPage }
 page NotFoundPage {
   component: import { NotFoundPage } from "@src/client/components/NotFoundPage"
 }
-//#endregion
 
 //#region Contact Form Messages
 // TODO:
@@ -313,4 +316,5 @@ page AdminMessagesPage {
   authRequired: true,
   component: import AdminMessages from "@src/admin/dashboards/messages/MessagesPage"
 }
+//#endregion
 //#endregion

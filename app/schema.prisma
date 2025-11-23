@@ -7,50 +7,124 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================================
+// ROLE-BASED ENUMS
+// ============================================
+enum UserRole {
+  ADMIN
+  COACH
+  CLIENT
+}
+
+enum BodyZone {
+  HEAD
+  THROAT
+  CHEST
+  SOLAR_PLEXUS
+  BELLY
+  PELVIS
+  ARMS
+  LEGS
+  FULL_BODY
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
 model User {
   id                        String          @id @default(uuid())
   createdAt                 DateTime        @default(now())
 
   email                     String?         @unique
   username                  String?         @unique
+
+  // ROLE MANAGEMENT
+  role                      UserRole        @default(COACH) // Public signups default to COACH
   isAdmin                   Boolean         @default(false)
 
+  // PROFILE RELATIONS (1:1)
+  coachProfile              CoachProfile?
+  clientProfile             ClientProfile?
+
+  // SUBSCRIPTION (Relevant for COACH only)
   paymentProcessorUserId    String?         @unique
-  lemonSqueezyCustomerPortalUrl String?     // You can delete this if you're not using Lemon Squeezy as your payments processor.
+  lemonSqueezyCustomerPortalUrl String?
   subscriptionStatus        String?         // 'active', 'cancel_at_period_end', 'past_due', 'deleted'
-  subscriptionPlan          String?         // 'hobby', 'pro'
+  subscriptionPlan          String?         // 'starter', 'pro'
   datePaid                  DateTime?
   credits                   Int             @default(3)
 
-  gptResponses              GptResponse[]
+  // BOILERPLATE FIELDS
+  isEmailVerified           Boolean         @default(false)
+  emailVerificationToken    String?
+  passwordResetToken        String?
+
   contactFormMessages       ContactFormMessage[]
-  tasks                     Task[]
   files                     File[]
 }
 
-model GptResponse {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
-  updatedAt                 DateTime        @updatedAt
+// ============================================
+// ROLE-SPECIFIC PROFILES
+// ============================================
+model CoachProfile {
+  id      String          @id @default(uuid())
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String          @unique
 
-  user                      User            @relation(fields: [userId], references: [id])
-  userId                    String
-
-  content                   String
+  // A Coach manages many Clients
+  clients ClientProfile[]
+  invitations ClientInvitation[]
 }
 
-model Task {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+model ClientProfile {
+  id      String          @id @default(uuid())
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String          @unique
 
-  user                      User            @relation(fields: [userId], references: [id])
-  userId                    String
+  // A Client belongs to one Coach
+  coach   CoachProfile?   @relation(fields: [coachId], references: [id])
+  coachId String?
 
-  description               String
-  time                      String          @default("1")
-  isDone                    Boolean         @default(false)
+  // The Core Feature: Somatic Logs (replaces Tasks)
+  somaticLogs SomaticLog[]
 }
 
+// ============================================
+// CLIENT INVITATIONS
+// ============================================
+model ClientInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  coachId   String
+  status    String   @default("PENDING") // PENDING, ACCEPTED
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  // Link to coach so they can see pending invites
+  coach     CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// SOMATIC LOGS (Core Feature)
+// ============================================
+model SomaticLog {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+
+  // The Data Point
+  bodyZone    BodyZone
+  sensation   String      // e.g., "Tight", "Hot", "Vibrating"
+  intensity   Int         // 1-10 scale
+  note        String?     @db.Text
+
+  client      ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+}
+
+// ============================================
+// FILE UPLOADS
+// ============================================
 model File {
   id                        String          @id @default(uuid())
   createdAt                 DateTime        @default(now())
@@ -63,6 +137,9 @@ model File {
   s3Key                     String
 }
 
+// ============================================
+// ANALYTICS & ADMIN
+// ============================================
 model DailyStats {
   id                               Int             @id @default(autoincrement())
   date                             DateTime        @default(now()) @unique

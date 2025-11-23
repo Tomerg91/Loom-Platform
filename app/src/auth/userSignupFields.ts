@@ -3,6 +3,9 @@ import { z } from "zod";
 
 const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
 
+// ============================================
+// EMAIL SIGNUP
+// ============================================
 const emailDataSchema = z.object({
   email: z.string(),
 });
@@ -20,8 +23,62 @@ export const getEmailUserFields = defineUserSignupFields({
     const emailData = emailDataSchema.parse(data);
     return adminEmails.includes(emailData.email);
   },
+  role: () => "COACH" as const, // All public signups default to COACH
+  isEmailVerified: () => false,
+  // Auto-create the CoachProfile using Prisma nested write
+  coachProfile: () => ({
+    create: {},
+  }),
 });
 
+// ============================================
+// GOOGLE SIGNUP
+// ============================================
+const googleDataSchema = z.object({
+  profile: z.object({
+    email: z.string(),
+    email_verified: z.boolean(),
+    name: z.string().optional(),
+  }),
+});
+
+export const getGoogleUserFields = defineUserSignupFields({
+  email: (data) => {
+    const googleData = googleDataSchema.parse(data);
+    return googleData.profile.email;
+  },
+  username: (data) => {
+    const googleData = googleDataSchema.parse(data);
+    // Use name if available, fallback to email
+    return googleData.profile.name || googleData.profile.email;
+  },
+  isAdmin: (data) => {
+    const googleData = googleDataSchema.parse(data);
+    if (!googleData.profile.email_verified) {
+      return false;
+    }
+    return adminEmails.includes(googleData.profile.email);
+  },
+  role: () => "COACH" as const, // All public signups default to COACH
+  isEmailVerified: (data) => {
+    const googleData = googleDataSchema.parse(data);
+    return googleData.profile.email_verified;
+  },
+  // Auto-create the CoachProfile using Prisma nested write
+  coachProfile: () => ({
+    create: {},
+  }),
+});
+
+export function getGoogleAuthConfig() {
+  return {
+    scopes: ["profile", "email"], // must include at least 'profile' for Google
+  };
+}
+
+// ============================================
+// GITHUB SIGNUP
+// ============================================
 const githubDataSchema = z.object({
   profile: z.object({
     emails: z
@@ -29,11 +86,11 @@ const githubDataSchema = z.object({
         z.object({
           email: z.string(),
           verified: z.boolean(),
-        }),
+        })
       )
       .min(
         1,
-        "You need to have an email address associated with your GitHub account to sign up.",
+        "You need to have an email address associated with your GitHub account to sign up."
       ),
     login: z.string(),
   }),
@@ -56,53 +113,30 @@ export const getGitHubUserFields = defineUserSignupFields({
     }
     return adminEmails.includes(emailInfo.email);
   },
+  role: () => "COACH" as const, // All public signups default to COACH
+  isEmailVerified: (data) => {
+    const githubData = githubDataSchema.parse(data);
+    return getGithubEmailInfo(githubData).verified;
+  },
+  // Auto-create the CoachProfile using Prisma nested write
+  coachProfile: () => ({
+    create: {},
+  }),
 });
 
-// We are using the first email from the list of emails returned by GitHub.
-// If you want to use a different email, you can modify this function.
 function getGithubEmailInfo(githubData: z.infer<typeof githubDataSchema>) {
   return githubData.profile.emails[0];
 }
 
-// NOTE: if we don't want to access users' emails, we can use scope ["user:read"]
-// instead of ["user"] and access args.profile.username instead
 export function getGitHubAuthConfig() {
   return {
     scopes: ["user"],
   };
 }
 
-const googleDataSchema = z.object({
-  profile: z.object({
-    email: z.string(),
-    email_verified: z.boolean(),
-  }),
-});
-
-export const getGoogleUserFields = defineUserSignupFields({
-  email: (data) => {
-    const googleData = googleDataSchema.parse(data);
-    return googleData.profile.email;
-  },
-  username: (data) => {
-    const googleData = googleDataSchema.parse(data);
-    return googleData.profile.email;
-  },
-  isAdmin: (data) => {
-    const googleData = googleDataSchema.parse(data);
-    if (!googleData.profile.email_verified) {
-      return false;
-    }
-    return adminEmails.includes(googleData.profile.email);
-  },
-});
-
-export function getGoogleAuthConfig() {
-  return {
-    scopes: ["profile", "email"], // must include at least 'profile' for Google
-  };
-}
-
+// ============================================
+// DISCORD SIGNUP
+// ============================================
 const discordDataSchema = z.object({
   profile: z.object({
     username: z.string(),
@@ -117,7 +151,7 @@ export const getDiscordUserFields = defineUserSignupFields({
     // Users need to have an email for payment processing.
     if (!discordData.profile.email) {
       throw new Error(
-        "You need to have an email address associated with your Discord account to sign up.",
+        "You need to have an email address associated with your Discord account to sign up."
       );
     }
     return discordData.profile.email;
@@ -133,6 +167,15 @@ export const getDiscordUserFields = defineUserSignupFields({
     }
     return adminEmails.includes(discordData.profile.email);
   },
+  role: () => "COACH" as const, // All public signups default to COACH
+  isEmailVerified: (data) => {
+    const discordData = discordDataSchema.parse(data);
+    return discordData.profile.verified || false;
+  },
+  // Auto-create the CoachProfile using Prisma nested write
+  coachProfile: () => ({
+    create: {},
+  }),
 });
 
 export function getDiscordAuthConfig() {
