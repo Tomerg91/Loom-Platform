@@ -1,23 +1,17 @@
-import aiReadyDark from "../client/static/assets/aiready-dark.webp";
-import aiReady from "../client/static/assets/aiready.webp";
 import HighlightedFeature from "./components/HighlightedFeature";
+import SomaticBodyMap from "../client/components/SomaticBodyMap";
 
-export default function AIReady() {
+export default function BodyMapShowcase() {
   return (
     <HighlightedFeature
-      name="Example Feature Highlight"
-      description="Yo! Use this component to show off the most important features in your app."
-      highlightedComponent={<AIReadyExample />}
-      direction="row-reverse"
+      name="Feel It. Map It. Track It."
+      description="The interactive Body Map turns sensations into insights. Heat, tension, vibration — all tracked over time. Click a zone to explore what you're feeling, then save it to your journal."
+      highlightedComponent={
+        <div className="w-full h-full flex justify-center p-4 md:p-8 bg-gradient-to-br from-slate-50 via-white to-teal-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 rounded-lg">
+          <SomaticBodyMap />
+        </div>
+      }
+      direction="row"
     />
-  );
-}
-
-const AIReadyExample = () => {
-  return (
-    <div className="w-full">
-      <img src={aiReady} alt="AI Ready" className="dark:hidden" />
-      <img src={aiReadyDark} alt="AI Ready" className="hidden dark:block" />
-    </div>
   );
 };

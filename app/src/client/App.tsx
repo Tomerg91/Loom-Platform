@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { routes } from "wasp/client/router";
 import { useAuth } from "wasp/client/auth";
+import { createSomaticLog } from "wasp/client/operations";
 import { Toaster } from "../components/ui/toaster";
 import "./Main.css";
 import i18nInstance from "./i18n";
@@ -9,6 +10,7 @@ import NavBar from "./components/NavBar/NavBar";
 import {
   demoNavigationitems,
   marketingNavigationItems,
+  getNavigationItemsForUser,
 } from "./components/NavBar/constants";
 import CookieConsentBanner from "./components/cookie-consent/Banner";
 
@@ -50,6 +52,37 @@ export default function App() {
     };
   }, []);
 
+  // Handle pending somatic log from landing page sessionStorage
+  // This runs after user authenticates (user changes from null to authenticated)
+  useEffect(() => {
+    if (!user) return;
+
+    const pendingLog = sessionStorage.getItem("pending_somatic_log");
+    if (!pendingLog) return;
+
+    try {
+      const { zone, sensation, timestamp } = JSON.parse(pendingLog);
+
+      // Save to database
+      createSomaticLog({
+        bodyZone: zone,
+        sensation,
+        intensity: 5, // Default intensity for landing page saves
+        note: `Saved from landing page on ${new Date(timestamp).toLocaleString()}`,
+      })
+        .then(() => {
+          sessionStorage.removeItem("pending_somatic_log");
+          console.log("Somatic log saved successfully");
+        })
+        .catch((error) => {
+          console.error("Failed to save somatic log:", error);
+        });
+    } catch (error) {
+      console.error("Failed to parse pending somatic log:", error);
+      sessionStorage.removeItem("pending_somatic_log");
+    }
+  }, [user]);
+
   const isMarketingPage = useMemo(() => {
     return (
       location.pathname === "/" || location.pathname.startsWith("/pricing")
@@ -58,7 +91,7 @@ export default function App() {
 
   const navigationItems = isMarketingPage
     ? marketingNavigationItems
-    : demoNavigationitems;
+    : getNavigationItemsForUser(user || undefined);
 
   const shouldDisplayAppNavBar = useMemo(() => {
     return (
