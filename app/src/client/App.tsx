@@ -1,8 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { routes } from "wasp/client/router";
+import { useAuth } from "wasp/client/auth";
 import { Toaster } from "../components/ui/toaster";
 import "./Main.css";
+import i18nInstance from "./i18n";
 import NavBar from "./components/NavBar/NavBar";
 import {
   demoNavigationitems,
@@ -16,6 +18,38 @@ import CookieConsentBanner from "./components/cookie-consent/Banner";
  */
 export default function App() {
   const location = useLocation();
+  const { data: user } = useAuth();
+
+  // Initialize i18n with user's preferred language
+  useEffect(() => {
+    if (user?.preferredLanguage) {
+      i18nInstance.changeLanguage(user.preferredLanguage);
+      const dir = user.preferredLanguage === "he" ? "rtl" : "ltr";
+      document.documentElement.dir = dir;
+      document.documentElement.lang = user.preferredLanguage;
+    } else {
+      // Default to Hebrew if no preference
+      i18nInstance.changeLanguage("he");
+      document.documentElement.dir = "rtl";
+      document.documentElement.lang = "he";
+    }
+  }, [user?.preferredLanguage]);
+
+  // Update document direction when language changes
+  useEffect(() => {
+    const handleLanguageChanged = (lng: string) => {
+      const dir = lng === "he" ? "rtl" : "ltr";
+      document.documentElement.dir = dir;
+      document.documentElement.lang = lng;
+    };
+
+    i18nInstance.on("languageChanged", handleLanguageChanged);
+
+    return () => {
+      i18nInstance.off("languageChanged", handleLanguageChanged);
+    };
+  }, []);
+
   const isMarketingPage = useMemo(() => {
     return (
       location.pathname === "/" || location.pathname.startsWith("/pricing")

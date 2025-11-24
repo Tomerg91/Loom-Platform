@@ -1,6 +1,7 @@
 import { CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "wasp/client/auth";
 import {
   generateCheckoutSession,
@@ -32,6 +33,33 @@ interface PaymentPlanCard {
   features: string[];
 }
 
+const getPricingPageCards = (t: (key: string) => string): Record<PaymentPlanId, PaymentPlanCard> => ({
+  [PaymentPlanId.Hobby]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Hobby),
+    price: "$9.99",
+    description: t("pricing.starter.description"),
+    features: [
+      t("pricing.starter.features.0"),
+      t("pricing.starter.features.1"),
+    ],
+  },
+  [PaymentPlanId.Pro]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Pro),
+    price: "$19.99",
+    description: t("pricing.pro.description"),
+    features: [
+      t("pricing.pro.features.0"),
+      t("pricing.pro.features.1"),
+    ],
+  },
+  [PaymentPlanId.Credits10]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Credits10),
+    price: "$9.99",
+    description: "One-time purchase of 10 credits for your account",
+    features: ["Use credits for e.g. OpenAI API calls", "No expiration date"],
+  },
+});
+
 export const paymentPlanCards: Record<PaymentPlanId, PaymentPlanCard> = {
   [PaymentPlanId.Hobby]: {
     name: prettyPaymentPlanName(PaymentPlanId.Hobby),
@@ -54,8 +82,10 @@ export const paymentPlanCards: Record<PaymentPlanId, PaymentPlanCard> = {
 };
 
 const PricingPage = () => {
+  const { t } = useTranslation();
   const [isPaymentLoading, setIsPaymentLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const pricingCards = getPricingPageCards(t);
 
   const { data: user } = useAuth();
   const isUserSubscribed =
@@ -121,17 +151,9 @@ const PricingPage = () => {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div id="pricing" className="mx-auto max-w-4xl text-center">
           <h2 className="text-foreground mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
-            Pick your <span className="text-primary">pricing</span>
+            {t("pricing.title")}
           </h2>
         </div>
-        <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-center text-lg leading-8">
-          Choose between Stripe and LemonSqueezy as your payment provider. Just
-          add your Product IDs! Try it out below with test credit card number{" "}
-          <br />
-          <span className="bg-muted text-muted-foreground rounded-md px-2 py-1 font-mono text-sm">
-            4242 4242 4242 4242 4242
-          </span>
-        </p>
         {errorMessage && (
           <Alert variant="destructive" className="mt-8">
             <AlertDescription>{errorMessage}</AlertDescription>
@@ -170,15 +192,15 @@ const PricingPage = () => {
                     id={planId}
                     className="text-foreground text-lg font-semibold leading-8"
                   >
-                    {paymentPlanCards[planId].name}
+                    {pricingCards[planId].name}
                   </CardTitle>
                 </div>
                 <p className="text-muted-foreground mt-4 text-sm leading-6">
-                  {paymentPlanCards[planId].description}
+                  {pricingCards[planId].description}
                 </p>
                 <p className="mt-6 flex items-baseline gap-x-1">
                   <span className="text-foreground text-4xl font-bold tracking-tight">
-                    {paymentPlanCards[planId].price}
+                    {pricingCards[planId].price}
                   </span>
                   <span className="text-muted-foreground text-sm font-semibold leading-6">
                     {paymentPlans[planId].effect.kind === "subscription" &&
@@ -189,7 +211,7 @@ const PricingPage = () => {
                   role="list"
                   className="text-muted-foreground mt-8 space-y-3 text-sm leading-6"
                 >
-                  {paymentPlanCards[planId].features.map((feature) => (
+                  {pricingCards[planId].features.map((feature) => (
                     <li key={feature} className="flex gap-x-3">
                       <CheckCircle
                         className="text-primary h-5 w-5 flex-none"
@@ -211,7 +233,7 @@ const PricingPage = () => {
                     }
                     className="w-full"
                   >
-                    Manage Subscription
+                    {t("pricing.manageSubscription")}
                   </Button>
                 ) : (
                   <Button
@@ -223,7 +245,7 @@ const PricingPage = () => {
                     className="w-full"
                     disabled={isPaymentLoading}
                   >
-                    {!!user ? "Buy plan" : "Log in to buy plan"}
+                    {!!user ? t("pricing.buyPlan") : t("pricing.loginToBuyPlan")}
                   </Button>
                 )}
               </CardFooter>
