@@ -1,11 +1,15 @@
 import type { User } from "wasp/entities";
-import { getSomaticLogs, useQuery } from "wasp/client/operations";
+import { getSomaticLogs, getRecentSessionsForClient, useQuery } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import SomaticLogForm from "./SomaticLogForm";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
+import { Calendar } from "lucide-react";
 
 export default function ClientDashboardPage({ user }: { user: User }) {
   const { data: somaticLogs, refetch } = useQuery(getSomaticLogs);
+
+  // Fetch recent sessions for this client (last 3)
+  const { data: recentSessions } = useQuery(getRecentSessionsForClient);
 
   const handleLogSuccess = () => {
     // Refetch logs when a new one is created
@@ -95,6 +99,58 @@ export default function ClientDashboardPage({ user }: { user: User }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Sessions */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Recent Sessions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!recentSessions || recentSessions.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No session recaps yet. Your coach will share summaries here.
+            </p>
+          ) : (
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              {recentSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="font-medium text-sm">
+                        {format(new Date(session.sessionDate), "MMMM d, yyyy")}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(new Date(session.sessionDate), "h:mm a")}
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(session.sessionDate), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  {session.sharedSummary && (
+                    <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                      "{session.sharedSummary}"
+                    </p>
+                  )}
+                  {!session.sharedSummary && (
+                    <p className="text-xs text-muted-foreground italic">
+                      No summary shared yet.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

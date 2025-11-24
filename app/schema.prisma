@@ -42,6 +42,9 @@ model User {
   role                      UserRole        @default(COACH) // Public signups default to COACH
   isAdmin                   Boolean         @default(false)
 
+  // INTERNATIONALIZATION
+  preferredLanguage         String?         @default("he")
+
   // PROFILE RELATIONS (1:1)
   coachProfile              CoachProfile?
   clientProfile             ClientProfile?
@@ -53,6 +56,9 @@ model User {
   subscriptionPlan          String?         // 'starter', 'pro'
   datePaid                  DateTime?
   credits                   Int             @default(3)
+
+  // TRANZILLA TOKENIZATION
+  tranzillaToken            String?         // TranzilaTK for auto-renewal
 
   // BOILERPLATE FIELDS
   isEmailVerified           Boolean         @default(false)
@@ -74,6 +80,9 @@ model CoachProfile {
   // A Coach manages many Clients
   clients ClientProfile[]
   invitations ClientInvitation[]
+
+  // Sessions logged by this Coach
+  sessions CoachSession[]
 }
 
 model ClientProfile {
@@ -87,6 +96,9 @@ model ClientProfile {
 
   // The Core Feature: Somatic Logs (replaces Tasks)
   somaticLogs SomaticLog[]
+
+  // Sessions logged by Coach
+  sessions CoachSession[]
 }
 
 // ============================================
@@ -120,6 +132,28 @@ model SomaticLog {
 
   client      ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String
+}
+
+// ============================================
+// COACH SESSIONS (Module 9: Session Recaps)
+// ============================================
+model CoachSession {
+  id            String        @id @default(uuid())
+  createdAt     DateTime      @default(now())
+  sessionDate   DateTime      @default(now())
+
+  // Coach-visible only
+  privateNotes  String?       @db.Text
+
+  // Visible to both Coach and Client
+  sharedSummary String?       @db.Text
+
+  // Relations
+  coach         CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId       String
+
+  client        ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
 }
 
 // ============================================
@@ -185,4 +219,17 @@ model ContactFormMessage {
   content                   String
   isRead                    Boolean         @default(false)
   repliedAt                 DateTime?
+}
+
+// ============================================
+// TRANZILLA TRANSACTIONS
+// ============================================
+model TranzillaTransaction {
+  id            String   @id @default(uuid())
+  transactionId String   @unique
+  userId        String
+  amount        Float
+  response      String
+  tranzilaTK    String?
+  processedAt   DateTime @default(now())
 }

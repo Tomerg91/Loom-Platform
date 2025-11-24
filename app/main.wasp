@@ -139,6 +139,17 @@ page CoachDashboardPage {
   component: import CoachDashboard from "@src/coach/CoachDashboardPage"
 }
 
+query getClientsForCoach {
+  fn: import { getClientsForCoach } from "@src/coach/operations",
+  entities: [User, CoachProfile, ClientProfile, SomaticLog, CoachSession]
+}
+
+route ClientDetailsRoute { path: "/coach/client/:clientId", to: ClientDetailsPage }
+page ClientDetailsPage {
+  authRequired: true,
+  component: import ClientDetails from "@src/coach/ClientDetailsPage"
+}
+
 route ClientDashboardRoute { path: "/client", to: ClientDashboardPage }
 page ClientDashboardPage {
   authRequired: true,
@@ -152,6 +163,11 @@ query getPaginatedUsers {
 
 action updateIsUserAdminById {
   fn: import { updateIsUserAdminById } from "@src/user/operations",
+  entities: [User]
+}
+
+action updateUserLanguage {
+  fn: import { updateUserLanguage } from "@src/user/operations",
   entities: [User]
 }
 //#endregion
@@ -190,6 +206,33 @@ query getSomaticLogs {
 }
 //#endregion
 
+//#region Sessions
+action createSession {
+  fn: import { createSession } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile, CoachSession]
+}
+
+action updateSession {
+  fn: import { updateSession } from "@src/session/operations",
+  entities: [User, CoachProfile, CoachSession]
+}
+
+action deleteSession {
+  fn: import { deleteSession } from "@src/session/operations",
+  entities: [User, CoachProfile, CoachSession]
+}
+
+query getSessionsForClient {
+  fn: import { getSessionsForClient } from "@src/session/operations",
+  entities: [User, ClientProfile, CoachProfile, CoachSession]
+}
+
+query getRecentSessionsForClient {
+  fn: import { getRecentSessionsForClient } from "@src/session/operations",
+  entities: [User, ClientProfile, CoachProfile, CoachSession]
+}
+//#endregion
+
 //#region Payment
 route PricingPageRoute { path: "/pricing", to: PricingPage }
 page PricingPage {
@@ -214,7 +257,7 @@ action generateCheckoutSession {
 
 api paymentsWebhook {
   fn: import { paymentsWebhook } from "@src/payment/webhook",
-  entities: [User],
+  entities: [User, TranzillaTransaction],
   middlewareConfigFn: import { paymentsMiddlewareConfigFn } from "@src/payment/webhook",
   httpRoute: (POST, "/payments-webhook")
 }
@@ -269,6 +312,17 @@ job dailyStatsJob {
     // cron: "* * * * *" // every minute. useful for debugging
   },
   entities: [User, DailyStats, Logs, PageViewSource]
+}
+
+job checkExpiredSubscriptionsJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { checkExpiredSubscriptions } from "@src/payment/worker"
+  },
+  schedule: {
+    cron: "0 2 * * *" // Daily at 2 AM
+  },
+  entities: [User]
 }
 //#endregion
 
