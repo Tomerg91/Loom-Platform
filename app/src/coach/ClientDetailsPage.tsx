@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import type { User } from "wasp/entities";
-import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession } from "wasp/client/operations";
+import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession, updateClientSchedule } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
@@ -10,7 +10,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import BodyMapSelector from "../client/components/BodyMapSelector";
-import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2 } from "lucide-react";
+import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import type { SessionResponse } from "../session/operations";
 
@@ -50,6 +50,17 @@ export default function ClientDetailsPage({ user }: { user: User }) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const itemsPerPage = 10;
 
+  // State for schedule modal
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    scheduleDay: 1, // Monday
+    scheduleTime: "14:00",
+    scheduleTimezone: "America/New_York",
+  });
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
+  const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+
   // Fetch somatic logs for this client
   const { data: somaticLogs, isLoading, error } = useQuery(getSomaticLogs, {
     clientId,
@@ -65,6 +76,7 @@ export default function ClientDetailsPage({ user }: { user: User }) {
   const createSessionFn = useAction(createSession);
   const updateSessionFn = useAction(updateSession);
   const deleteSessionFn = useAction(deleteSession);
+  const updateScheduleFn = useAction(updateClientSchedule);
 
   // Calculate zone highlights from recent logs (last 30 days)
   const getZoneHighlights = (): ZoneHighlight[] => {
@@ -185,6 +197,42 @@ export default function ClientDetailsPage({ user }: { user: User }) {
     }
   };
 
+  const handleOpenScheduleDialog = () => {
+    setScheduleError(null);
+    setScheduleSuccess(null);
+    setIsScheduleDialogOpen(true);
+  };
+
+  const handleCloseScheduleDialog = () => {
+    setIsScheduleDialogOpen(false);
+    setScheduleError(null);
+    setScheduleSuccess(null);
+  };
+
+  const handleSubmitSchedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setScheduleError(null);
+    setScheduleSuccess(null);
+
+    try {
+      setIsSubmittingSchedule(true);
+      await updateScheduleFn({
+        clientId,
+        scheduleDay: scheduleForm.scheduleDay,
+        scheduleTime: scheduleForm.scheduleTime,
+        scheduleTimezone: scheduleForm.scheduleTimezone,
+      });
+      setScheduleSuccess("Schedule set successfully! Next session date has been calculated.");
+      setTimeout(() => {
+        handleCloseScheduleDialog();
+      }, 1500);
+    } catch (error: any) {
+      setScheduleError(error.message || "Failed to set schedule");
+    } finally {
+      setIsSubmittingSchedule(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="mt-10 px-6">
@@ -221,13 +269,23 @@ export default function ClientDetailsPage({ user }: { user: User }) {
               Viewing somatic journey and body map data
             </p>
           </div>
-          <Button
-            onClick={() => handleOpenSessionDialog()}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Log Session
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={handleOpenScheduleDialog}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Clock className="h-4 w-4" />
+              Schedule Settings
+            </Button>
+            <Button
+              onClick={() => handleOpenSessionDialog()}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Log Session
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -630,6 +688,134 @@ export default function ClientDetailsPage({ user }: { user: User }) {
                   </>
                 ) : (
                   editingSession ? "Update Session" : "Log Session"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog Modal */}
+      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set Recurring Session Schedule</DialogTitle>
+            <DialogDescription>
+              Configure the weekly meeting day and time for this client.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitSchedule} className="space-y-4">
+            {/* Day of Week */}
+            <div className="space-y-2">
+              <Label htmlFor="schedule-day">Day of Week</Label>
+              <select
+                id="schedule-day"
+                value={scheduleForm.scheduleDay}
+                onChange={(e) =>
+                  setScheduleForm({
+                    ...scheduleForm,
+                    scheduleDay: parseInt(e.target.value, 10),
+                  })
+                }
+                disabled={isSubmittingSchedule}
+                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={0}>Sunday</option>
+                <option value={1}>Monday</option>
+                <option value={2}>Tuesday</option>
+                <option value={3}>Wednesday</option>
+                <option value={4}>Thursday</option>
+                <option value={5}>Friday</option>
+                <option value={6}>Saturday</option>
+              </select>
+            </div>
+
+            {/* Time */}
+            <div className="space-y-2">
+              <Label htmlFor="schedule-time">Time (24h format)</Label>
+              <Input
+                id="schedule-time"
+                type="time"
+                value={scheduleForm.scheduleTime}
+                onChange={(e) =>
+                  setScheduleForm({
+                    ...scheduleForm,
+                    scheduleTime: e.target.value,
+                  })
+                }
+                disabled={isSubmittingSchedule}
+              />
+              <p className="text-xs text-muted-foreground">
+                Scheduled session time
+              </p>
+            </div>
+
+            {/* Timezone */}
+            <div className="space-y-2">
+              <Label htmlFor="schedule-timezone">Timezone</Label>
+              <select
+                id="schedule-timezone"
+                value={scheduleForm.scheduleTimezone}
+                onChange={(e) =>
+                  setScheduleForm({
+                    ...scheduleForm,
+                    scheduleTimezone: e.target.value,
+                  })
+                }
+                disabled={isSubmittingSchedule}
+                className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="America/New_York">Eastern</option>
+                <option value="America/Chicago">Central</option>
+                <option value="America/Denver">Mountain</option>
+                <option value="America/Los_Angeles">Pacific</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="Europe/Paris">Europe/Paris</option>
+                <option value="Asia/Tokyo">Asia/Tokyo</option>
+                <option value="Australia/Sydney">Australia/Sydney</option>
+                <option value="Asia/Kolkata">Asia/Kolkata</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Client's timezone for scheduling
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {scheduleError && (
+              <Alert className="bg-red-50 border-red-200">
+                <AlertDescription className="text-red-800">
+                  {scheduleError}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Success Message */}
+            {scheduleSuccess && (
+              <Alert className="bg-green-50 border-green-200">
+                <AlertDescription className="text-green-800">
+                  {scheduleSuccess}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseScheduleDialog}
+                disabled={isSubmittingSchedule}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmittingSchedule}>
+                {isSubmittingSchedule ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Set Schedule"
                 )}
               </Button>
             </DialogFooter>

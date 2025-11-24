@@ -5,9 +5,14 @@ import type {
   DeleteSession,
   GetSessionsForClient,
   GetRecentSessionsForClient,
+  UpdateClientSchedule,
+  LogSession,
+  GetUpcomingSessions,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
+import { addDays, setHours, setMinutes, format } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 // ============================================
 // SESSION RESPONSE TYPE
@@ -16,6 +21,8 @@ export type SessionResponse = {
   id: string;
   createdAt: Date;
   sessionDate: Date;
+  sessionNumber?: number | null;
+  topic?: string | null;
   privateNotes: string | null;
   sharedSummary: string | null;
 };
@@ -23,8 +30,42 @@ export type SessionResponse = {
 export type SessionResponsePublic = {
   id: string;
   sessionDate: Date;
+  sessionNumber?: number | null;
+  topic?: string | null;
   sharedSummary: string | null;
 };
+
+// ============================================
+// TIMEZONE UTILITIES
+// ============================================
+function calculateNextSessionDate(
+  scheduleDay: number,
+  scheduleTime: string,
+  scheduleTimezone: string,
+  startDate: Date = new Date()
+): Date {
+  // Parse time (format: "14:00")
+  const [hours, minutes] = scheduleTime.split(":").map(Number);
+
+  // Get today's date in the user's timezone
+  const zonedNow = toZonedTime(startDate, scheduleTimezone);
+  const todayDayOfWeek = zonedNow.getDay();
+
+  // Calculate days until the target day
+  let daysUntil = scheduleDay - todayDayOfWeek;
+  if (daysUntil <= 0) {
+    daysUntil += 7;
+  }
+
+  // Create the next session date in the user's timezone
+  let nextDate = new Date(zonedNow);
+  nextDate.setDate(nextDate.getDate() + daysUntil);
+  nextDate.setHours(hours, minutes, 0, 0);
+
+  // Convert back to UTC
+  const utcDate = fromZonedTime(nextDate, scheduleTimezone);
+  return utcDate;
+}
 
 // ============================================
 // CREATE SESSION
@@ -412,4 +453,277 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
   }
 
   throw new HttpError(403, "Invalid user role");
+};
+
+// ============================================
+// UPDATE CLIENT SCHEDULE (Module 10)
+// ============================================
+const updateClientScheduleSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
+  scheduleDay: z.number().int().min(0).max(6, "Day must be 0-6"),
+  scheduleTime: z.string().regex(/^\d{2}:\d{2}$/, "Time must be in HH:mm format"),
+  scheduleTimezone: z.string().min(1, "Timezone is required"),
+  startDate: z.string().or(z.date()).optional(),
+});
+
+type UpdateClientScheduleInput = z.infer<typeof updateClientScheduleSchema>;
+
+export type ScheduleResponse = {
+  clientId: string;
+  scheduleDay: number;
+  scheduleTime: string;
+  scheduleTimezone: string;
+  nextSessionDate: Date;
+};
+
+export const updateClientSchedule: UpdateClientSchedule<
+  UpdateClientScheduleInput,
+  ScheduleResponse
+> = async (rawArgs, context) => {
+  const {
+    clientId,
+    scheduleDay,
+    scheduleTime,
+    scheduleTimezone,
+    startDate,
+  } = ensureArgsSchemaOrThrowHttpError(updateClientScheduleSchema, rawArgs);
+
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in");
+  }
+
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can set client schedules");
+  }
+
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
+
+  const client = await context.entities.ClientProfile.findUnique({
+    where: { id: clientId },
+  });
+
+  if (!client || client.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You do not have access to this client");
+  }
+
+  // Calculate the next session date
+  const nextSessionDate = calculateNextSessionDate(
+    scheduleDay,
+    scheduleTime,
+    scheduleTimezone,
+    startDate ? new Date(startDate) : new Date()
+  );
+
+  // Update the client profile
+  const updatedClient = await context.entities.ClientProfile.update({
+    where: { id: clientId },
+    data: {
+      scheduleDay,
+      scheduleTime,
+      scheduleTimezone,
+      nextSessionDate,
+    },
+  });
+
+  return {
+    clientId: updatedClient.id,
+    scheduleDay: updatedClient.scheduleDay!,
+    scheduleTime: updatedClient.scheduleTime!,
+    scheduleTimezone: updatedClient.scheduleTimezone!,
+    nextSessionDate: updatedClient.nextSessionDate!,
+  };
+};
+
+// ============================================
+// LOG SESSION (Module 10)
+// ============================================
+const logSessionSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
+  sessionDate: z.string().or(z.date()),
+  topic: z.string().optional().nullable(),
+  privateNotes: z.string().optional().nullable(),
+  sharedSummary: z.string().optional().nullable(),
+});
+
+type LogSessionInput = z.infer<typeof logSessionSchema>;
+
+export type LogSessionResponse = {
+  id: string;
+  sessionNumber: number;
+  sessionDate: Date;
+  topic: string | null;
+  privateNotes: string | null;
+  sharedSummary: string | null;
+  nextSessionDate: Date | null;
+  dateWarning?: string;
+};
+
+export const logSession: LogSession<LogSessionInput, LogSessionResponse> =
+  async (rawArgs, context) => {
+    const { clientId, sessionDate, topic, privateNotes, sharedSummary } =
+      ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
+
+    if (!context.user) {
+      throw new HttpError(401, "You must be logged in");
+    }
+
+    if (context.user.role !== "COACH") {
+      throw new HttpError(403, "Only coaches can log sessions");
+    }
+
+    const coachProfile = await context.entities.CoachProfile.findUnique({
+      where: { userId: context.user.id },
+    });
+
+    if (!coachProfile) {
+      throw new HttpError(404, "Coach profile not found");
+    }
+
+    const client = await context.entities.ClientProfile.findUnique({
+      where: { id: clientId },
+    });
+
+    if (!client || client.coachId !== coachProfile.id) {
+      throw new HttpError(403, "You do not have access to this client");
+    }
+
+    // Calculate the next session date (7 days from logged date, preserving time)
+    const sessionDateObj = new Date(sessionDate);
+    let nextSessionDate: Date | null = null;
+    let dateWarning: string | undefined;
+
+    if (client.scheduleTimezone && client.scheduleTime) {
+      const [hours, minutes] = client.scheduleTime.split(":").map(Number);
+
+      // Add 7 days to the logged session date
+      const nextDateBase = addDays(sessionDateObj, 7);
+
+      // Create the next date with the scheduled time in the user's timezone
+      const zonedDate = toZonedTime(nextDateBase, client.scheduleTimezone);
+      zonedDate.setHours(hours, minutes, 0, 0);
+
+      // Convert back to UTC
+      nextSessionDate = fromZonedTime(zonedDate, client.scheduleTimezone);
+
+      // Check if logged date matches expected schedule
+      if (
+        client.nextSessionDate &&
+        Math.abs(
+          sessionDateObj.getTime() - client.nextSessionDate.getTime()
+        ) > 24 * 60 * 60 * 1000
+      ) {
+        dateWarning =
+          "Session logged on different date than scheduled. Schedule has been advanced from the logged date.";
+      }
+    }
+
+    // Increment session count and create session
+    const nextSessionNumber = (client.sessionCount || 0) + 1;
+
+    const session = await context.entities.CoachSession.create({
+      data: {
+        sessionDate: sessionDateObj,
+        sessionNumber: nextSessionNumber,
+        topic: topic || null,
+        privateNotes: privateNotes || null,
+        sharedSummary: sharedSummary || null,
+        coachId: coachProfile.id,
+        clientId: clientId,
+      },
+    });
+
+    // Update client with new session count and next session date
+    const updatedClient = await context.entities.ClientProfile.update({
+      where: { id: clientId },
+      data: {
+        sessionCount: nextSessionNumber,
+        ...(nextSessionDate && { nextSessionDate }),
+      },
+    });
+
+    return {
+      id: session.id,
+      sessionNumber: session.sessionNumber || nextSessionNumber,
+      sessionDate: session.sessionDate,
+      topic: session.topic,
+      privateNotes: session.privateNotes,
+      sharedSummary: session.sharedSummary,
+      nextSessionDate: updatedClient.nextSessionDate,
+      ...(dateWarning && { dateWarning }),
+    };
+  };
+
+// ============================================
+// GET UPCOMING SESSIONS (Module 10)
+// ============================================
+const getUpcomingSessionsSchema = z.object({
+  limit: z.number().int().positive().default(10).optional(),
+});
+
+type GetUpcomingSessionsInput = z.infer<typeof getUpcomingSessionsSchema>;
+
+export type UpcomingSessionResponse = {
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  nextSessionDate: Date;
+  sessionCount: number;
+  scheduleDay: number;
+  scheduleTime: string;
+  scheduleTimezone: string;
+};
+
+export const getUpcomingSessions: GetUpcomingSessions<
+  GetUpcomingSessionsInput,
+  UpcomingSessionResponse[]
+> = async (rawArgs, context) => {
+  const args = ensureArgsSchemaOrThrowHttpError(
+    getUpcomingSessionsSchema,
+    rawArgs
+  );
+
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in");
+  }
+
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can view upcoming sessions");
+  }
+
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+    include: {
+      clients: {
+        where: {
+          nextSessionDate: { not: null },
+        },
+        orderBy: { nextSessionDate: "asc" },
+        take: args.limit || 10,
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
+
+  return coachProfile.clients.map((client) => ({
+    clientId: client.id,
+    clientName: client.user.username || client.user.email || "Unknown",
+    clientEmail: client.user.email || "unknown@example.com",
+    nextSessionDate: client.nextSessionDate!,
+    sessionCount: client.sessionCount,
+    scheduleDay: client.scheduleDay!,
+    scheduleTime: client.scheduleTime!,
+    scheduleTimezone: client.scheduleTimezone!,
+  }));
 };

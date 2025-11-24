@@ -83,6 +83,9 @@ model CoachProfile {
 
   // Sessions logged by this Coach
   sessions CoachSession[]
+
+  // Resources uploaded by this Coach
+  resources Resource[]
 }
 
 model ClientProfile {
@@ -99,6 +102,13 @@ model ClientProfile {
 
   // Sessions logged by Coach
   sessions CoachSession[]
+
+  // MODULE 10: Recurring Session Schedule
+  scheduleDay      Int?      // 0-6 (Sunday-Saturday)
+  scheduleTime     String?   // "14:00" (24h format)
+  scheduleTimezone String?   // IANA timezone (e.g., "America/New_York")
+  nextSessionDate  DateTime? // Computed next session date in UTC
+  sessionCount     Int       @default(0) // Total sessions completed
 }
 
 // ============================================
@@ -142,6 +152,10 @@ model CoachSession {
   createdAt     DateTime      @default(now())
   sessionDate   DateTime      @default(now())
 
+  // MODULE 10: Session tracking
+  sessionNumber Int?          // Auto-incremented for each client's sessions
+  topic         String?       // e.g., "Work Stress"
+
   // Coach-visible only
   privateNotes  String?       @db.Text
 
@@ -169,6 +183,21 @@ model File {
   name                      String
   type                      String
   s3Key                     String
+}
+
+// ============================================
+// RESOURCE LIBRARY (Module 8)
+// ============================================
+model Resource {
+  id          String        @id @default(uuid())
+  name        String
+  type        String        // MIME type: "application/pdf", "image/jpeg", "audio/mpeg", etc.
+  s3Key       String
+  description String?       // Optional description for coaches
+  createdAt   DateTime      @default(now())
+
+  coach       CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId     String
 }
 
 // ============================================

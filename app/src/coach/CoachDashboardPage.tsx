@@ -3,6 +3,7 @@ import type { User } from "wasp/entities";
 import {
   inviteClient,
   getPendingInvitations,
+  getClientsForCoach,
   useQuery,
   useAction,
 } from "wasp/client/operations";
@@ -10,7 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { CheckCircle, Mail, Clock } from "lucide-react";
+import { CheckCircle, Mail, Clock, Users, Calendar } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import UpcomingSessions from "./components/UpcomingSessions";
 
 export default function CoachDashboardPage({ user }: { user: User }) {
   const [email, setEmail] = useState("");
@@ -20,6 +23,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
 
   const inviteClientFn = useAction(inviteClient);
   const { data: pendingInvitations, refetch } = useQuery(getPendingInvitations);
+  const { data: clients } = useQuery(getClientsForCoach);
 
   const handleInviteClient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +54,62 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 mb-6">
+        {/* Upcoming Sessions - Full Width */}
+        <UpcomingSessions />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* My Clients Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              My Clients
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {clients && clients.length > 0 ? (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {clients.map((client) => (
+                  <div
+                    key={client.id}
+                    className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      window.location.href = `/coach/client/${client.id}`;
+                    }}
+                  >
+                    <div className="font-medium text-sm">
+                      {client.username || client.email || "Client"}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {client.email}
+                    </div>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        {client.somaticLogCount} logs
+                      </span>
+                      {client.lastLogDate && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDistanceToNow(new Date(client.lastLogDate), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                No clients yet. Send an invitation to get started!
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Invite New Client Card */}
         <Card>
           <CardHeader>

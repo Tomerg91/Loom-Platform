@@ -231,6 +231,35 @@ query getRecentSessionsForClient {
   fn: import { getRecentSessionsForClient } from "@src/session/operations",
   entities: [User, ClientProfile, CoachProfile, CoachSession]
 }
+
+//#region Module 10: Recurring Sessions
+action updateClientSchedule {
+  fn: import { updateClientSchedule } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile]
+}
+
+action logSession {
+  fn: import { logSession } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile, CoachSession]
+}
+
+query getUpcomingSessions {
+  fn: import { getUpcomingSessions } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile]
+}
+
+route LogSessionRoute { path: "/coach/client/:clientId/log-session", to: LogSessionPage }
+page LogSessionPage {
+  authRequired: true,
+  component: import LogSession from "@src/coach/LogSessionPage"
+}
+
+route SessionHistoryRoute { path: "/client/sessions", to: SessionHistoryPage }
+page SessionHistoryPage {
+  authRequired: true,
+  component: import SessionHistory from "@src/client/SessionHistoryPage"
+}
+//#endregion Module 10
 //#endregion
 
 //#region Payment
@@ -293,6 +322,45 @@ query getDownloadFileSignedURL {
 action deleteFile {
   fn: import { deleteFile } from "@src/file-upload/operations",
   entities: [User, File]
+}
+//#endregion
+
+//#region Resource Library (Module 8)
+route CoachResourcesRoute { path: "/coach/resources", to: CoachResourcesPage }
+page CoachResourcesPage {
+  authRequired: true,
+  component: import CoachResources from "@src/coach/ResourcesPage"
+}
+
+route ClientResourcesRoute { path: "/client/resources", to: ClientResourcesPage }
+page ClientResourcesPage {
+  authRequired: true,
+  component: import ClientResources from "@src/client/ResourcesPage"
+}
+
+action getUploadUrl {
+  fn: import { getUploadUrl } from "@src/resources/operations",
+  entities: [User, CoachProfile, Resource]
+}
+
+action createResource {
+  fn: import { createResource } from "@src/resources/operations",
+  entities: [User, CoachProfile, Resource]
+}
+
+query getCoachResources {
+  fn: import { getCoachResources } from "@src/resources/operations",
+  entities: [User, CoachProfile, ClientProfile, Resource]
+}
+
+query getResourceDownloadUrl {
+  fn: import { getResourceDownloadUrl } from "@src/resources/operations",
+  entities: [User, CoachProfile, ClientProfile, Resource]
+}
+
+action deleteResource {
+  fn: import { deleteResource } from "@src/resources/operations",
+  entities: [User, CoachProfile, Resource]
 }
 //#endregion
 
