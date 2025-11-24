@@ -17,7 +17,7 @@
     "local:e2e:start-stripe": "stripe listen --forward-to localhost:3001/payments-webhook &"
   },
   "dependencies": {
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "^1.56.1",
     "@prisma/client": "5.19.1",
     "@wasp.sh/wasp-app-runner": "0.0.9",
     "prisma": "5.19.1"
