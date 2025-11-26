@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
   getSessionsForClient,
@@ -11,23 +12,14 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { ChevronDown, ChevronUp, Calendar, Clock, FileText, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-// Helper to convert BodyZone enum to display name
-const getBodyZoneLabel = (zone: string): string => {
-  const labels: Record<string, string> = {
-    HEAD: "Head",
-    THROAT: "Throat",
-    CHEST: "Chest",
-    SOLAR_PLEXUS: "Solar Plexus",
-    BELLY: "Belly",
-    PELVIS: "Pelvis",
-    ARMS: "Arms",
-    LEGS: "Legs",
-    FULL_BODY: "Full Body",
-  };
-  return labels[zone] || zone;
-};
-
 export default function SessionHistoryPage({ user }: { user: User }) {
+  const { t } = useTranslation();
+
+  // Helper to convert BodyZone enum to display name
+  const getBodyZoneLabel = (zone: string): string => {
+    const zoneKey = `somatic.bodyZones.${zone}`;
+    return t(zoneKey, { defaultValue: zone });
+  };
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
 
@@ -47,7 +39,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
         <Alert className="bg-yellow-50 border-yellow-200">
           <Calendar className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You are not set up as a client. Please contact your coach.
+            {t("session.notSetupAsClient")}
           </AlertDescription>
         </Alert>
       </div>
@@ -58,11 +50,11 @@ export default function SessionHistoryPage({ user }: { user: User }) {
     return (
       <div className="mt-10 px-6">
         <h1 className="text-3xl font-bold text-foreground mb-8">
-          Session History
+          {t("session.sessionHistory")}
         </h1>
         <Card>
           <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">Loading...</p>
+            <p className="text-muted-foreground text-center">{t("common.loading")}</p>
           </CardContent>
         </Card>
       </div>
@@ -73,11 +65,11 @@ export default function SessionHistoryPage({ user }: { user: User }) {
     return (
       <div className="mt-10 px-6">
         <h1 className="text-3xl font-bold text-foreground mb-8">
-          Session History
+          {t("session.sessionHistory")}
         </h1>
         <Alert className="bg-red-50 border-red-200">
           <AlertDescription className="text-red-800">
-            Error loading session history
+            {t("session.failedLoadHistory")}
           </AlertDescription>
         </Alert>
       </div>
@@ -100,7 +92,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
       document.body.removeChild(link);
     } catch (error) {
       console.error("Failed to download resource:", error);
-      alert("Failed to download resource. Please try again.");
+      alert(t("session.downloadFailed"));
     } finally {
       setDownloadingResourceId(null);
     }
@@ -109,9 +101,9 @@ export default function SessionHistoryPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Session History</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("session.sessionHistory")}</h1>
         <p className="text-muted-foreground mt-2">
-          {total} session{total !== 1 ? "s" : ""} completed
+          {t("session.totalSessions", { total })}
         </p>
       </div>
 
@@ -169,7 +161,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                   {(session as any).somaticAnchor && (
                     <div className="flex items-center gap-2">
                       <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                        🎯 Anchor: {getBodyZoneLabel((session as any).somaticAnchor)}
+                        🎯 {t("session.anchor", { zone: getBodyZoneLabel((session as any).somaticAnchor) })}
                       </span>
                     </div>
                   )}
@@ -178,7 +170,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                   {session.sharedSummary ? (
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">
-                        Session Summary
+                        {t("session.sessionSummary")}
                       </h3>
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">
                         {session.sharedSummary}
@@ -187,7 +179,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                   ) : (
                     <div>
                       <p className="text-sm text-muted-foreground italic">
-                        No summary available for this session.
+                        {t("session.noSummary")}
                       </p>
                     </div>
                   )}
@@ -197,7 +189,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                     <div>
                       <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                         <FileText className="h-4 w-4" />
-                        Homework
+                        {t("session.homework")}
                       </h3>
                       <div className="space-y-2">
                         {(session as any).resources.map(
@@ -218,7 +210,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                                   <span className="text-sm text-gray-700">
-                                    Downloading...
+                                    {t("session.downloading")}
                                   </span>
                                 </>
                               ) : (
@@ -246,11 +238,10 @@ export default function SessionHistoryPage({ user }: { user: User }) {
             <div className="text-center">
               <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                No Sessions Yet
+                {t("session.noSessionsYet")}
               </h3>
               <p className="text-muted-foreground">
-                Your session history will appear here as you complete sessions
-                with your coach.
+                {t("session.noSessionsDescription")}
               </p>
             </div>
           </CardContent>

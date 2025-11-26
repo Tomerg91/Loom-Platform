@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User } from 'wasp/entities';
 import {
   createGoal,
@@ -14,6 +15,7 @@ import { Alert, AlertDescription } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function ClientGoalsPage({ user }: { user: User }) {
+  const { t } = useTranslation();
   const clientId = (user as any).clientProfile?.id;
 
   const { data: goals = [], isLoading, error, refetch } = useQuery(getGoals, {
@@ -31,7 +33,7 @@ export default function ClientGoalsPage({ user }: { user: User }) {
         <Alert className="bg-yellow-50 border-yellow-200">
           <AlertCircle className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            You are not set up as a client. Please contact your coach.
+            {t("session.notSetupAsClient")}
           </AlertDescription>
         </Alert>
       </div>
@@ -44,7 +46,7 @@ export default function ClientGoalsPage({ user }: { user: User }) {
         <Alert className="bg-red-50 border-red-200">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Failed to load goals. Please try again.
+            {t("goals.failedLoadGoals")}
           </AlertDescription>
         </Alert>
       </div>
