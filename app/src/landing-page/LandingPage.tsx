@@ -3,6 +3,7 @@ import FAQ from "./components/FAQ";
 import FeaturesGrid from "./components/FeaturesGrid";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
+import PersonaCallouts from "./components/PersonaCallouts";
 import Testimonials from "./components/Testimonials";
 import {
   examples,
@@ -21,6 +22,7 @@ export default function LandingPage() {
         <ExamplesCarousel examples={examples} />
         <BodyMapShowcase />
         <FeaturesGrid features={features} />
+        <PersonaCallouts />
         <Testimonials testimonials={testimonials} />
         <FAQ faqs={faqs} />
       </main>

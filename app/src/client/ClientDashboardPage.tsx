@@ -2,14 +2,15 @@ import type { User } from "wasp/entities";
 import { getSomaticLogs, getRecentSessionsForClient, useQuery } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import SomaticLogForm from "./SomaticLogForm";
+import EmptyStateWithHelp from "./components/EmptyStateWithHelp";
 import { formatDistanceToNow, format } from "date-fns";
-import { Calendar } from "lucide-react";
+import { Calendar, Zap, BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function ClientDashboardPage({ user }: { user: User }) {
   const { data: somaticLogs, refetch } = useQuery(getSomaticLogs);
-
-  // Fetch recent sessions for this client (last 3)
   const { data: recentSessions } = useQuery(getRecentSessionsForClient);
+  const { t } = useTranslation();
 
   const handleLogSuccess = () => {
     // Refetch logs when a new one is created
@@ -17,7 +18,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
   };
 
   return (
-    <div className="mt-10 px-6 pb-12">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 pb-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">
           Welcome, {user.username || user.email}
@@ -36,13 +37,33 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         {/* Recent Sensations */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Sensations</CardTitle>
+            <CardTitle>{t("client.recentSensations")}</CardTitle>
           </CardHeader>
           <CardContent>
             {!somaticLogs || somaticLogs.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                No logs yet. Start by creating your first body map entry.
-              </p>
+              <EmptyStateWithHelp
+                icon={<Zap className="h-8 w-8" />}
+                title={t("client.noLogsTitle")}
+                description={t("client.noLogsDescription")}
+                buttonText={t("client.logFirstSensationBtn")}
+                helpTitle={t("client.somaticLoggingHelp")}
+                helpContent={
+                  <div className="space-y-4">
+                    <p>{t("client.somaticLoggingExplanation")}</p>
+                    <div>
+                      <h4 className="font-semibold mb-2">
+                        {t("client.howToLog")}
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        <li>{t("client.step1SelectZone")}</li>
+                        <li>{t("client.step2ChooseSensation")}</li>
+                        <li>{t("client.step3SetIntensity")}</li>
+                        <li>{t("client.step4OptionalNotes")}</li>
+                      </ul>
+                    </div>
+                  </div>
+                }
+              />
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                 {somaticLogs.map((log) => (
@@ -105,14 +126,38 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Recent Sessions
+            {t("client.recentSessions")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {!recentSessions || recentSessions.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No session recaps yet. Your coach will share summaries here.
-            </p>
+            <EmptyStateWithHelp
+              icon={<BookOpen className="h-8 w-8" />}
+              title={t("client.noSessionsTitle")}
+              description={t("client.noSessionsDescription")}
+              buttonText={t("client.learnAboutSessionsBtn")}
+              helpTitle={t("client.sessionHistoryHelp")}
+              helpContent={
+                <div className="space-y-4">
+                  <p>{t("client.sessionHistoryExplanation")}</p>
+                  <div>
+                    <h4 className="font-semibold mb-2">
+                      {t("client.whatYouWillSee")}
+                    </h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>{t("client.sessionDate")}</li>
+                      <li>{t("client.sharedSummary")}</li>
+                      <li>{t("client.sessionNotes")}</li>
+                      <li>{t("client.coachInsights")}</li>
+                    </ul>
+                  </div>
+                  <div className="bg-primary/10 rounded-lg p-3 text-sm">
+                    <p className="font-medium mb-1">💡 {t("client.tip")}</p>
+                    <p>{t("client.sessionTip")}</p>
+                  </div>
+                </div>
+              }
+            />
           ) : (
             <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
               {recentSessions.map((session) => (
