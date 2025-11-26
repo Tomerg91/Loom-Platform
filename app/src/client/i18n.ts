@@ -224,7 +224,7 @@ const resources = {
         loginNow: "התחבר עכשיו",
         verifyEmail: "אמת את דוא\"לך",
         sendVerification: "שלח דוא\"ל אימות",
-        createAccount: "יצור חשבון",
+        createAccount: "צור חשבון",
         logIn: "התחבר",
       },
       somatic: {
@@ -246,10 +246,10 @@ const resources = {
           hot: "חם",
           cold: "קר",
           vibrating: "רועד",
-          numb: "מנומbed",
+          numb: "מנומן",
           heavy: "כבד",
           light: "קל",
-          tingling: "עיקול",
+          tingling: "עקצוץ",
           aching: "כואב",
           relaxed: "רגוע",
         },
@@ -257,7 +257,7 @@ const resources = {
         notes: "הערות",
         addLog: "הוסף רישום",
         viewLogs: "צפה ברישומים",
-        somaticLogs: "רישומי סומטיים",
+        somaticLogs: "רישומים סומטיים",
         noLogs: "אין רישומים עדיין",
         intensityLow: "נמוך (1-3)",
         intensityMedium: "בינוני (4-6)",
@@ -274,7 +274,7 @@ const resources = {
         clientEmail: "דוא\"ל הלקוח",
         sendInvite: "שלח הזמנה",
         pendingInvites: "הזמנות ממתינות",
-        acceptedClients: "לקוחות שקיבלו",
+        acceptedClients: "לקוחות פעילים",
         viewClientLogs: "צפה ברישומי הלקוח",
         clientSomaticLogs: "רישומים סומטיים של הלקוח",
       },
@@ -289,7 +289,7 @@ const resources = {
           title: "ברוכים הבאים ל-Loom Platform",
           subtitle: "פלטפורמת אימון סומטי עבור שיטת Satya",
           cta: "התחל",
-          description: "הפוך את ההנחיה שלך בעזרת מערכת רישום סומטי ומיפוי גוף.",
+          description: "שנה את תרגול האימון שלך עם מערכת רישום סומטי ומיפוי גוף מתקדמת.",
         },
         features: {
           title: "תכונות",
@@ -303,7 +303,7 @@ const resources = {
           },
           clientManagement: {
             title: "ניהול לקוחות",
-            description: "נהל מספר לקוחות וקנו את התקדמותם לאורך זמן",
+            description: "נהל מספר לקוחות ועקוב אחר התקדמותם לאורך זמן",
           },
           secure: {
             title: "בטוח ופרטי",
@@ -311,7 +311,7 @@ const resources = {
           },
         },
         cta: {
-          title: "האם אתה מוכן להפוך את התרגול שלך?",
+          title: "מוכנים לשנות את תרגול האימון שלכם?",
           button: "התחל ניסיון חינם",
         },
       },
@@ -330,7 +330,7 @@ const resources = {
         },
         pro: {
           name: "פרו",
-          description: "עבור תרגולי הנחיה גדלים",
+          description: "עבור תרגולי אימון מתרחבים",
           price: "₪116",
           period: "לחודש",
           features: [
