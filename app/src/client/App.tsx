@@ -69,6 +69,7 @@ export default function App() {
         sensation,
         intensity: 5, // Default intensity for landing page saves
         note: `Saved from landing page on ${new Date(timestamp).toLocaleString()}`,
+        sharedWithCoach: true,
       })
         .then(() => {
           sessionStorage.removeItem("pending_somatic_log");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { User } from "wasp/entities";
 import {
   inviteClient,
@@ -6,6 +6,8 @@ import {
   getClientsForCoach,
   useQuery,
   useAction,
+  getOnboardingStatus,
+  updateOnboardingStatus,
 } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -14,16 +16,27 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { CheckCircle, Mail, Clock, Users, Calendar } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import UpcomingSessions from "./components/UpcomingSessions";
+import OnboardingModal from "../components/OnboardingModal";
 
 export default function CoachDashboardPage({ user }: { user: User }) {
   const [email, setEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const inviteClientFn = useAction(inviteClient);
   const { data: pendingInvitations, refetch } = useQuery(getPendingInvitations);
   const { data: clients } = useQuery(getClientsForCoach);
+  const { data: onboardingStatus } = useQuery(getOnboardingStatus);
+  const updateOnboarding = useAction(updateOnboardingStatus);
+
+  useEffect(() => {
+    // Show onboarding if not completed
+    if (onboardingStatus && !onboardingStatus.onboardingCompleted) {
+      setShowOnboarding(true);
+    }
+  }, [onboardingStatus]);
 
   const handleInviteClient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,16 +56,37 @@ export default function CoachDashboardPage({ user }: { user: User }) {
     }
   };
 
+  const handleOnboardingComplete = async (steps: Record<string, boolean>) => {
+    try {
+      await updateOnboarding({
+        onboardingCompleted: true,
+        onboardingSteps: steps,
+      });
+      setShowOnboarding(false);
+    } catch (error) {
+      console.error('Failed to update onboarding:', error);
+    }
+  };
+
   return (
-    <div className="mt-10 px-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
-          Welcome, Coach {user.username || user.email}
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your clients and track their somatic progress
-        </p>
-      </div>
+    <>
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        userRole={user.role}
+        onboardingSteps={onboardingStatus?.onboardingSteps}
+        onMarkComplete={handleOnboardingComplete}
+      />
+
+      <div className="mt-10 px-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">
+            Welcome, Coach {user.username || user.email}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Manage your clients and track their somatic progress
+          </p>
+        </div>
 
       <div className="grid gap-6 lg:grid-cols-2 mb-6">
         {/* Upcoming Sessions - Full Width */}
@@ -197,6 +231,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

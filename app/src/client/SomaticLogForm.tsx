@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createSomaticLog, useAction } from "wasp/client/operations";
 import BodyMapSelector from "./components/BodyMapSelector";
+import { useTranslation } from "react-i18next";
 
 // BodyZone type definition matching Prisma schema
 type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
@@ -10,7 +11,7 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Slider } from "../components/ui/slider";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const SENSATIONS = [
   "Tight",
@@ -30,9 +31,11 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   const [selectedSensation, setSelectedSensation] = useState<string>("");
   const [intensity, setIntensity] = useState<number>(5);
   const [note, setNote] = useState<string>("");
+  const [sharedWithCoach, setSharedWithCoach] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const createSomaticLogFn = useAction(createSomaticLog);
 
@@ -58,6 +61,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
         sensation: selectedSensation,
         intensity,
         note: note.trim() || undefined,
+        sharedWithCoach,
       });
 
       setSuccessMessage("Sensation logged successfully!");
@@ -67,6 +71,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
       setSelectedSensation("");
       setIntensity(5);
       setNote("");
+      setSharedWithCoach(true);
 
       // Call onSuccess callback if provided
       if (onSuccess) {
@@ -159,6 +164,39 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               rows={3}
               className="resize-none"
             />
+          </div>
+
+          {/* Share with Coach Toggle */}
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+            <div className="flex items-center gap-3">
+              {sharedWithCoach ? (
+                <Eye className="h-5 w-5 text-primary" />
+              ) : (
+                <EyeOff className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <Label className="font-medium cursor-pointer">
+                  {t('sharing.sharedWithCoach')}
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('sharing.shareExplanation')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSharedWithCoach(!sharedWithCoach)}
+              disabled={isSubmitting}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                sharedWithCoach ? 'bg-primary' : 'bg-muted-foreground'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  sharedWithCoach ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Error Message */}

@@ -5,6 +5,8 @@ import {
   type GetPaginatedUsers,
   type UpdateIsUserAdminById,
   type UpdateUserLanguage,
+  type GetOnboardingStatus,
+  type UpdateOnboardingStatus,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { SubscriptionStatus } from "../payment/plans";
@@ -189,4 +191,83 @@ export const updateUserLanguage: UpdateUserLanguage<
     where: { id: context.user.id },
     data: { preferredLanguage: language },
   });
+};
+
+// ============================================
+// ONBOARDING
+// ============================================
+
+type OnboardingStatusResponse = {
+  onboardingCompleted: boolean;
+  onboardingSteps: Record<string, boolean> | null;
+};
+
+export const getOnboardingStatus: GetOnboardingStatus<
+  void,
+  OnboardingStatusResponse
+> = async (_, context) => {
+  if (!context.user) {
+    throw new HttpError(
+      401,
+      "Only authenticated users are allowed to perform this operation",
+    );
+  }
+
+  const user = await context.entities.User.findUnique({
+    where: { id: context.user.id },
+    select: {
+      onboardingCompleted: true,
+      onboardingSteps: true,
+    },
+  });
+
+  if (!user) {
+    throw new HttpError(404, "User not found");
+  }
+
+  return {
+    onboardingCompleted: user.onboardingCompleted,
+    onboardingSteps: user.onboardingSteps as Record<string, boolean> | null,
+  };
+};
+
+const updateOnboardingStatusInputSchema = z.object({
+  onboardingCompleted: z.boolean(),
+  onboardingSteps: z.record(z.boolean()).optional(),
+});
+
+type UpdateOnboardingStatusInput = z.infer<typeof updateOnboardingStatusInputSchema>;
+
+export const updateOnboardingStatus: UpdateOnboardingStatus<
+  UpdateOnboardingStatusInput,
+  OnboardingStatusResponse
+> = async (rawArgs, context) => {
+  const { onboardingCompleted, onboardingSteps } = ensureArgsSchemaOrThrowHttpError(
+    updateOnboardingStatusInputSchema,
+    rawArgs,
+  );
+
+  if (!context.user) {
+    throw new HttpError(
+      401,
+      "Only authenticated users are allowed to perform this operation",
+    );
+  }
+
+  const user = await context.entities.User.update({
+    where: { id: context.user.id },
+    data: {
+      onboardingCompleted,
+      ...(onboardingSteps && { onboardingSteps }),
+    },
+    select: {
+      onboardingCompleted: true,
+      onboardingSteps: true,
+    },
+  });
+
+  return {
+    onboardingCompleted: user.onboardingCompleted,
+    onboardingSteps: user.onboardingSteps as Record<string, boolean> | null,
+  };
 };

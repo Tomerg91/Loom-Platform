@@ -6,7 +6,7 @@ import {
   SubscriptionStatus,
 } from "../../payment/plans";
 
-type MockUserData = Omit<User, "id">;
+type MockUserData = Omit<User, "id" | "onboardingSteps">;
 
 /**
  * This function, which we've imported in `app.db.seeds` in the `main.wasp` file,
@@ -69,6 +69,7 @@ function generateMockUserData(): MockUserData {
       : null,
     tranzillaToken: null, // Mock users don't have Tranzilla tokens
     preferredLanguage: "he", // Default language is Hebrew
+    onboardingCompleted: false,
   };
 }
 
@@ -121,6 +122,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       subscriptionPlan: null,
       tranzillaToken: null,
       preferredLanguage: "he",
+      onboardingCompleted: false,
       coachProfile: {
         create: {},
       },
@@ -154,6 +156,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       subscriptionPlan: null,
       tranzillaToken: null,
       preferredLanguage: "he",
+      onboardingCompleted: false,
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,
@@ -323,6 +326,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       subscriptionPlan: null,
       tranzillaToken: null,
       preferredLanguage: "he",
+      onboardingCompleted: false,
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,
@@ -402,6 +406,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       subscriptionPlan: null,
       tranzillaToken: null,
       preferredLanguage: "he",
+      onboardingCompleted: false,
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,

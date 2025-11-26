@@ -172,6 +172,16 @@ action updateUserLanguage {
   fn: import { updateUserLanguage } from "@src/user/operations",
   entities: [User]
 }
+
+query getOnboardingStatus {
+  fn: import { getOnboardingStatus } from "@src/user/operations",
+  entities: [User]
+}
+
+action updateOnboardingStatus {
+  fn: import { updateOnboardingStatus } from "@src/user/operations",
+  entities: [User]
+}
 //#endregion
 
 //#region Invitations
@@ -205,6 +215,11 @@ action createSomaticLog {
 query getSomaticLogs {
   fn: import { getSomaticLogs } from "@src/somatic-logs/operations",
   entities: [User, ClientProfile, CoachProfile, SomaticLog]
+}
+
+action updateSomaticLogVisibility {
+  fn: import { updateSomaticLogVisibility } from "@src/somatic-logs/operations",
+  entities: [User, ClientProfile, SomaticLog]
 }
 //#endregion
 

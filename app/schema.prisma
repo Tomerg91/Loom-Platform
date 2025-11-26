@@ -77,6 +77,10 @@ model User {
   emailVerificationToken    String?
   passwordResetToken        String?
 
+  // ONBOARDING
+  onboardingCompleted       Boolean         @default(false)
+  onboardingSteps           Json?           // Tracks completed onboarding steps per role
+
   contactFormMessages       ContactFormMessage[]
   files                     File[]
 }
@@ -146,17 +150,20 @@ model ClientInvitation {
 // SOMATIC LOGS (Core Feature)
 // ============================================
 model SomaticLog {
-  id          String      @id @default(uuid())
-  createdAt   DateTime    @default(now())
+  id                String      @id @default(uuid())
+  createdAt         DateTime    @default(now())
 
   // The Data Point
-  bodyZone    BodyZone
-  sensation   String      // e.g., "Tight", "Hot", "Vibrating"
-  intensity   Int         // 1-10 scale
-  note        String?     @db.Text
+  bodyZone          BodyZone
+  sensation         String      // e.g., "Tight", "Hot", "Vibrating"
+  intensity         Int         // 1-10 scale
+  note              String?     @db.Text
 
-  client      ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId    String
+  // SHARING CONTROL
+  sharedWithCoach   Boolean     @default(true) // Controls coach visibility
+
+  client            ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId          String
 }
 
 // ============================================
