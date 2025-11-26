@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { User, Resource } from "wasp/entities";
 import {
   getUploadUrl,
@@ -31,6 +32,7 @@ import { validateResourceFile } from "../resources/validation";
 import { formatDistanceToNow } from "date-fns";
 
 export default function CoachResourcesPage({ user }: { user: User }) {
+  const { t } = useTranslation();
   const [uploadProgressPercent, setUploadProgressPercent] = useState<number>(0);
   const [resourceToDelete, setResourceToDelete] = useState<Pick<
     Resource,
@@ -71,8 +73,8 @@ export default function CoachResourcesPage({ user }: { user: User }) {
 
       if (!file || !(file instanceof File) || file.size === 0) {
         toast({
-          title: "No file selected",
-          description: "Please select a file to upload.",
+          title: t("resources.noFileSelected"),
+          description: t("resources.pleaseSelectFile"),
           variant: "destructive",
         });
         return;
@@ -80,8 +82,8 @@ export default function CoachResourcesPage({ user }: { user: User }) {
 
       if (!resourceName || resourceName.trim() === "") {
         toast({
-          title: "Name required",
-          description: "Please enter a name for this resource.",
+          title: t("resources.nameRequired"),
+          description: t("resources.pleaseEnterName"),
           variant: "destructive",
         });
         return;
@@ -91,7 +93,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
       const validation = validateResourceFile(file);
       if (!validation.valid) {
         toast({
-          title: "Invalid file",
+          title: t("resources.invalidFile"),
           description: validation.error,
           variant: "destructive",
         });
@@ -124,15 +126,15 @@ export default function CoachResourcesPage({ user }: { user: User }) {
       setDescription("");
       refetch();
       toast({
-        title: "Resource uploaded",
-        description: "Your resource has been successfully uploaded.",
+        title: t("resources.resourceUploaded"),
+        description: t("resources.uploadSuccess"),
       });
     } catch (error) {
       console.error("Error uploading resource:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Error uploading resource.";
+        error instanceof Error ? error.message : t("resources.errorUploading");
       toast({
-        title: "Error uploading resource",
+        title: t("resources.errorUploading"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -148,15 +150,15 @@ export default function CoachResourcesPage({ user }: { user: User }) {
       setResourceToDelete(null);
       refetch();
       toast({
-        title: "Resource deleted",
-        description: `${resourceName} has been deleted.`,
+        title: t("resources.resourceDeleted"),
+        description: t("resources.deleteSuccess", { name: resourceName }),
       });
     } catch (error) {
       console.error("Error deleting resource:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Error deleting resource.";
+        error instanceof Error ? error.message : t("resources.errorDeleting");
       toast({
-        title: "Error deleting resource",
+        title: t("resources.errorDeleting"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -166,9 +168,9 @@ export default function CoachResourcesPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Resources Library</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("resources.resourcesLibrary")}</h1>
         <p className="text-muted-foreground mt-2">
-          Upload resources for your clients to access
+          {t("resources.uploadForClients")}
         </p>
       </div>
 
@@ -179,23 +181,23 @@ export default function CoachResourcesPage({ user }: { user: User }) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Upload Resource
+                {t("resources.uploadResource")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUpload} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="resource-name">Resource Name</Label>
+                  <Label htmlFor="resource-name">{t("resources.resourceName")}</Label>
                   <Input
                     id="resource-name"
                     name="resource-name"
-                    placeholder="e.g., Grounding Meditation"
+                    placeholder={t("resources.namePlaceholder")}
                     disabled={isUploading}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="file-upload">Select File</Label>
+                  <Label htmlFor="file-upload">{t("resources.selectFile")}</Label>
                   <Input
                     id="file-upload"
                     name="file-upload"
@@ -204,15 +206,15 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                     disabled={isUploading}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Max 20MB. Supported: PDF, Images, Audio
+                    {t("resources.fileTypeSupport")}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Label htmlFor="description">{t("resources.descriptionOptional")}</Label>
                   <Textarea
                     id="description"
-                    placeholder="Add a description for this resource..."
+                    placeholder={t("resources.descriptionPlaceholder")}
                     className="h-20 resize-none"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -223,14 +225,14 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 {uploadProgressPercent > 0 && (
                   <div className="space-y-2">
                     <div className="text-sm text-muted-foreground">
-                      Uploading... {uploadProgressPercent}%
+                      {t("resources.uploading", { percent: uploadProgressPercent })}
                     </div>
                     <Progress value={uploadProgressPercent} />
                   </div>
                 )}
 
                 <Button type="submit" disabled={isUploading} className="w-full">
-                  {isUploading ? "Uploading..." : "Upload Resource"}
+                  {isUploading ? t("resources.uploading", { percent: "" }).trim() : t("resources.uploadResource")}
                 </Button>
               </form>
             </CardContent>
@@ -241,7 +243,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Your Resources ({resources?.length || 0})</CardTitle>
+              <CardTitle>{t("resources.yourResources", { count: resources?.length || 0 })}</CardTitle>
             </CardHeader>
             <CardContent>
               {resources && resources.length > 0 ? (
@@ -266,7 +268,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                               </div>
                             )}
                             <div className="text-xs text-muted-foreground mt-2">
-                              Uploaded{" "}
+                              {t("resources.uploaded")}{" "}
                               {formatDistanceToNow(new Date(resource.createdAt), {
                                 addSuffix: true,
                               })}
@@ -289,7 +291,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 <div className="text-center py-12">
                   <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-40" />
                   <p className="text-muted-foreground">
-                    No resources yet. Upload one to get started!
+                    {t("resources.noResourcesYet")}
                   </p>
                 </div>
               )}
@@ -302,14 +304,14 @@ export default function CoachResourcesPage({ user }: { user: User }) {
       <Dialog open={!!resourceToDelete} onOpenChange={(open) => !open && setResourceToDelete(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Resource</DialogTitle>
+            <DialogTitle>{t("resources.deleteResource")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{resourceToDelete?.name}"? This action cannot be undone.
+              {t("resources.deleteConfirmation", { name: resourceToDelete?.name })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResourceToDelete(null)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -319,7 +321,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 }
               }}
             >
-              Delete
+              {t("common.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

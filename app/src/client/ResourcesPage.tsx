@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { User, Resource } from "wasp/entities";
 import {
   getCoachResources,
@@ -12,6 +13,7 @@ import { toast } from "../hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
 export default function ClientResourcesPage({ user }: { user: User }) {
+  const { t } = useTranslation();
   const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
 
   const { data: resources, isLoading } = useQuery(getCoachResources);
@@ -29,15 +31,15 @@ export default function ClientResourcesPage({ user }: { user: User }) {
       const downloadUrl = await getResourceDownloadUrl({ resourceId });
       window.open(downloadUrl, "_blank");
       toast({
-        title: "Download started",
-        description: `${resourceName} is downloading...`,
+        title: t("resources.downloadStarted"),
+        description: t("resources.downloading", { name: resourceName }),
       });
     } catch (error) {
       console.error("Error downloading resource:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Error downloading resource.";
+        error instanceof Error ? error.message : t("resources.errorDownloading");
       toast({
-        title: "Error downloading resource",
+        title: t("resources.errorDownloading"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -49,15 +51,15 @@ export default function ClientResourcesPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Resources</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("resources.resources")}</h1>
         <p className="text-muted-foreground mt-2">
-          Access resources shared by your coach
+          {t("resources.accessCoachResources")}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Available Resources ({resources?.length || 0})</CardTitle>
+          <CardTitle>{t("resources.availableResources", { count: resources?.length || 0 })}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -86,7 +88,7 @@ export default function ClientResourcesPage({ user }: { user: User }) {
                           </div>
                         )}
                         <div className="text-xs text-muted-foreground mt-2">
-                          Shared{" "}
+                          {t("resources.shared")}{" "}
                           {formatDistanceToNow(new Date(resource.createdAt), {
                             addSuffix: true,
                           })}
@@ -102,12 +104,12 @@ export default function ClientResourcesPage({ user }: { user: User }) {
                       {downloadingResourceId === resource.id ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Downloading...
+                          {t("resources.downloadingBtn")}
                         </>
                       ) : (
                         <>
                           <Download className="h-4 w-4 mr-2" />
-                          Download
+                          {t("resources.download")}
                         </>
                       )}
                     </Button>
@@ -119,7 +121,7 @@ export default function ClientResourcesPage({ user }: { user: User }) {
             <div className="text-center py-12">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-40" />
               <p className="text-muted-foreground">
-                No resources available yet. Check back soon!
+                {t("resources.noResourcesAvailableYet")}
               </p>
             </div>
           )}

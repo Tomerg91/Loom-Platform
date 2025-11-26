@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
   logSession,
@@ -23,6 +24,7 @@ export default function LogSessionPage({
 }: {
   user: User;
 }) {
+  const { t } = useTranslation();
   const { clientId } = useParams<{ clientId: string }>();
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
@@ -129,7 +131,7 @@ export default function LogSessionPage({
       });
 
       setSuccessMessage(
-        `Session #${result.sessionNumber} logged successfully!`
+        t("session.sessionLoggedSuccess", { number: result.sessionNumber })
       );
       if (result.dateWarning) {
         setDateWarning(result.dateWarning);
@@ -162,7 +164,7 @@ export default function LogSessionPage({
   return (
     <div className="mt-10 px-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Log Session</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("session.logSession")}</h1>
         {sessionNumber && (
           <p className="text-muted-foreground mt-2">
             Session #{sessionNumber}
@@ -177,7 +179,7 @@ export default function LogSessionPage({
           <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-lg">
-                Recent Somatic Activity (Last 14 Days)
+                {t("session.recentSomaticActivity")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -185,14 +187,14 @@ export default function LogSessionPage({
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Loading client context...
+                    {t("session.loadingContext")}
                   </p>
                 </div>
               ) : contextError ? (
                 <Alert className="bg-yellow-50 border-yellow-200">
                   <AlertCircle className="h-4 w-4 text-yellow-600" />
                   <AlertDescription className="text-yellow-800 text-sm">
-                    Unable to load somatic logs. Proceeding with session log...
+                    {t("session.unableToLoadLogs")}
                   </AlertDescription>
                 </Alert>
               ) : contextData?.somaticLogs && contextData.somaticLogs.length > 0 ? (
@@ -203,20 +205,17 @@ export default function LogSessionPage({
                   />
                   <div className="bg-gray-50 rounded-md p-3 text-xs text-muted-foreground">
                     <p className="font-semibold text-foreground mb-1">
-                      Found {contextData.somaticLogs.length} log
-                      {contextData.somaticLogs.length !== 1 ? "s" : ""} from
-                      the last 14 days
+                      {t("session.foundLogs", { count: contextData.somaticLogs.length })}
                     </p>
                     <p>
-                      Review the heatmap above to understand where your client
-                      has been experiencing sensations.
+                      {t("session.reviewHeatmap")}
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">
-                    No somatic logs recorded in the last 14 days
+                    {t("session.noLogsRecent")}
                   </p>
                 </div>
               )}
@@ -228,13 +227,13 @@ export default function LogSessionPage({
         <div>
           <Card className="h-full">
             <CardHeader>
-              <CardTitle className="text-lg">Session Details</CardTitle>
+              <CardTitle className="text-lg">{t("session.sessionDetails")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Session Date */}
                 <div className="space-y-2">
-                  <Label htmlFor="sessionDate">Session Date & Time</Label>
+                  <Label htmlFor="sessionDate">{t("session.sessionDate")}</Label>
                   <Input
                     type="datetime-local"
                     id="sessionDate"
@@ -244,7 +243,7 @@ export default function LogSessionPage({
                     disabled={isSubmitting}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Date and time when the session took place
+                    {t("session.sessionDateHelp")}
                   </p>
                 </div>
 
@@ -259,11 +258,11 @@ export default function LogSessionPage({
 
                 {/* Topic */}
                 <div className="space-y-2">
-                  <Label htmlFor="topic">Topic (Optional)</Label>
+                  <Label htmlFor="topic">{t("session.topic")}</Label>
                   <Input
                     type="text"
                     id="topic"
-                    placeholder="e.g., Work Stress, Anxiety Management"
+                    placeholder={t("session.topicPlaceholder")}
                     value={formData.topic}
                     onChange={(e) =>
                       setFormData({ ...formData, topic: e.target.value })
@@ -271,14 +270,14 @@ export default function LogSessionPage({
                     disabled={isSubmitting}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Main topic or focus of this session
+                    {t("session.topicHelp")}
                   </p>
                 </div>
 
                 {/* Somatic Anchor */}
                 <div className="space-y-2">
                   <Label htmlFor="somaticAnchor">
-                    Body Zone Discussed (Optional)
+                    {t("session.bodyZoneDiscussed")}
                   </Label>
                   <select
                     id="somaticAnchor"
@@ -289,30 +288,30 @@ export default function LogSessionPage({
                     disabled={isSubmitting}
                     className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">-- No anchor --</option>
-                    <option value="HEAD">Head</option>
-                    <option value="THROAT">Throat</option>
-                    <option value="CHEST">Chest</option>
-                    <option value="SOLAR_PLEXUS">Solar Plexus</option>
-                    <option value="BELLY">Belly</option>
-                    <option value="PELVIS">Pelvis</option>
-                    <option value="ARMS">Arms</option>
-                    <option value="LEGS">Legs</option>
-                    <option value="FULL_BODY">Full Body</option>
+                    <option value="">{t("session.noAnchor")}</option>
+                    <option value="HEAD">{t("somatic.bodyZones.HEAD")}</option>
+                    <option value="THROAT">{t("somatic.bodyZones.THROAT")}</option>
+                    <option value="CHEST">{t("somatic.bodyZones.CHEST")}</option>
+                    <option value="SOLAR_PLEXUS">{t("somatic.bodyZones.SOLAR_PLEXUS")}</option>
+                    <option value="BELLY">{t("somatic.bodyZones.BELLY")}</option>
+                    <option value="PELVIS">{t("somatic.bodyZones.PELVIS")}</option>
+                    <option value="ARMS">{t("somatic.bodyZones.ARMS")}</option>
+                    <option value="LEGS">{t("somatic.bodyZones.LEGS")}</option>
+                    <option value="FULL_BODY">{t("somatic.bodyZones.FULL_BODY")}</option>
                   </select>
                   <p className="text-xs text-muted-foreground">
-                    Which body zone was the focus of this session?
+                    {t("session.bodyZoneHelp")}
                   </p>
                 </div>
 
                 {/* Shared Summary */}
                 <div className="space-y-2">
                   <Label htmlFor="sharedSummary">
-                    Session Summary (Visible to Client)
+                    {t("session.sharedSummary")}
                   </Label>
                   <textarea
                     id="sharedSummary"
-                    placeholder="What happened in this session? What key insights did we explore?"
+                    placeholder={t("session.sharedSummaryPlaceholder")}
                     value={formData.sharedSummary}
                     onChange={(e) =>
                       setFormData({ ...formData, sharedSummary: e.target.value })
@@ -322,18 +321,18 @@ export default function LogSessionPage({
                     className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <p className="text-xs text-muted-foreground">
-                    This will be visible to your client
+                    {t("session.sharedSummaryHelp")}
                   </p>
                 </div>
 
                 {/* Private Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="privateNotes">
-                    Private Notes (Coach Only)
+                    {t("session.privateNotes")}
                   </Label>
                   <textarea
                     id="privateNotes"
-                    placeholder="Personal observations, next steps, follow-up items..."
+                    placeholder={t("session.privateNotesPlaceholder")}
                     value={formData.privateNotes}
                     onChange={(e) =>
                       setFormData({ ...formData, privateNotes: e.target.value })
@@ -343,21 +342,21 @@ export default function LogSessionPage({
                     className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Private notes visible only to you
+                    {t("session.privateNotesHelp")}
                   </p>
                 </div>
 
                 {/* Attach Resources */}
                 <div className="space-y-2">
-                  <Label>Attach Resources (Homework)</Label>
+                  <Label>{t("session.attachResources")}</Label>
                   {isResourcesLoading ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading resources...
+                      {t("session.loadingResources")}
                     </div>
                   ) : resourcesError ? (
                     <p className="text-sm text-red-600">
-                      Error loading resources
+                      {t("session.errorLoadingResources")}
                     </p>
                   ) : resourcesData && resourcesData.length > 0 ? (
                     <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
@@ -393,12 +392,11 @@ export default function LogSessionPage({
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      No resources available. Upload resources in your library
-                      first.
+                      {t("session.noResourcesAvailable")}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Select resources to attach as homework for this session
+                    {t("session.selectResourcesHelp")}
                   </p>
                 </div>
 
@@ -431,7 +429,7 @@ export default function LogSessionPage({
                     {isSubmitting && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    {isSubmitting ? "Saving..." : "Log Session"}
+                    {isSubmitting ? t("session.saving") : t("session.logSession")}
                   </Button>
                   <Button
                     type="button"
@@ -439,7 +437,7 @@ export default function LogSessionPage({
                     onClick={() => window.history.back()}
                     disabled={isSubmitting}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               </form>
