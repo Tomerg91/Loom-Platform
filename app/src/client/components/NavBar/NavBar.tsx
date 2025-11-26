@@ -1,6 +1,7 @@
 import { LogIn, Menu } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "wasp/client/auth";
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
 import {
@@ -17,6 +18,7 @@ import { UserMenuItems } from "../../../user/UserMenuItems";
 import { useIsLandingPage } from "../../hooks/useIsLandingPage";
 import logo from "../../static/logo.webp";
 import DarkModeSwitcher from "../DarkModeSwitcher";
+import LanguageSwitcher from "../LanguageSwitcher";
 import { Announcement } from "./Announcement";
 
 export interface NavigationItem {
@@ -29,6 +31,7 @@ export default function NavBar({
 }: {
   navigationItems: NavigationItem[];
 }) {
+  const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const isLandingPage = useIsLandingPage();
 
@@ -92,7 +95,7 @@ export default function NavBar({
               </WaspRouterLink>
 
               <ul className="ml-4 hidden items-center gap-6 lg:flex">
-                {renderNavigationItems(navigationItems)}
+                {renderNavigationItems(navigationItems, undefined, t)}
               </ul>
             </div>
             <NavBarMobileMenu
@@ -108,12 +111,14 @@ export default function NavBar({
 }
 
 function NavBarDesktopUserDropdown({ isScrolled }: { isScrolled: boolean }) {
+  const { t } = useTranslation();
   const { data: user, isLoading: isUserLoading } = useAuth();
 
   return (
     <div className="hidden items-center justify-end gap-3 lg:flex lg:flex-1">
       <ul className="flex items-center justify-center gap-2 sm:gap-4">
         <DarkModeSwitcher />
+        <LanguageSwitcher />
       </ul>
       {isUserLoading ? null : !user ? (
         <WaspRouterLink
@@ -127,7 +132,7 @@ function NavBarDesktopUserDropdown({ isScrolled }: { isScrolled: boolean }) {
           )}
         >
           <div className="text-foreground hover:text-primary flex items-center transition-colors duration-300 ease-in-out">
-            Log in{" "}
+            {t("auth.logIn")}{" "}
             <LogIn
               size={isScrolled ? "1rem" : "1.1rem"}
               className={cn("transition-all duration-300", {
@@ -153,6 +158,7 @@ function NavBarMobileMenu({
   isScrolled: boolean;
   navigationItems: NavigationItem[];
 }) {
+  const { t } = useTranslation();
   const { data: user, isLoading: isUserLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -188,13 +194,13 @@ function NavBarMobileMenu({
           <div className="mt-6 flow-root">
             <div className="divide-border -my-6 divide-y">
               <ul className="space-y-2 py-6">
-                {renderNavigationItems(navigationItems, setMobileMenuOpen)}
+                {renderNavigationItems(navigationItems, setMobileMenuOpen, t)}
               </ul>
               <div className="py-6">
                 {isUserLoading ? null : !user ? (
                   <WaspRouterLink to={routes.LoginRoute.to}>
                     <div className="text-foreground hover:text-primary flex items-center justify-end transition-colors duration-300 ease-in-out">
-                      Log in <LogIn size="1.1rem" className="ml-1" />
+                      {t("auth.logIn")} <LogIn size="1.1rem" className="ml-1" />
                     </div>
                   </WaspRouterLink>
                 ) : (
@@ -206,8 +212,9 @@ function NavBarMobileMenu({
                   </ul>
                 )}
               </div>
-              <div className="py-6">
+              <div className="py-6 flex items-center gap-2">
                 <DarkModeSwitcher />
+                <LanguageSwitcher />
               </div>
             </div>
           </div>
@@ -220,6 +227,7 @@ function NavBarMobileMenu({
 function renderNavigationItems(
   navigationItems: NavigationItem[],
   setMobileMenuOpen?: Dispatch<SetStateAction<boolean>>,
+  t?: (key: string) => string,
 ) {
   const menuStyles = cn({
     "block rounded-lg px-3 py-2 text-sm font-medium leading-7 text-foreground hover:bg-accent hover:text-accent-foreground transition-colors":
@@ -229,6 +237,10 @@ function renderNavigationItems(
   });
 
   return navigationItems.map((item) => {
+    // Get the translation key for this item
+    const translationKey = `nav.${item.name.toLowerCase().replace(/\s+/g, "")}`;
+    const displayName = t ? t(translationKey) : item.name;
+
     return (
       <li key={item.name}>
         <ReactRouterLink
@@ -237,7 +249,7 @@ function renderNavigationItems(
           onClick={setMobileMenuOpen && (() => setMobileMenuOpen(false))}
           target={item.to.startsWith("http") ? "_blank" : undefined}
         >
-          {item.name}
+          {displayName}
         </ReactRouterLink>
       </li>
     );

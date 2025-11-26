@@ -1,120 +1,75 @@
 import daBoiAvatar from "../client/static/da-boi.webp";
-import kivo from "../client/static/examples/kivo.webp";
-import messync from "../client/static/examples/messync.webp";
-import microinfluencerClub from "../client/static/examples/microinfluencers.webp";
-import promptpanda from "../client/static/examples/promptpanda.webp";
-import reviewradar from "../client/static/examples/reviewradar.webp";
-import scribeist from "../client/static/examples/scribeist.webp";
-import searchcraft from "../client/static/examples/searchcraft.webp";
-import { BlogUrl, DocsUrl } from "../shared/common";
 import type { GridFeature } from "./components/FeaturesGrid";
 
 export const features: GridFeature[] = [
   {
-    name: "Cool Feature 1",
-    description: "Your feature",
-    emoji: "🤝",
-    href: DocsUrl,
-    size: "small",
-  },
-  {
-    name: "Cool Feature 2",
-    description: "Feature description",
-    emoji: "🔐",
-    href: DocsUrl,
-    size: "small",
-  },
-  {
-    name: "Cool Feature 3",
-    description: "Describe your cool feature here",
-    emoji: "🥞",
-    href: DocsUrl,
-    size: "medium",
-  },
-  {
-    name: "Cool Feature 4",
-    description: "Describe your cool feature here",
-    emoji: "💸",
-    href: DocsUrl,
+    name: "The Sensory Layer",
+    description: "Clients don't just tell you they are tight—they show you. Our interactive Body Map tracks heat, tension, and vibration over time.",
+    emoji: "🌡️",
+    href: "/signup",
     size: "large",
   },
   {
-    name: "Cool Feature 5",
-    description: "Describe your cool feature here",
-    emoji: "💼",
-    href: DocsUrl,
+    name: "The Infinite Session",
+    description: "Never ask 'What session number is this?' again. Loom automatically tracks session counts and connects previous homework to current insights.",
+    emoji: "♾️",
+    href: "/signup",
     size: "large",
   },
   {
-    name: "Cool Feature 6",
-    description: "It is cool",
-    emoji: "📈",
-    href: DocsUrl,
-    size: "small",
-  },
-  {
-    name: "Cool Feature 7",
-    description: "Cool feature",
-    emoji: "📧",
-    href: DocsUrl,
-    size: "small",
-  },
-  {
-    name: "Cool Feature 8",
-    description: "Describe your cool feature here",
-    emoji: "🤖",
-    href: DocsUrl,
-    size: "medium",
-  },
-  {
-    name: "Cool Feature 9",
-    description: "Describe your cool feature here",
-    emoji: "🚀",
-    href: DocsUrl,
-    size: "medium",
+    name: "Frictionless Business",
+    description: "You pay, they heal. Invite unlimited clients for free. Integrated payments and simple scheduling rules keep the admin out of the therapy room.",
+    emoji: "💳",
+    href: "/signup",
+    size: "large",
   },
 ];
 
 export const testimonials = [
   {
-    name: "Da Boi",
-    role: "Wasp Mascot",
-    avatarSrc: daBoiAvatar,
-    socialUrl: "https://twitter.com/wasplang",
-    quote: "I don't even know how to code. I'm just a plushie.",
-  },
-  {
-    name: "Mr. Foobar",
-    role: "Founder @ Cool Startup",
-    avatarSrc: daBoiAvatar,
-    socialUrl: "",
-    quote: "This product makes me cooler than I already am.",
-  },
-  {
-    name: "Jamie",
-    role: "Happy Customer",
+    name: "Dr. Sarah Cohen",
+    role: "Senior Satya Method Coach, Tel Aviv",
     avatarSrc: daBoiAvatar,
     socialUrl: "#",
-    quote: "My cats love it!",
+    quote: "The Body Map changed everything. Clients can finally show me their 'red chest' instead of struggling to describe it. It's like having X-ray vision into their nervous system.",
+  },
+  {
+    name: "Michael Levi",
+    role: "Satya Method Practitioner, 8 Years",
+    avatarSrc: daBoiAvatar,
+    socialUrl: "#",
+    quote: "I was drowning in session notes. Loom's automatic tracking means I can stay present with my clients instead of frantically scribbling 'Session 7' in my notebook.",
   },
 ];
 
 export const faqs = [
   {
     id: 1,
-    question: "Whats the meaning of life?",
-    answer: "42.",
-    href: "https://en.wikipedia.org/wiki/42_(number)",
+    question: "Do my clients have to pay?",
+    answer: "No! You subscribe to Loom, and your clients get free access. They can log their sensations and view their session history at no cost. You're paying for the container, not per-seat.",
+    href: "/pricing",
+  },
+  {
+    id: 2,
+    question: "Is it available in Hebrew?",
+    answer: "Yes. Loom is fully localized in Hebrew and English. Your clients can switch languages instantly from their dashboard.",
+    href: "#",
+  },
+  {
+    id: 3,
+    question: "How does pricing work?",
+    answer: "Hobby plan (₪99/mo) supports up to 5 clients. Pro plan (₪199/mo) includes unlimited clients plus the Resource Library for sharing materials. Both include all core features.",
+    href: "/pricing",
   },
 ];
 
 export const footerNavigation = {
   app: [
-    { name: "Documentation", href: DocsUrl },
-    { name: "Blog", href: BlogUrl },
+    { name: "Pricing", href: "/pricing" },
+    { name: "Sign Up", href: "/signup" },
   ],
   company: [
-    { name: "About", href: "https://wasp.sh" },
+    { name: "About Satya Method", href: "#" },
     { name: "Privacy", href: "#" },
     { name: "Terms of Service", href: "#" },
   ],
@@ -122,45 +77,21 @@ export const footerNavigation = {
 
 export const examples = [
   {
-    name: "Example #1",
-    description: "Describe your example here.",
-    imageSrc: kivo,
+    name: "Rachel T.",
+    description: "Went from scattered notes to organized insights. Now tracks 12 clients effortlessly with Loom's Session Tracker.",
+    imageSrc: daBoiAvatar,
     href: "#",
   },
   {
-    name: "Example #2",
-    description: "Describe your example here.",
-    imageSrc: messync,
+    name: "David K.",
+    description: "Body Map helped him identify a pattern across 3 clients - tension migrating from shoulders to chest after Session 4.",
+    imageSrc: daBoiAvatar,
     href: "#",
   },
   {
-    name: "Example #3",
-    description: "Describe your example here.",
-    imageSrc: microinfluencerClub,
-    href: "#",
-  },
-  {
-    name: "Example #4",
-    description: "Describe your example here.",
-    imageSrc: promptpanda,
-    href: "#",
-  },
-  {
-    name: "Example #5",
-    description: "Describe your example here.",
-    imageSrc: reviewradar,
-    href: "#",
-  },
-  {
-    name: "Example #6",
-    description: "Describe your example here.",
-    imageSrc: scribeist,
-    href: "#",
-  },
-  {
-    name: "Example #7",
-    description: "Describe your example here.",
-    imageSrc: searchcraft,
+    name: "Yael M.",
+    description: "Switched from paper logs to Loom. Her clients love seeing their progress visualized on the heat map.",
+    imageSrc: daBoiAvatar,
     href: "#",
   },
 ];

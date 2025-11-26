@@ -29,18 +29,39 @@ export type PaymentPlanEffect =
 
 export const paymentPlans = {
   [PaymentPlanId.Hobby]: {
-    getPaymentProcessorPlanId: () =>
-      requireNodeEnvVar("PAYMENTS_HOBBY_SUBSCRIPTION_PLAN_ID"),
+    getPaymentProcessorPlanId: () => {
+      // Check which payment processor is active
+      // For Tranzilla, return the plan ID (which is used to lookup price)
+      // For Stripe/LemonSqueezy, return their specific plan ID
+      try {
+        return requireNodeEnvVar("PAYMENTS_HOBBY_SUBSCRIPTION_PLAN_ID");
+      } catch {
+        // If Stripe/LS env var not set, assume Tranzilla
+        return PaymentPlanId.Hobby;
+      }
+    },
     effect: { kind: "subscription" },
   },
   [PaymentPlanId.Pro]: {
-    getPaymentProcessorPlanId: () =>
-      requireNodeEnvVar("PAYMENTS_PRO_SUBSCRIPTION_PLAN_ID"),
+    getPaymentProcessorPlanId: () => {
+      try {
+        return requireNodeEnvVar("PAYMENTS_PRO_SUBSCRIPTION_PLAN_ID");
+      } catch {
+        // If Stripe/LS env var not set, assume Tranzilla
+        return PaymentPlanId.Pro;
+      }
+    },
     effect: { kind: "subscription" },
   },
   [PaymentPlanId.Credits10]: {
-    getPaymentProcessorPlanId: () =>
-      requireNodeEnvVar("PAYMENTS_CREDITS_10_PLAN_ID"),
+    getPaymentProcessorPlanId: () => {
+      try {
+        return requireNodeEnvVar("PAYMENTS_CREDITS_10_PLAN_ID");
+      } catch {
+        // If Stripe/LS env var not set, assume Tranzilla
+        return PaymentPlanId.Credits10;
+      }
+    },
     effect: { kind: "credits", amount: 10 },
   },
 } as const satisfies Record<PaymentPlanId, PaymentPlan>;

@@ -8,6 +8,7 @@ import type {
   UpdateClientSchedule,
   LogSession,
   GetUpcomingSessions,
+  GetSessionContext,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
@@ -33,6 +34,8 @@ export type SessionResponsePublic = {
   sessionNumber?: number | null;
   topic?: string | null;
   sharedSummary: string | null;
+  somaticAnchor: string | null;
+  resources: { id: string; name: string; type: string; s3Key: string }[];
 };
 
 // ============================================
@@ -307,13 +310,21 @@ export const getSessionsForClient: GetSessionsForClient<
       orderBy: { sessionDate: "desc" },
       skip,
       take: limit,
+      include: { resources: true },
     });
 
-    // Return ONLY public fields for CLIENT
+    // Return ONLY public fields for CLIENT (including harmony features)
     const publicSessions: SessionResponsePublic[] = sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
       sharedSummary: session.sharedSummary,
+      somaticAnchor: session.somaticAnchor,
+      resources: session.resources.map((r) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        s3Key: r.s3Key,
+      })),
     }));
 
     const totalPages = Math.ceil(total / limit);
@@ -351,6 +362,7 @@ export const getSessionsForClient: GetSessionsForClient<
       orderBy: { sessionDate: "desc" },
       skip,
       take: limit,
+      include: { resources: true },
     });
 
     const fullSessions: SessionResponse[] = sessions.map((session) => ({
@@ -359,7 +371,7 @@ export const getSessionsForClient: GetSessionsForClient<
       sessionDate: session.sessionDate,
       privateNotes: session.privateNotes,
       sharedSummary: session.sharedSummary,
-    }));
+    })) as any; // Cast to maintain backward compatibility
 
     const totalPages = Math.ceil(total / limit);
     return { sessions: fullSessions, total, page, limit, totalPages };
@@ -411,12 +423,20 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
       where: { clientId: clientProfile.id },
       orderBy: { sessionDate: "desc" },
       take: 3,
+      include: { resources: true },
     });
 
     return sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
       sharedSummary: session.sharedSummary,
+      somaticAnchor: session.somaticAnchor,
+      resources: session.resources.map((r) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        s3Key: r.s3Key,
+      })),
     }));
   }
 
@@ -443,12 +463,20 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
       where: { clientId: args.clientId },
       orderBy: { sessionDate: "desc" },
       take: 3,
+      include: { resources: true },
     });
 
     return sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
       sharedSummary: session.sharedSummary,
+      somaticAnchor: session.somaticAnchor,
+      resources: session.resources.map((r) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        s3Key: r.s3Key,
+      })),
     }));
   }
 
@@ -541,6 +569,84 @@ export const updateClientSchedule: UpdateClientSchedule<
 };
 
 // ============================================
+// GET SESSION CONTEXT (Harmony Update)
+// ============================================
+const getSessionContextSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
+});
+
+type GetSessionContextInput = z.infer<typeof getSessionContextSchema>;
+
+type SomaticLogData = {
+  id: string;
+  createdAt: Date;
+  bodyZone: string;
+  intensity: number;
+};
+
+export type SessionContextResponse = {
+  somaticLogs: SomaticLogData[];
+};
+
+export const getSessionContext: GetSessionContext<
+  GetSessionContextInput,
+  SessionContextResponse
+> = async (rawArgs, context) => {
+  const { clientId } = ensureArgsSchemaOrThrowHttpError(
+    getSessionContextSchema,
+    rawArgs
+  );
+
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in");
+  }
+
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can view session context");
+  }
+
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
+
+  // Verify the client belongs to this coach
+  const client = await context.entities.ClientProfile.findUnique({
+    where: { id: clientId },
+  });
+
+  if (!client || client.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You do not have access to this client");
+  }
+
+  // Get somatic logs from the last 14 days
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const somaticLogs = await context.entities.SomaticLog.findMany({
+    where: {
+      clientId,
+      createdAt: {
+        gte: fourteenDaysAgo,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return {
+    somaticLogs: somaticLogs.map((log) => ({
+      id: log.id,
+      createdAt: log.createdAt,
+      bodyZone: log.bodyZone,
+      intensity: log.intensity,
+    })),
+  };
+};
+
+// ============================================
 // LOG SESSION (Module 10)
 // ============================================
 const logSessionSchema = z.object({
@@ -549,6 +655,18 @@ const logSessionSchema = z.object({
   topic: z.string().optional().nullable(),
   privateNotes: z.string().optional().nullable(),
   sharedSummary: z.string().optional().nullable(),
+  somaticAnchor: z.enum([
+    "HEAD",
+    "THROAT",
+    "CHEST",
+    "SOLAR_PLEXUS",
+    "BELLY",
+    "PELVIS",
+    "ARMS",
+    "LEGS",
+    "FULL_BODY",
+  ]).optional().nullable(),
+  resourceIds: z.array(z.string()).optional().default([]),
 });
 
 type LogSessionInput = z.infer<typeof logSessionSchema>;
@@ -566,8 +684,15 @@ export type LogSessionResponse = {
 
 export const logSession: LogSession<LogSessionInput, LogSessionResponse> =
   async (rawArgs, context) => {
-    const { clientId, sessionDate, topic, privateNotes, sharedSummary } =
-      ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
+    const {
+      clientId,
+      sessionDate,
+      topic,
+      privateNotes,
+      sharedSummary,
+      somaticAnchor,
+      resourceIds,
+    } = ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
 
     if (!context.user) {
       throw new HttpError(401, "You must be logged in");
@@ -626,6 +751,12 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> =
     // Increment session count and create session
     const nextSessionNumber = (client.sessionCount || 0) + 1;
 
+    // Prepare resource connections if any resourceIds provided
+    const resourcesConnect =
+      resourceIds && resourceIds.length > 0
+        ? { connect: resourceIds.map((id) => ({ id })) }
+        : undefined;
+
     const session = await context.entities.CoachSession.create({
       data: {
         sessionDate: sessionDateObj,
@@ -633,6 +764,8 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> =
         topic: topic || null,
         privateNotes: privateNotes || null,
         sharedSummary: sharedSummary || null,
+        somaticAnchor: somaticAnchor || null,
+        ...(resourcesConnect && { resources: resourcesConnect }),
         coachId: coachProfile.id,
         clientId: clientId,
       },

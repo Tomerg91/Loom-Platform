@@ -4,6 +4,7 @@ import { HttpError, prisma } from "wasp/server";
 import {
   type GetPaginatedUsers,
   type UpdateIsUserAdminById,
+  type UpdateUserLanguage,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { SubscriptionStatus } from "../payment/plans";
@@ -156,4 +157,36 @@ export const getPaginatedUsers: GetPaginatedUsers<
     users: pageOfUsers,
     totalPages,
   };
+};
+
+// ============================================
+// INTERNATIONALIZATION
+// ============================================
+
+const updateUserLanguageInputSchema = z.object({
+  language: z.enum(["en", "he"]),
+});
+
+type UpdateUserLanguageInput = z.infer<typeof updateUserLanguageInputSchema>;
+
+export const updateUserLanguage: UpdateUserLanguage<
+  UpdateUserLanguageInput,
+  User
+> = async (rawArgs, context) => {
+  const { language } = ensureArgsSchemaOrThrowHttpError(
+    updateUserLanguageInputSchema,
+    rawArgs,
+  );
+
+  if (!context.user) {
+    throw new HttpError(
+      401,
+      "Only authenticated users are allowed to perform this operation",
+    );
+  }
+
+  return context.entities.User.update({
+    where: { id: context.user.id },
+    data: { preferredLanguage: language },
+  });
 };

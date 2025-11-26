@@ -1,13 +1,37 @@
 import { useState } from "react";
 import type { User } from "wasp/entities";
-import { getSessionsForClient, useQuery } from "wasp/client/operations";
+import {
+  getSessionsForClient,
+  getResourceDownloadUrl,
+  useQuery,
+  useAction,
+} from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { ChevronDown, ChevronUp, Calendar, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, Clock, FileText, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+
+// Helper to convert BodyZone enum to display name
+const getBodyZoneLabel = (zone: string): string => {
+  const labels: Record<string, string> = {
+    HEAD: "Head",
+    THROAT: "Throat",
+    CHEST: "Chest",
+    SOLAR_PLEXUS: "Solar Plexus",
+    BELLY: "Belly",
+    PELVIS: "Pelvis",
+    ARMS: "Arms",
+    LEGS: "Legs",
+    FULL_BODY: "Full Body",
+  };
+  return labels[zone] || zone;
+};
 
 export default function SessionHistoryPage({ user }: { user: User }) {
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
+
+  const getDownloadUrl = useAction(getResourceDownloadUrl);
 
   // Get client profile ID from an endpoint or local storage/context
   // For now, we'll make a query that returns it
@@ -62,6 +86,25 @@ export default function SessionHistoryPage({ user }: { user: User }) {
 
   const sessions = response?.sessions || [];
   const total = response?.total || 0;
+
+  const handleDownloadResource = async (resourceId: string, resourceName: string) => {
+    try {
+      setDownloadingResourceId(resourceId);
+      const downloadUrl = await getDownloadUrl({ resourceId });
+      // Create a temporary link and trigger download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = resourceName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to download resource:", error);
+      alert("Failed to download resource. Please try again.");
+    } finally {
+      setDownloadingResourceId(null);
+    }
+  };
 
   return (
     <div className="mt-10 px-6 max-w-4xl mx-auto">
@@ -122,6 +165,16 @@ export default function SessionHistoryPage({ user }: { user: User }) {
 
               {expandedSessionId === session.id && (
                 <CardContent className="space-y-4 border-t pt-4">
+                  {/* Somatic Anchor Badge */}
+                  {(session as any).somaticAnchor && (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                        🎯 Anchor: {getBodyZoneLabel((session as any).somaticAnchor)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Session Summary */}
                   {session.sharedSummary ? (
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">
@@ -136,6 +189,50 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                       <p className="text-sm text-muted-foreground italic">
                         No summary available for this session.
                       </p>
+                    </div>
+                  )}
+
+                  {/* Attached Resources (Homework) */}
+                  {(session as any).resources && (session as any).resources.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Homework
+                      </h3>
+                      <div className="space-y-2">
+                        {(session as any).resources.map(
+                          (resource: {
+                            id: string;
+                            name: string;
+                            type: string;
+                          }) => (
+                            <button
+                              key={resource.id}
+                              onClick={() =>
+                                handleDownloadResource(resource.id, resource.name)
+                              }
+                              disabled={downloadingResourceId === resource.id}
+                              className="w-full flex items-center gap-2 p-2 text-left bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors disabled:opacity-50"
+                            >
+                              {downloadingResourceId === resource.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                  <span className="text-sm text-gray-700">
+                                    Downloading...
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                  <span className="text-sm text-blue-600 underline">
+                                    📄 {resource.name}
+                                  </span>
+                                </>
+                              )}
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   )}
                 </CardContent>

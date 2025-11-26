@@ -3,20 +3,20 @@ app OpenSaaS {
     version: "^0.19.0"
   },
 
-  title: "Loom Platform",
+  title: "Loom - The Somatic Coaching Platform",
 
   head: [
     "<link rel='icon' href='/favicon.ico' />",
     "<meta charset='utf-8' />",
-    "<meta name='description' content='Somatic coaching platform for the Satya Method.' />",
+    "<meta name='description' content='The all-in-one workspace for Satya Method practitioners. Visualise client sensations, track session history, and manage your practice effortlessly.' />",
     "<meta name='author' content='Loom Platform' />",
-    "<meta name='keywords' content='coaching, somatic, body mapping, Satya Method' />",
+    "<meta name='keywords' content='somatic coaching, Satya Method, body mapping, sensation tracking, somatic therapy' />",
 
     "<meta property='og:type' content='website' />",
-    "<meta property='og:title' content='Loom Platform' />",
-    "<meta property='og:site_name' content='Loom Platform' />",
+    "<meta property='og:title' content='Loom - The Somatic Coaching Platform' />",
+    "<meta property='og:site_name' content='Loom' />",
     "<meta property='og:url' content='https://loom-platform.com' />",
-    "<meta property='og:description' content='Somatic coaching platform for the Satya Method.' />",
+    "<meta property='og:description' content='The all-in-one workspace for Satya Method practitioners. Visualise client sensations, track session history, and manage your practice effortlessly.' />",
     "<meta property='og:image' content='https://loom-platform.com/public-banner.webp' />",
     "<meta name='twitter:image' content='https://loom-platform.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
@@ -74,6 +74,8 @@ app OpenSaaS {
       import { seedMockUsers } from "@src/server/scripts/dbSeeds",
       // Creates missing CoachProfile/ClientProfile for existing users
       import { createMissingProfiles } from "@src/server/scripts/createMissingProfiles",
+      // Creates test coach and clients with realistic sample data for development
+      import { seedTestCoachWithClients } from "@src/server/scripts/dbSeeds",
     ]
   },
 
@@ -232,6 +234,11 @@ query getRecentSessionsForClient {
   entities: [User, ClientProfile, CoachProfile, CoachSession]
 }
 
+query getSessionContext {
+  fn: import { getSessionContext } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile, SomaticLog]
+}
+
 //#region Module 10: Recurring Sessions
 action updateClientSchedule {
   fn: import { updateClientSchedule } from "@src/session/operations",
@@ -260,6 +267,50 @@ page SessionHistoryPage {
   component: import SessionHistory from "@src/client/SessionHistoryPage"
 }
 //#endregion Module 10
+
+//#region Module 11: Goals & Milestones
+action createGoal {
+  fn: import { createGoal } from "@src/goals/operations",
+  entities: [User, ClientProfile, Goal, Milestone]
+}
+
+action updateGoal {
+  fn: import { updateGoal } from "@src/goals/operations",
+  entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
+}
+
+action deleteGoal {
+  fn: import { deleteGoal } from "@src/goals/operations",
+  entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
+}
+
+query getGoals {
+  fn: import { getGoals } from "@src/goals/operations",
+  entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
+}
+
+action toggleMilestone {
+  fn: import { toggleMilestone } from "@src/goals/operations",
+  entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
+}
+
+action updateGoalProgress {
+  fn: import { updateGoalProgress } from "@src/goals/operations",
+  entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
+}
+
+route ClientGoalsRoute { path: "/client/goals", to: ClientGoalsPage }
+page ClientGoalsPage {
+  authRequired: true,
+  component: import ClientGoals from "@src/client/GoalsPage"
+}
+
+route CoachClientGoalsRoute { path: "/coach/client/:clientId/goals", to: CoachClientGoalsPage }
+page CoachClientGoalsPage {
+  authRequired: true,
+  component: import CoachClientGoals from "@src/coach/ClientGoalsPage"
+}
+//#endregion Module 11
 //#endregion
 
 //#region Payment
@@ -425,6 +476,13 @@ page AdminUIButtonsPage {
   authRequired: true,
   component: import AdminUI from "@src/admin/elements/ui-elements/ButtonsPage"
 }
+
+//#region Demo Pages (for screenshots)
+route DemoBodyMapRoute { path: "/demo-body-map", to: DemoBodyMapPage }
+page DemoBodyMapPage {
+  component: import BodyMapPromoDemo from "@src/landing-page/BodyMapPromoDemoPage"
+}
+//#endregion
 
 route NotFoundRoute { path: "*", to: NotFoundPage }
 page NotFoundPage {

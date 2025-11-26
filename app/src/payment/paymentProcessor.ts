@@ -18,7 +18,7 @@ export interface FetchCustomerPortalUrlArgs {
 }
 
 export interface PaymentProcessor {
-  id: "stripe" | "lemonsqueezy";
+  id: "stripe" | "lemonsqueezy" | "tranzilla";
   createCheckoutSession: (
     args: CreateCheckoutSessionArgs,
   ) => Promise<{ session: { id: string; url: string } }>;
@@ -33,5 +33,8 @@ export interface PaymentProcessor {
  * Choose which payment processor you'd like to use, then delete the
  * other payment processor code that you're not using  from `/src/payment`
  */
-export const paymentProcessor: PaymentProcessor = stripePaymentProcessor;
+import { tranzillaPaymentProcessor } from "./tranzilla/paymentProcessor";
+
+export const paymentProcessor: PaymentProcessor = tranzillaPaymentProcessor;
+// export const paymentProcessor: PaymentProcessor = stripePaymentProcessor;
 // export const paymentProcessor: PaymentProcessor = lemonSqueezyPaymentProcessor;

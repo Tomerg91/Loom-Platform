@@ -1,7 +1,6 @@
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
-import openSaasBannerDark from "../../client/static/open-saas-banner-dark.svg";
-import openSaasBannerLight from "../../client/static/open-saas-banner-light.svg";
 import { Button } from "../../components/ui/button";
+import BodyMapSelector from "../../client/components/BodyMapSelector";
 
 export default function Hero() {
   return (
@@ -12,43 +11,36 @@ export default function Hero() {
         <div className="max-w-8xl mx-auto px-6 lg:px-8">
           <div className="lg:mb-18 mx-auto max-w-3xl text-center">
             <h1 className="text-foreground text-5xl font-bold sm:text-6xl">
-              Some <span className="italic">cool</span> words about{" "}
-              <span className="text-gradient-primary">your product</span>
+              Stop Guessing <span className="text-gradient-primary">How Your Clients Feel</span>
             </h1>
             <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg leading-8">
-              With some more exciting words about your product!
+              The first platform built for Somatic Coaching. Track sensations on a visual Body Map, manage session history automatically, and deepen your container.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button size="lg" variant="outline" asChild>
                 <WaspRouterLink to={routes.PricingPageRoute.to}>
-                  Learn More
+                  See Pricing
                 </WaspRouterLink>
               </Button>
               <Button size="lg" variant="default" asChild>
                 <WaspRouterLink to={routes.SignupRoute.to}>
-                  Get Started <span aria-hidden="true">→</span>
+                  Start Free Trial <span aria-hidden="true">→</span>
                 </WaspRouterLink>
               </Button>
             </div>
           </div>
           <div className="mt-14 flow-root sm:mt-14">
             <div className="m-2 hidden justify-center rounded-xl md:flex lg:-m-4 lg:rounded-2xl lg:p-4">
-              <img
-                src={openSaasBannerLight}
-                alt="App screenshot"
-                width={1000}
-                height={530}
-                loading="lazy"
-                className="rounded-md shadow-2xl ring-1 ring-gray-900/10 dark:hidden"
-              />
-              <img
-                src={openSaasBannerDark}
-                alt="App screenshot"
-                width={1000}
-                height={530}
-                loading="lazy"
-                className="hidden rounded-md shadow-2xl ring-1 ring-gray-900/10 dark:block"
-              />
+              <div className="w-full max-w-2xl p-8 bg-white dark:bg-slate-800 rounded-lg shadow-2xl ring-1 ring-gray-900/10 dark:ring-gray-700/50">
+                <BodyMapSelector
+                  mode="readonly"
+                  highlightedZones={[
+                    { zone: "CHEST", intensity: 9 },
+                    { zone: "ARMS", intensity: 6 },
+                    { zone: "THROAT", intensity: 5 },
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>

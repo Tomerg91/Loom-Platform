@@ -28,6 +28,18 @@ enum BodyZone {
   FULL_BODY
 }
 
+enum GoalType {
+  OKR
+  SMART
+  HABIT
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
 // ============================================
 // USER & AUTHENTICATION
 // ============================================
@@ -109,6 +121,9 @@ model ClientProfile {
   scheduleTimezone String?   // IANA timezone (e.g., "America/New_York")
   nextSessionDate  DateTime? // Computed next session date in UTC
   sessionCount     Int       @default(0) // Total sessions completed
+
+  // MODULE 11: Goals & Milestones
+  goals            Goal[]
 }
 
 // ============================================
@@ -162,12 +177,52 @@ model CoachSession {
   // Visible to both Coach and Client
   sharedSummary String?       @db.Text
 
+  // HARMONY UPDATE: Somatic Anchor & Resource Attachments
+  somaticAnchor BodyZone?     // Body zone discussed in session
+  resources     Resource[]    // Resources attached as homework
+
   // Relations
   coach         CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
   coachId       String
 
   client        ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId      String
+}
+
+// ============================================
+// GOALS & MILESTONES (Module 11)
+// ============================================
+model Goal {
+  id            String        @id @default(uuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  title         String
+  type          GoalType      @default(OKR)
+  status        GoalStatus    @default(NOT_STARTED)
+  progress      Int           @default(0)  // 0-100, calculated from milestones
+  dueDate       DateTime?
+
+  // Relations
+  client        ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+
+  // Milestones for this goal
+  milestones    Milestone[]
+}
+
+model Milestone {
+  id            String        @id @default(uuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  text          String
+  completed     Boolean       @default(false)
+  order         Int           @default(0)  // For ordering within a goal
+
+  // Relations
+  goal          Goal          @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId        String
 }
 
 // ============================================
@@ -198,6 +253,9 @@ model Resource {
 
   coach       CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
   coachId     String
+
+  // HARMONY UPDATE: Resource can be attached to sessions
+  sessions    CoachSession[] // Sessions where this resource was prescribed
 }
 
 // ============================================

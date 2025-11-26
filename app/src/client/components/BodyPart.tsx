@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import React, { useMemo } from 'react';
 
 type BodyZone = 'HEAD' | 'THROAT' | 'CHEST' | 'SOLAR_PLEXUS' | 'BELLY' | 'PELVIS' | 'ARMS' | 'LEGS';
 
@@ -26,17 +26,30 @@ const zoneLabels: Record<BodyZone, string> = {
 };
 
 /**
- * BodyPart Component - High-Fidelity Thermal Heatmap
+ * Helper to calculate the center point of a path for the heat orb positioning.
+ * This is a simplified approximation based on the zone.
+ */
+const getZoneCenter = (zone: BodyZone): { cx: number; cy: number; r: number } => {
+  switch (zone) {
+    case 'HEAD': return { cx: 150, cy: 65, r: 45 };
+    case 'THROAT': return { cx: 150, cy: 120, r: 25 };
+    case 'CHEST': return { cx: 150, cy: 180, r: 70 };
+    case 'SOLAR_PLEXUS': return { cx: 150, cy: 280, r: 50 };
+    case 'BELLY': return { cx: 150, cy: 340, r: 55 };
+    case 'PELVIS': return { cx: 150, cy: 410, r: 60 };
+    // Arms and Legs are multi-part or long, so we handle them slightly differently or use a large covering orb
+    case 'ARMS': return { cx: 150, cy: 250, r: 140 };
+    case 'LEGS': return { cx: 150, cy: 530, r: 120 };
+  }
+};
+
+/**
+ * BodyPart Component - High-Fidelity Volumetric Heatmap
  *
- * Renders a single body zone as a motion.path element with:
- * - SVG radial gradient fills (referenced by gradientId)
- * - Elegant stroke work: 1px idle, 1.5px active (dark grey #374151)
- * - Pulse animation on active state (opacity 0.85→1→0.85 over 3 seconds)
- * - Vector-effect="non-scaling-stroke" for consistent outline rendering
- *
- * IMPORTANT: This component does NOT render an <svg> wrapper.
- * The parent (SomaticBodyMap) renders the single <svg> container,
- * ensuring all paths share the exact same coordinate space.
+ * Renders:
+ * 1. A "Heat Orb" (motion.circle/ellipse) masked by the body path.
+ *    - This creates the effect of internal energy emanating from within.
+ * 2. An invisible interaction layer (the path itself) to capture events.
  */
 const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
   (
@@ -52,84 +65,104 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
     },
     ref
   ) => {
-    // Idle state: transparent fill, dark grey outline
-    const idleFill = 'transparent';
-    const idleStroke = '#374151'; // Dark Grey
-    const idleStrokeWidth = 1;
+    const center = useMemo(() => getZoneCenter(zone), [zone]);
+    const maskId = `clip-${zone}`;
 
-    // Hover state: subtle gradient glow at 40% opacity
-    const hoverFill = `url(#${gradientId})`;
-    const hoverFillOpacity = 0.4;
-    const hoverStroke = '#374151'; // Dark Grey
-    const hoverStrokeWidth = 1.5;
+    // Animation variants for the Heat Orb
+    const orbVariants = {
+      idle: {
+        opacity: 0,
+        scale: 0.8,
+        filter: 'blur(10px)',
+      },
+      hover: {
+        opacity: 0.6,
+        scale: 1.1,
+        filter: 'blur(20px)', // Bloom effect
+        transition: { duration: 0.4, ease: "easeOut" as const }
+      },
+      active: {
+        opacity: 0.9,
+        scale: 1.2,
+        filter: 'blur(15px)',
+        transition: { duration: 0.5, ease: "easeOut" as const }
+      }
+    };
 
-    // Active state: full gradient fill with pulse animation
-    const activeFill = `url(#${gradientId})`;
-    const activeStroke = '#374151'; // Dark Grey
-    const activeStrokeWidth = 1.5;
-
-    // Determine current state
-    let fill = idleFill;
-    let fillOpacity = 1;
-    let stroke = idleStroke;
-    let strokeWidth = idleStrokeWidth;
-
-    if (isSelected) {
-      fill = activeFill;
-      fillOpacity = 1; // Will be animated via framer-motion
-      stroke = activeStroke;
-      strokeWidth = activeStrokeWidth;
-    } else if (isHovered) {
-      fill = hoverFill;
-      fillOpacity = hoverFillOpacity;
-      stroke = hoverStroke;
-      strokeWidth = hoverStrokeWidth;
-    }
+    // Pulse animation for active state
+    const pulseTransition = {
+      opacity: {
+        duration: 2.5,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut" as const
+      },
+      scale: {
+        duration: 3,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut" as const
+      }
+    };
 
     return (
-      <motion.path
-        ref={ref}
-        d={path}
-        role="button"
-        tabIndex={0}
-        aria-label={zoneLabels[zone]}
-        className="cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
-        fill={fill}
-        stroke={stroke}
-        vectorEffect="non-scaling-stroke"
-        animate={{
-          opacity: isSelected ? [0.85, 1, 0.85] : 1,
-          strokeWidth,
-        }}
-        transition={
-          isSelected
-            ? {
-                opacity: {
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: 'reverse',
-                  ease: 'easeInOut',
-                },
-                strokeWidth: {
-                  duration: 0.3,
-                  ease: 'easeOut',
-                },
-              }
-            : {
-                duration: 0.3,
-                ease: 'easeOut',
-              }
-        }
-        onClick={onClick}
-        onMouseEnter={onHoverStart}
-        onMouseLeave={onHoverEnd}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onClick();
-          }
-        }}
-      />
+      <g>
+        {/* 1. VOLUMETRIC HEAT LAYER (Masked) */}
+        <g clipPath={`url(#${maskId})`}>
+          <motion.circle
+            cx={center.cx}
+            cy={center.cy}
+            r={center.r}
+            fill={`url(#${gradientId})`}
+            initial="idle"
+            animate={isSelected ? "active" : isHovered ? "hover" : "idle"}
+            variants={orbVariants}
+            transition={isSelected ? pulseTransition : undefined}
+            style={{ transformOrigin: `${center.cx}px ${center.cy}px` }}
+          />
+
+          {/* Secondary "Core" for extra depth when active */}
+          {isSelected && (
+            <motion.circle
+              cx={center.cx}
+              cy={center.cy}
+              r={center.r * 0.6}
+              fill="white"
+              opacity={0.3}
+              filter="blur(10px)"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1, opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+        </g>
+
+        {/* 2. INTERACTION LAYER (Invisible Path) */}
+        {/* We also use this to draw a subtle rim light when active/hovered */}
+        <motion.path
+          ref={ref}
+          d={path}
+          role="button"
+          tabIndex={0}
+          aria-label={zoneLabels[zone]}
+          className="cursor-pointer focus-visible:outline-none"
+          fill="transparent"
+          stroke={isSelected || isHovered ? "white" : "transparent"}
+          strokeOpacity={isSelected ? 0.5 : 0.2}
+          strokeWidth={isSelected ? 2 : 1}
+          vectorEffect="non-scaling-stroke"
+          onClick={onClick}
+          onMouseEnter={onHoverStart}
+          onMouseLeave={onHoverEnd}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onClick();
+            }
+          }}
+          whileTap={{ scale: 0.99 }} // Subtle tactile feedback
+        />
+      </g>
     );
   }
 );
