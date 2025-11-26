@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { getCustomerPortalUrl, useQuery } from "wasp/client/operations";
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
 import type { User } from "wasp/entities";
@@ -17,12 +18,13 @@ import {
 } from "../payment/plans";
 
 export default function AccountPage({ user }: { user: User }) {
+  const { t } = useTranslation();
   return (
     <div className="mt-10 px-6">
       <Card className="mb-4 lg:m-8">
         <CardHeader>
           <CardTitle className="text-foreground text-base font-semibold leading-6">
-            Account Information
+            {t("account.accountInformation")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -31,7 +33,7 @@ export default function AccountPage({ user }: { user: User }) {
               <div className="px-6 py-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                   <div className="text-muted-foreground text-sm font-medium">
-                    Email address
+                    {t("account.emailAddress")}
                   </div>
                   <div className="text-foreground mt-1 text-sm sm:col-span-2 sm:mt-0">
                     {user.email}
@@ -45,7 +47,7 @@ export default function AccountPage({ user }: { user: User }) {
                 <div className="px-6 py-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                     <div className="text-muted-foreground text-sm font-medium">
-                      Username
+                      {t("account.username")}
                     </div>
                     <div className="text-foreground mt-1 text-sm sm:col-span-2 sm:mt-0">
                       {user.username}
@@ -58,7 +60,7 @@ export default function AccountPage({ user }: { user: User }) {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                 <div className="text-muted-foreground text-sm font-medium">
-                  Your Plan
+                  {t("account.yourPlan")}
                 </div>
                 <UserCurrentSubscriptionPlan
                   subscriptionPlan={user.subscriptionPlan}
@@ -71,10 +73,10 @@ export default function AccountPage({ user }: { user: User }) {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                 <div className="text-muted-foreground text-sm font-medium">
-                  Credits
+                  {t("account.credits")}
                 </div>
                 <div className="text-foreground mt-1 text-sm sm:col-span-1 sm:mt-0">
-                  {user.credits} credits
+                  {t("account.creditsCount", { count: user.credits })}
                 </div>
                 <div className="ml-auto mt-4 sm:mt-0">
                   <BuyMoreButton subscriptionStatus={user.subscriptionStatus} />
@@ -85,10 +87,10 @@ export default function AccountPage({ user }: { user: User }) {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                 <div className="text-muted-foreground text-sm font-medium">
-                  About
+                  {t("account.about")}
                 </div>
                 <div className="text-foreground mt-1 text-sm sm:col-span-2 sm:mt-0">
-                  I'm a cool customer.
+                  {t("account.aboutDescription")}
                 </div>
               </div>
             </div>
@@ -104,7 +106,8 @@ function UserCurrentSubscriptionPlan({
   subscriptionStatus,
   datePaid,
 }: Pick<User, "subscriptionPlan" | "subscriptionStatus" | "datePaid">) {
-  let subscriptionPlanMessage = "Free Plan";
+  const { t } = useTranslation();
+  let subscriptionPlanMessage = t("account.freePlan");
   if (
     subscriptionPlan !== null &&
     subscriptionStatus !== null &&
@@ -114,6 +117,7 @@ function UserCurrentSubscriptionPlan({
       parsePaymentPlanId(subscriptionPlan),
       datePaid,
       subscriptionStatus as SubscriptionStatus,
+      t,
     );
   }
 
@@ -133,15 +137,17 @@ function formatSubscriptionStatusMessage(
   subscriptionPlan: PaymentPlanId,
   datePaid: Date,
   subscriptionStatus: SubscriptionStatus,
+  t: any,
 ): string {
   const paymentPlanName = prettyPaymentPlanName(subscriptionPlan);
   const statusToMessage: Record<SubscriptionStatus, string> = {
     active: `${paymentPlanName}`,
-    past_due: `Payment for your ${paymentPlanName} plan is past due! Please update your subscription payment information.`,
-    cancel_at_period_end: `Your ${paymentPlanName} plan subscription has been canceled, but remains active until the end of the current billing period: ${prettyPrintEndOfBillingPeriod(
-      datePaid,
-    )}`,
-    deleted: `Your previous subscription has been canceled and is no longer active.`,
+    past_due: t("account.subscriptionPastDue", { plan: paymentPlanName }),
+    cancel_at_period_end: t("account.subscriptionCanceled", {
+      plan: paymentPlanName,
+      date: prettyPrintEndOfBillingPeriod(datePaid)
+    }),
+    deleted: t("account.subscriptionDeleted"),
   };
 
   if (!statusToMessage[subscriptionStatus]) {
@@ -158,6 +164,7 @@ function prettyPrintEndOfBillingPeriod(date: Date) {
 }
 
 function CustomerPortalButton() {
+  const { t } = useTranslation();
   const { data: customerPortalUrl, isLoading: isCustomerPortalUrlLoading } =
     useQuery(getCustomerPortalUrl);
 
@@ -168,7 +175,7 @@ function CustomerPortalButton() {
   return (
     <a href={customerPortalUrl} target="_blank" rel="noopener noreferrer">
       <Button disabled={isCustomerPortalUrlLoading} variant="link">
-        Manage Payment Details
+        {t("account.managePaymentDetails")}
       </Button>
     </a>
   );
@@ -177,6 +184,8 @@ function CustomerPortalButton() {
 function BuyMoreButton({
   subscriptionStatus,
 }: Pick<User, "subscriptionStatus">) {
+  const { t } = useTranslation();
+
   if (
     subscriptionStatus === SubscriptionStatus.Active ||
     subscriptionStatus === SubscriptionStatus.CancelAtPeriodEnd
@@ -189,7 +198,7 @@ function BuyMoreButton({
       to={routes.PricingPageRoute.to}
       className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
     >
-      <Button variant="link">Buy More Credits</Button>
+      <Button variant="link">{t("account.buyMoreCredits")}</Button>
     </WaspRouterLink>
   );
 }
