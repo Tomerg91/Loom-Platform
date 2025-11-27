@@ -9,6 +9,7 @@ interface BodyPathData {
   zone: BodyZone;
   path: string;
   gradientId: string;
+  center: { x: number; y: number; r: number }; // x, y, radius
 }
 
 /**
@@ -27,61 +28,78 @@ const zoneGradientMap: Record<BodyZone, string> = {
 };
 
 /**
- * Refined SVG paths for the full-body somatic figure.
+ * High-Fidelity Anatomical Body Paths
  * Coordinate space: viewBox="0 0 300 650"
- * 
+ *
  * Improvements:
- * - More organic connections between joints
- * - Overlapping regions for seamless blending
+ * - Cubic Bezier curves (C) to simulate musculature
+ * - Realistic shoulders, calves, thighs with defined curves
+ * - Organic torso flowing naturally from chest to hips
+ * - Real limb proportions with tapering
+ * - Explicit center coordinates for accurate heat orb placement
  */
 const bodyPaths: BodyPathData[] = [
   {
     zone: 'HEAD',
-    // Smoother neck connection
-    path: 'M150 20 C 130 20 115 35 115 60 C 115 80 125 95 135 105 L 135 115 C 135 120 120 125 100 130 L 200 130 C 180 125 165 120 165 115 L 165 105 C 175 95 185 80 185 60 C 185 35 170 20 150 20 Z',
+    // Organic oval with jawline definition
+    path: 'M 150 20 C 135 20 125 35 125 60 C 125 85 135 100 150 100 C 165 100 175 85 175 60 C 175 35 165 20 150 20 Z',
     gradientId: zoneGradientMap.HEAD,
+    center: { x: 150, y: 60, r: 40 },
   },
   {
     zone: 'THROAT',
-    // Organic bridge between head and chest
-    path: 'M 135 105 C 135 115 125 125 135 135 L 165 135 C 175 125 165 115 165 105 C 160 108 155 110 150 110 C 145 110 140 108 135 105 Z',
+    // Tapered neck connecting jaw to clavicle
+    path: 'M 138 95 C 138 105 130 115 130 120 L 170 120 C 170 115 162 105 162 95 Q 150 102 138 95 Z',
     gradientId: zoneGradientMap.THROAT,
+    center: { x: 150, y: 110, r: 25 },
   },
   {
     zone: 'CHEST',
-    // Broader, more rounded shoulders
-    path: 'M 100 130 C 80 140 50 150 45 180 L 60 250 C 60 250 90 240 150 240 C 210 240 240 250 240 250 L 255 180 C 250 150 220 140 200 130 L 100 130 Z',
+    // Defined pectorals/breastplate, wider at shoulders (deltoids)
+    path: 'M 130 120 C 100 120 80 135 80 160 C 80 190 90 200 150 200 C 210 200 220 190 220 160 C 220 135 200 120 170 120 Z',
     gradientId: zoneGradientMap.CHEST,
+    center: { x: 150, y: 160, r: 60 },
   },
   {
     zone: 'SOLAR_PLEXUS',
-    // Upper abdomen, blending into chest and belly
-    path: 'M 65 245 C 70 290 80 320 150 320 C 220 320 230 290 235 245 C 200 235 100 235 65 245 Z',
+    // Diamond shape fitting under the chest arch
+    path: 'M 110 200 C 120 200 150 190 190 200 C 185 230 170 245 150 245 C 130 245 115 230 110 200 Z',
     gradientId: zoneGradientMap.SOLAR_PLEXUS,
+    center: { x: 150, y: 220, r: 35 },
   },
   {
     zone: 'BELLY',
-    // Lower abdomen, rounded
-    path: 'M 70 310 C 75 360 85 390 150 390 C 215 390 225 360 230 310 C 220 320 80 320 70 310 Z',
+    // Rounded organic abdomen
+    path: 'M 110 245 C 105 260 105 290 150 290 C 195 290 195 260 190 245 C 170 255 130 255 110 245 Z',
     gradientId: zoneGradientMap.BELLY,
+    center: { x: 150, y: 265, r: 45 },
   },
   {
     zone: 'PELVIS',
-    // Hips and groin area
-    path: 'M 85 380 C 85 410 90 430 100 450 L 150 460 L 200 450 C 210 430 215 410 215 380 C 180 385 120 385 85 380 Z',
+    // Hips widening slightly
+    path: 'M 105 290 C 95 310 95 330 150 340 C 205 330 205 310 195 290 C 180 295 120 295 105 290 Z',
     gradientId: zoneGradientMap.PELVIS,
+    center: { x: 150, y: 315, r: 50 },
   },
   {
     zone: 'ARMS',
-    // Natural arm curves
-    path: 'M 45 180 C 25 190 15 230 10 270 C 5 310 5 330 15 350 L 35 340 C 30 310 35 270 60 250 L 45 180 Z M 255 180 C 275 190 285 230 290 270 C 295 310 295 330 285 350 L 265 340 C 270 310 265 270 240 250 L 255 180 Z',
+    // Anatomical arms: Deltoid -> Bicep -> Forearm -> Hand
+    // Left Arm
+    path: 'M 80 135 C 60 140 50 160 55 200 C 58 230 50 250 45 280 C 42 300 45 320 55 330 L 75 325 C 80 300 85 250 85 200 C 85 180 90 150 105 130 Z ' +
+    // Right Arm
+          'M 220 135 C 240 140 250 160 245 200 C 242 230 250 250 255 280 C 258 300 255 320 245 330 L 225 325 C 220 300 215 250 215 200 C 215 180 210 150 195 130 Z',
     gradientId: zoneGradientMap.ARMS,
+    center: { x: 150, y: 220, r: 140 }, // Large aura covering both sides
   },
   {
     zone: 'LEGS',
-    // Full legs
-    path: 'M 100 450 C 90 500 90 570 95 620 L 80 640 L 120 640 L 110 620 C 115 570 130 500 150 460 L 100 450 Z M 200 450 C 210 500 210 570 205 620 L 220 640 L 180 640 L 190 620 C 185 570 170 500 150 460 L 200 450 Z',
+    // Anatomical legs: Thighs -> Knees -> Calves
+    // Left Leg
+    path: 'M 100 335 C 90 380 95 420 105 450 C 100 480 95 520 100 560 L 130 560 C 135 520 140 480 135 450 C 145 420 145 380 140 335 Z ' +
+    // Right Leg
+          'M 200 335 C 210 380 205 420 195 450 C 200 480 205 520 200 560 L 170 560 C 165 520 160 480 165 450 C 155 420 155 380 160 335 Z',
     gradientId: zoneGradientMap.LEGS,
+    center: { x: 150, y: 450, r: 120 }, // Large aura covering both legs
   },
 ];
 
@@ -203,6 +221,7 @@ export default function SomaticBodyMap() {
               zone={bodyPath.zone}
               path={bodyPath.path}
               gradientId={bodyPath.gradientId}
+              center={bodyPath.center}
               isSelected={selectedZone === bodyPath.zone}
               isHovered={hoveredZone === bodyPath.zone}
               onClick={() => handleZoneClick(bodyPath.zone)}

@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import React from 'react';
 
 type BodyZone = 'HEAD' | 'THROAT' | 'CHEST' | 'SOLAR_PLEXUS' | 'BELLY' | 'PELVIS' | 'ARMS' | 'LEGS';
 
@@ -7,6 +7,7 @@ interface BodyPartProps {
   zone: BodyZone;
   path: string;
   gradientId: string;
+  center: { x: number; y: number; r: number };
   isSelected: boolean;
   isHovered: boolean;
   onClick: () => void;
@@ -26,24 +27,6 @@ const zoneLabels: Record<BodyZone, string> = {
 };
 
 /**
- * Helper to calculate the center point of a path for the heat orb positioning.
- * This is a simplified approximation based on the zone.
- */
-const getZoneCenter = (zone: BodyZone): { cx: number; cy: number; r: number } => {
-  switch (zone) {
-    case 'HEAD': return { cx: 150, cy: 65, r: 45 };
-    case 'THROAT': return { cx: 150, cy: 120, r: 25 };
-    case 'CHEST': return { cx: 150, cy: 180, r: 70 };
-    case 'SOLAR_PLEXUS': return { cx: 150, cy: 280, r: 50 };
-    case 'BELLY': return { cx: 150, cy: 340, r: 55 };
-    case 'PELVIS': return { cx: 150, cy: 410, r: 60 };
-    // Arms and Legs are multi-part or long, so we handle them slightly differently or use a large covering orb
-    case 'ARMS': return { cx: 150, cy: 250, r: 140 };
-    case 'LEGS': return { cx: 150, cy: 530, r: 120 };
-  }
-};
-
-/**
  * BodyPart Component - High-Fidelity Volumetric Heatmap
  *
  * Renders:
@@ -57,6 +40,7 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
       zone,
       path,
       gradientId,
+      center,
       isSelected,
       isHovered,
       onClick,
@@ -65,7 +49,6 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
     },
     ref
   ) => {
-    const center = useMemo(() => getZoneCenter(zone), [zone]);
     const maskId = `clip-${zone}`;
 
     // Animation variants for the Heat Orb
@@ -110,22 +93,22 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         {/* 1. VOLUMETRIC HEAT LAYER (Masked) */}
         <g clipPath={`url(#${maskId})`}>
           <motion.circle
-            cx={center.cx}
-            cy={center.cy}
+            cx={center.x}
+            cy={center.y}
             r={center.r}
             fill={`url(#${gradientId})`}
             initial="idle"
             animate={isSelected ? "active" : isHovered ? "hover" : "idle"}
             variants={orbVariants}
             transition={isSelected ? pulseTransition : undefined}
-            style={{ transformOrigin: `${center.cx}px ${center.cy}px` }}
+            style={{ transformOrigin: `${center.x}px ${center.y}px` }}
           />
 
           {/* Secondary "Core" for extra depth when active */}
           {isSelected && (
             <motion.circle
-              cx={center.cx}
-              cy={center.cy}
+              cx={center.x}
+              cy={center.y}
               r={center.r * 0.6}
               fill="white"
               opacity={0.3}
