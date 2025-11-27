@@ -261,6 +261,10 @@ const resources = {
         deleteSession: "Delete Session",
         deleteConfirm: "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
         deleteSessionConfirm: "Delete Session",
+        timezoneInfo: "Timezone Information",
+        yourTimezone: "Your timezone",
+        clientTimezone: "Client's timezone",
+        timezoneNote: "Session time will be saved as entered in your timezone",
       },
       resources: {
         resourcesLibrary: "Resources Library",
@@ -595,6 +599,10 @@ const resources = {
         deleteSession: "מחק הפעלה",
         deleteConfirm: "האם אתה בטוח שברצונך למחוק את ההפעלה מ-{{date}}? לא ניתן לבטל פעולה זו.",
         deleteSessionConfirm: "מחק הפעלה",
+        timezoneInfo: "מידע אזור הזמן",
+        yourTimezone: "אזור הזמן שלך",
+        clientTimezone: "אזור הזמן של הלקוח",
+        timezoneNote: "זמן ההפעלה יישמר כפי שהוזן באזור הזמן שלך",
       },
       resources: {
         resourcesLibrary: "ספריית משאבים",

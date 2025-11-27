@@ -586,6 +586,7 @@ type SomaticLogData = {
 
 export type SessionContextResponse = {
   somaticLogs: SomaticLogData[];
+  clientTimezone: string | null;
 };
 
 export const getSessionContext: GetSessionContext<
@@ -643,6 +644,7 @@ export const getSessionContext: GetSessionContext<
       bodyZone: log.bodyZone,
       intensity: log.intensity,
     })),
+    clientTimezone: client.scheduleTimezone,
   };
 };
 

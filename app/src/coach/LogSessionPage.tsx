@@ -141,6 +141,15 @@ function LogSessionPageContent({
     }));
   };
 
+  // Get the browser's timezone
+  const getBrowserTimezone = (): string => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return "Unknown";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -274,6 +283,27 @@ function LogSessionPageContent({
                   <p className="text-xs text-muted-foreground">
                     {t("session.sessionDateHelp")}
                   </p>
+                  {/* Timezone Indicator */}
+                  <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                    <p className="text-xs font-semibold text-blue-900 mb-1">
+                      {t("session.timezoneInfo", "Timezone Information")}
+                    </p>
+                    <div className="space-y-1 text-xs text-blue-800">
+                      <p>
+                        {t("session.yourTimezone", "Your timezone")}:
+                        <span className="font-semibold ml-1">{getBrowserTimezone()}</span>
+                      </p>
+                      {contextData?.clientTimezone && (
+                        <p>
+                          {t("session.clientTimezone", "Client's timezone")}:
+                          <span className="font-semibold ml-1">{contextData.clientTimezone}</span>
+                        </p>
+                      )}
+                      <p className="mt-2 italic text-blue-700">
+                        {t("session.timezoneNote", "Session time will be saved as entered in your timezone")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {dateWarning && (
