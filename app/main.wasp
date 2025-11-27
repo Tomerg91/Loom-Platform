@@ -223,6 +223,19 @@ action updateSomaticLogVisibility {
 }
 //#endregion
 
+//#region Insights
+query getClientInsights {
+  fn: import { getClientInsights } from "@src/insights/operations",
+  entities: [CoachProfile, ClientProfile, SomaticLog]
+}
+
+route ClientInsightsRoute { path: "/coach/clients/:clientId/insights", to: ClientInsightsPage }
+page ClientInsightsPage {
+  authRequired: true,
+  component: import ClientInsightsPage from "@src/coach/ClientInsightsPage"
+}
+//#endregion
+
 //#region Sessions
 action createSession {
   fn: import { createSession } from "@src/session/operations",

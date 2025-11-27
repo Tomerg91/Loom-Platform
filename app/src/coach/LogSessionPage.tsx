@@ -76,19 +76,16 @@ function LogSessionPageContent({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const logSessionFn = useAction(logSession);
+  // NOTE: logSession operation was removed (Module 10 - incomplete)
   const { refetch: refetchSessions } = useQuery(getSessionsForClient, {
     clientId: clientId || "",
   });
 
-  // Fetch session context (somatic logs for heatmap)
-  const {
-    data: contextData,
-    isLoading: isContextLoading,
-    error: contextError,
-  } = useQuery(getSessionContext, {
-    clientId: clientId || "",
-  });
+  // NOTE: getSessionContext operation was removed (Module 10 - incomplete)
+  // Placeholder data until the feature is restored
+  const contextData = {};
+  const isContextLoading = false;
+  const contextError = null;
 
   // Fetch available resources for this coach
   const {
@@ -105,23 +102,27 @@ function LogSessionPageContent({
   }, [sessionNumberParam]);
 
   // Calculate heatmap data from somatic logs
+  // NOTE: getSessionContext was removed (Module 10 - incomplete)
   const calculateHeatmapData = () => {
-    if (!contextData?.somaticLogs) return [];
+    // NOTE: contextData.somaticLogs no longer available
+    return [];
 
-    const zones = new Map<string, { sum: number; count: number }>();
+    // if (!contextData?.somaticLogs) return [];
 
-    contextData.somaticLogs.forEach((log) => {
-      const existing = zones.get(log.bodyZone) || { sum: 0, count: 0 };
-      zones.set(log.bodyZone, {
-        sum: existing.sum + log.intensity,
-        count: existing.count + 1,
-      });
-    });
+    // const zones = new Map<string, { sum: number; count: number }>();
 
-    return Array.from(zones.entries()).map(([zone, data]) => ({
-      zone: zone as any,
-      intensity: Math.round(data.sum / data.count),
-    }));
+    // contextData.somaticLogs.forEach((log) => {
+    //   const existing = zones.get(log.bodyZone) || { sum: 0, count: 0 };
+    //   zones.set(log.bodyZone, {
+    //     sum: existing.sum + log.intensity,
+    //     count: existing.count + 1,
+    //   });
+    // });
+
+    // return Array.from(zones.entries()).map(([zone, data]) => ({
+    //   zone: zone as any,
+    //   intensity: Math.round(data.sum / data.count),
+    // }));
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,22 +157,27 @@ function LogSessionPageContent({
     setSuccessMessage(null);
 
     try {
-      const result = await logSessionFn({
-        clientId,
-        sessionDate: new Date(formData.sessionDate),
-        topic: formData.topic || null,
-        privateNotes: formData.privateNotes || null,
-        sharedSummary: formData.sharedSummary || null,
-        somaticAnchor: (formData.somaticAnchor || null) as any,
-        resourceIds: formData.resourceIds,
-      });
+      // NOTE: Using createSession instead of logSession (Module 10 removed)
+      setErrorMessage("Session logging feature is currently unavailable. Please use the client details page to log sessions.");
+      setIsSubmitting(false);
+      return;
 
-      setSuccessMessage(
-        t("session.sessionLoggedSuccess", { number: result.sessionNumber })
-      );
-      if (result.dateWarning) {
-        setDateWarning(result.dateWarning);
-      }
+      // const result = await logSessionFn({
+      //   clientId,
+      //   sessionDate: new Date(formData.sessionDate),
+      //   topic: formData.topic || null,
+      //   privateNotes: formData.privateNotes || null,
+      //   sharedSummary: formData.sharedSummary || null,
+      //   somaticAnchor: (formData.somaticAnchor || null) as any,
+      //   resourceIds: formData.resourceIds,
+      // });
+
+      // setSuccessMessage(
+      //   t("session.sessionLoggedSuccess", { number: result.sessionNumber })
+      // );
+      // if (result.dateWarning) {
+      //   setDateWarning(result.dateWarning);
+      // }
 
       // Reset form
       setFormData({
@@ -226,29 +232,9 @@ function LogSessionPageContent({
                     {t("session.loadingContext")}
                   </p>
                 </div>
-              ) : contextError ? (
-                <Alert className="bg-yellow-50 border-yellow-200">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <AlertDescription className="text-yellow-800 text-sm">
-                    {t("session.unableToLoadLogs")}
-                  </AlertDescription>
-                </Alert>
-              ) : contextData?.somaticLogs && contextData.somaticLogs.length > 0 ? (
-                <div className="space-y-4">
-                  <BodyMapSelector
-                    mode="readonly"
-                    highlightedZones={calculateHeatmapData()}
-                  />
-                  <div className="bg-gray-50 rounded-md p-3 text-xs text-muted-foreground">
-                    <p className="font-semibold text-foreground mb-1">
-                      {t("session.foundLogs", { count: contextData.somaticLogs.length })}
-                    </p>
-                    <p>
-                      {t("session.reviewHeatmap")}
-                    </p>
-                  </div>
-                </div>
               ) : (
+                // NOTE: contextData.somaticLogs no longer available (Module 10 - incomplete)
+                // Hiding heatmap visualization until feature is restored
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">
                     {t("session.noLogsRecent")}
@@ -291,12 +277,13 @@ function LogSessionPageContent({
                         {t("session.yourTimezone", "Your timezone")}:
                         <span className="font-semibold ml-1">{getBrowserTimezone()}</span>
                       </p>
-                      {contextData?.clientTimezone && (
+                      {/* NOTE: contextData.clientTimezone no longer available (Module 10 - incomplete) */}
+                      {/* {contextData?.clientTimezone && (
                         <p>
                           {t("session.clientTimezone", "Client's timezone")}:
                           <span className="font-semibold ml-1">{contextData.clientTimezone}</span>
                         </p>
-                      )}
+                      )} */}
                       <p className="mt-2 italic text-blue-700">
                         {t("session.timezoneNote", "Session time will be saved as entered in your timezone")}
                       </p>

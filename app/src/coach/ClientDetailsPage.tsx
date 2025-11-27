@@ -12,7 +12,7 @@ import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import type { SessionResponse } from "../session/operations";
 
@@ -113,7 +113,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
   const createSessionFn = useAction(createSession);
   const updateSessionFn = useAction(updateSession);
   const deleteSessionFn = useAction(deleteSession);
-  const updateScheduleFn = useAction(updateClientSchedule);
+  // NOTE: updateClientSchedule operation was removed (Module 10 - incomplete)
 
   // Calculate zone highlights from recent logs (last 30 days)
   const getZoneHighlights = (): ZoneHighlight[] => {
@@ -225,7 +225,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
       setSessionError(null);
       await deleteSessionFn({ sessionId });
       setSessionSuccess("Session deleted successfully!");
-      setDeleteConfirm(null);
+      setSessionToDelete(null);
       setTimeout(() => {
         refetchSessions();
       }, 500);
@@ -251,23 +251,27 @@ function ClientDetailsPageContent({ user }: { user: User }) {
     setScheduleError(null);
     setScheduleSuccess(null);
 
-    try {
-      setIsSubmittingSchedule(true);
-      await updateScheduleFn({
-        clientId,
-        scheduleDay: scheduleForm.scheduleDay,
-        scheduleTime: scheduleForm.scheduleTime,
-        scheduleTimezone: scheduleForm.scheduleTimezone,
-      });
-      setScheduleSuccess("Schedule set successfully! Next session date has been calculated.");
-      setTimeout(() => {
-        handleCloseScheduleDialog();
-      }, 1500);
-    } catch (error: any) {
-      setScheduleError(error.message || "Failed to set schedule");
-    } finally {
-      setIsSubmittingSchedule(false);
-    }
+    // NOTE: updateClientSchedule operation was removed (Module 10 - incomplete)
+    setScheduleError("Schedule management feature is currently unavailable. Please contact support.");
+    setIsSubmittingSchedule(false);
+
+    // try {
+    //   setIsSubmittingSchedule(true);
+    //   await updateScheduleFn({
+    //     clientId,
+    //     scheduleDay: scheduleForm.scheduleDay,
+    //     scheduleTime: scheduleForm.scheduleTime,
+    //     scheduleTimezone: scheduleForm.scheduleTimezone,
+    //   });
+    //   setScheduleSuccess("Schedule set successfully! Next session date has been calculated.");
+    //   setTimeout(() => {
+    //     handleCloseScheduleDialog();
+    //   }, 1500);
+    // } catch (error: any) {
+    //   setScheduleError(error.message || "Failed to set schedule");
+    // } finally {
+    //   setIsSubmittingSchedule(false);
+    // }
   };
 
   if (isLoading) {
@@ -307,6 +311,14 @@ function ClientDetailsPageContent({ user }: { user: User }) {
             </p>
           </div>
           <div className="flex gap-3">
+            <Button
+              onClick={() => navigate(`/coach/clients/${clientId}/insights`)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <TrendingUp className="h-4 w-4" />
+              {t("insights.viewInsights", "View Insights")}
+            </Button>
             <Button
               onClick={handleOpenScheduleDialog}
               variant="outline"

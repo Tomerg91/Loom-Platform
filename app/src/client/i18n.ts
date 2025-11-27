@@ -136,6 +136,37 @@ const resources = {
         tip: "Tip",
         sessionTip: "Review past sessions to spot patterns in your somatic responses and track your progress over time.",
       },
+      insights: {
+        title: "Client Insights",
+        viewInsights: "View Insights",
+        timeRange: {
+          "30days": "Last 30 Days",
+          "3months": "Last 3 Months",
+          allTime: "All Time",
+        },
+        emptyState: {
+          title: "Not enough data yet",
+          subtitle: "{{clientName}} needs at least {{minLogs}} somatic logs to see patterns. Currently has {{totalLogs}}.",
+          action: "View Client Details",
+        },
+        sensations: {
+          title: "Top Recurring Sensations",
+          logs: "logs",
+        },
+        bodyZones: {
+          title: "Body Zone Activity",
+          legend: "Activity Level",
+          legendLow: "Few logs",
+          legendHigh: "Many logs",
+          detail: "{{zone}}: {{count}} logs ({{percentage}}%)",
+        },
+        stats: {
+          totalLogs: "Total Logs",
+          averageIntensity: "Average Intensity",
+          uniqueSensations: "Unique Sensations",
+        },
+        noData: "No data available",
+      },
       landing: {
         hero: {
           title: "Welcome to Loom Platform",
@@ -550,6 +581,37 @@ const resources = {
         coachInsights: "דפוסים ותצפיות ממסע הסומטי שלך",
         tip: "עצה",
         sessionTip: "בדוק פגישות קודמות כדי לזהות דפוסים בתגובות הסומטיות שלך וללמוד על התקדמותך לאורך זמן.",
+      },
+      insights: {
+        title: "תובנות הלקוח",
+        viewInsights: "צפה בתובנות",
+        timeRange: {
+          "30days": "30 הימים האחרונים",
+          "3months": "3 החודשים האחרונים",
+          allTime: "כל הזמן",
+        },
+        emptyState: {
+          title: "אין מספיק נתונים עדיין",
+          subtitle: "{{clientName}} צריך לפחות {{minLogs}} רישומים סומטיים כדי לראות דפוסים. כרגע יש {{totalLogs}}.",
+          action: "צפה בפרטי הלקוח",
+        },
+        sensations: {
+          title: "התחושות החוזרות המובילות",
+          logs: "רישומים",
+        },
+        bodyZones: {
+          title: "פעילות אזורי הגוף",
+          legend: "רמת פעילות",
+          legendLow: "מעט רישומים",
+          legendHigh: "הרבה רישומים",
+          detail: "{{zone}}: {{count}} רישומים ({{percentage}}%)",
+        },
+        stats: {
+          totalLogs: "סה\"כ רישומים",
+          averageIntensity: "עוצמה ממוצעת",
+          uniqueSensations: "תחושות ייחודיות",
+        },
+        noData: "אין נתונים זמינים",
       },
       landing: {
         hero: {
