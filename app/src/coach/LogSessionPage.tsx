@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
@@ -24,6 +24,7 @@ export default function LogSessionPage({
 }: {
   user: User;
 }) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { clientId } = useParams<{ clientId: string }>();
   const [searchParams] = useSearchParams();
@@ -152,7 +153,7 @@ export default function LogSessionPage({
 
       // Redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = `/coach/client/${clientId}`;
+        navigate(`/coach/client/${clientId}`);
       }, 2000);
     } catch (error: any) {
       setErrorMessage(error.message || "Failed to log session");
@@ -434,7 +435,7 @@ export default function LogSessionPage({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => window.history.back()}
+                    onClick={() => navigate(-1)}
                     disabled={isSubmitting}
                   >
                     {t("common.cancel")}

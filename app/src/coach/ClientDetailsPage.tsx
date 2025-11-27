@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import type { User } from "wasp/entities";
 import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession, updateClientSchedule } from "wasp/client/operations";
@@ -31,6 +31,7 @@ type ZoneHighlight = {
 };
 
 export default function ClientDetailsPage({ user }: { user: User }) {
+  const navigate = useNavigate();
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam || "";
 
@@ -256,7 +257,7 @@ export default function ClientDetailsPage({ user }: { user: User }) {
       {/* Header with Back Button */}
       <div className="mb-8">
         <button
-          onClick={() => (window.location.href = "/coach")}
+          onClick={() => navigate("/coach")}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type { User } from "wasp/entities";
 import {
   inviteClient,
@@ -19,6 +20,7 @@ import UpcomingSessions from "./components/UpcomingSessions";
 import OnboardingModal from "../components/OnboardingModal";
 
 export default function CoachDashboardPage({ user }: { user: User }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                     key={client.id}
                     className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => {
-                      window.location.href = `/coach/client/${client.id}`;
+                      navigate(`/coach/client/${client.id}`);
                     }}
                   >
                     <div className="font-medium text-sm">
