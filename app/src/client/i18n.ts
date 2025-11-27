@@ -319,6 +319,18 @@ const resources = {
         visibilityUpdateSuccess: "Log visibility changed successfully",
         visibilityUpdateError: "Failed to update visibility",
       },
+      errors: {
+        errorBoundary: {
+          title: "Oops! Something went wrong",
+          message: "We encountered an unexpected error. Please try going back to the dashboard.",
+          goHome: "Go to Dashboard",
+          contact: "If the problem persists, please contact support.",
+        },
+        missingClientId: {
+          title: "Invalid Client",
+          message: "The client ID is missing or invalid. Please select a client from your dashboard.",
+        },
+      },
     },
   },
   he: {
@@ -637,6 +649,18 @@ const resources = {
         visibilityUpdated: "הנראות עודכנה",
         visibilityUpdateSuccess: "הנראות של הרישום שונתה בהצלחה",
         visibilityUpdateError: "נכשל בעדכון הנראות",
+      },
+      errors: {
+        errorBoundary: {
+          title: "אופס! משהו השתבש",
+          message: "נתקלנו בשגיאה בלתי צפויה. אנא נסה לחזור לתוך לוח הבקרה.",
+          goHome: "לך לתוך לוח הבקרה",
+          contact: "אם הבעיה נמשכת, אנא צור קשר עם התמיכה.",
+        },
+        missingClientId: {
+          title: "לקוח לא תקין",
+          message: "ID הלקוח חסר או לא תקין. בחר לקוח מלוח הבקרה שלך.",
+        },
       },
     },
   },

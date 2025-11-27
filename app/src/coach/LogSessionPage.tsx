@@ -15,20 +15,53 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 
-export default function LogSessionPage({
+function LogSessionPageContent({
   user,
 }: {
   user: User;
 }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { clientId } = useParams<{ clientId: string }>();
+  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
+  const clientId = clientIdParam || "";
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
+
+  // Validate clientId parameter at the top
+  if (!clientId) {
+    return (
+      <div className="mt-10 px-6 pb-12">
+        <div className="max-w-md mx-auto">
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-yellow-800 ml-2">
+              <div className="font-semibold text-lg mb-2">
+                {t("errors.missingClientId.title", "Invalid Client")}
+              </div>
+              <p className="text-sm mb-4">
+                {t(
+                  "errors.missingClientId.message",
+                  "The client ID is missing or invalid. Please select a client from your dashboard."
+                )}
+              </p>
+            </AlertDescription>
+          </Alert>
+          <Button
+            onClick={() => navigate("/coach")}
+            className="w-full mt-4 flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t("common.back", "Go Back")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const [formData, setFormData] = useState({
     sessionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
@@ -110,11 +143,6 @@ export default function LogSessionPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!clientId) {
-      setErrorMessage("Client ID is missing");
-      return;
-    }
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -447,5 +475,21 @@ export default function LogSessionPage({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Wrapper component that provides error boundary protection
+ * for the LogSessionPage
+ */
+export default function LogSessionPage({
+  user,
+}: {
+  user: User;
+}) {
+  return (
+    <ErrorBoundary>
+      <LogSessionPageContent user={user} />
+    </ErrorBoundary>
   );
 }
