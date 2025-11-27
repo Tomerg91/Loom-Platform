@@ -121,6 +121,12 @@ export const createSession: CreateSession<CreateSessionInput, SessionResponse> =
       },
     });
 
+    // Update client's lastActivityDate
+    await context.entities.ClientProfile.update({
+      where: { id: clientId },
+      data: { lastActivityDate: new Date() },
+    });
+
     return {
       id: session.id,
       createdAt: session.createdAt,

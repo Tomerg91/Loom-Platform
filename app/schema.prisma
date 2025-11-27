@@ -28,6 +28,12 @@ enum BodyZone {
   FULL_BODY
 }
 
+enum ClientType {
+  REGISTERED  // Has User account (accepted invitation)
+  OFFLINE     // Manually added, no User account
+  INVITED     // Invitation sent but not yet accepted
+}
+
 enum GoalType {
   OKR
   SMART
@@ -106,12 +112,19 @@ model CoachProfile {
 
 model ClientProfile {
   id      String          @id @default(uuid())
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String          @unique
+  user    User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String?         @unique
 
   // A Client belongs to one Coach
   coach   CoachProfile?   @relation(fields: [coachId], references: [id])
   coachId String?
+
+  // OFFLINE CLIENT SUPPORT
+  clientType       ClientType  @default(OFFLINE)  // REGISTERED, OFFLINE, or INVITED
+  displayName      String?                        // Name for offline clients
+  contactEmail     String?                        // Optional contact email (not for auth)
+  avatarS3Key      String?                        // S3 key for client avatar photo
+  lastActivityDate DateTime?                      // Track for "Inactive" status badge
 
   // The Core Feature: Somatic Logs (replaces Tasks)
   somaticLogs SomaticLog[]

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
-import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession } from "wasp/client/operations";
+import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession, getClientProfile } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
@@ -97,6 +97,11 @@ function ClientDetailsPageContent({ user }: { user: User }) {
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
   const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+
+  // Fetch client profile (for offline client details)
+  const { data: clientProfile } = useQuery(getClientProfile, {
+    clientId,
+  });
 
   // Fetch somatic logs for this client
   const { data: somaticLogs, isLoading, error } = useQuery(getSomaticLogs, {
@@ -305,10 +310,34 @@ function ClientDetailsPageContent({ user }: { user: User }) {
         </button>
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Client Details</h1>
-            <p className="text-muted-foreground mt-2">
-              Viewing somatic journey and body map data
-            </p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground">
+                {clientProfile?.displayName || "Client Details"}
+              </h1>
+              {clientProfile?.clientType === "OFFLINE" && (
+                <span className="px-2 py-1 bg-gray-200 text-gray-800 text-xs font-semibold rounded">
+                  Offline
+                </span>
+              )}
+            </div>
+            {clientProfile?.clientType === "REGISTERED" && clientProfile?.user?.email && (
+              <p className="text-muted-foreground mt-2">{clientProfile.user.email}</p>
+            )}
+            {clientProfile?.clientType === "OFFLINE" && clientProfile?.contactEmail && (
+              <p className="text-muted-foreground text-sm mt-2">
+                Contact: {clientProfile.contactEmail}
+              </p>
+            )}
+            {clientProfile?.lastActivityDate && (
+              <p className="text-muted-foreground text-xs mt-1">
+                Last activity: {formatDistanceToNow(new Date(clientProfile.lastActivityDate), { addSuffix: true })}
+              </p>
+            )}
+            {!clientProfile?.lastActivityDate && (
+              <p className="text-muted-foreground text-xs mt-1">
+                No activity yet
+              </p>
+            )}
           </div>
           <div className="flex gap-3">
             <Button

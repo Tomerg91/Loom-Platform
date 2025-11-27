@@ -8,7 +8,8 @@ import { Button } from "../components/ui/button";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { ArrowLeft, BarChart3, AlertCircle, Loader2, TrendingUp } from "lucide-react";
 import { cn } from "../lib/utils";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+// TODO: Install recharts package to fix this import
+// import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 type BodyZone =
   | "HEAD"

@@ -69,6 +69,12 @@ export const createSomaticLog: CreateSomaticLog<
       clientId: clientProfile.id,
     },
   });
+
+  // Update client's lastActivityDate
+  await context.entities.ClientProfile.update({
+    where: { id: clientProfile.id },
+    data: { lastActivityDate: new Date() },
+  });
 };
 
 // ============================================

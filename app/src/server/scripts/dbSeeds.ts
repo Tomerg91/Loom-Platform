@@ -160,6 +160,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,
+          clientType: "REGISTERED",
           scheduleDay: 1, // Monday
           scheduleTime: "14:00",
           scheduleTimezone: "Asia/Jerusalem",
@@ -330,6 +331,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,
+          clientType: "REGISTERED",
           sessionCount: 1,
         },
       },
@@ -410,6 +412,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       clientProfile: {
         create: {
           coachId: coach.coachProfile!.id,
+          clientType: "REGISTERED",
           scheduleDay: 3, // Wednesday
           scheduleTime: "10:00",
           scheduleTimezone: "Asia/Jerusalem",
@@ -528,4 +531,37 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
   console.log("3. Visit http://localhost:3000/coach/client/{id} to see client data");
   console.log("\nOr to setup passwords for existing accounts, visit:");
   console.log("http://localhost:3000/forgot-password and reset each account\n");
+}
+
+/**
+ * Migration seed to set clientType=REGISTERED for all existing clients
+ * that have user accounts (clients created via invitation).
+ *
+ * This ensures backward compatibility when clientType was added to the schema.
+ */
+export async function migrateClientTypesToRegistered(
+  prismaClient: PrismaClient
+) {
+  try {
+    console.log("Migrating existing ClientProfiles to clientType=REGISTERED...");
+
+    const updated = await prismaClient.clientProfile.updateMany({
+      where: {
+        userId: {
+          not: null, // Only update clients with user accounts
+        },
+        clientType: "OFFLINE", // Only update those still marked as OFFLINE
+      },
+      data: {
+        clientType: "REGISTERED",
+      },
+    });
+
+    console.log(
+      `Successfully migrated ${updated.count} existing clients to clientType=REGISTERED`
+    );
+  } catch (error) {
+    console.error("Error migrating client types:", error);
+    throw error;
+  }
 }

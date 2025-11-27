@@ -199,6 +199,8 @@ export const acceptInvitation: AcceptInvitation<
     data: {
       userId: newUser.id,
       coachId: invitation.coachId,
+      clientType: "REGISTERED",
+      lastActivityDate: new Date(),
     },
   });
 

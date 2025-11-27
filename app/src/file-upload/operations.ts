@@ -6,6 +6,7 @@ import {
   type DeleteFile,
   type GetAllFilesByUser,
   type GetDownloadFileSignedURL,
+  type GetClientAvatarUploadUrl,
 } from "wasp/server/operations";
 
 import * as z from "zod";
@@ -151,4 +152,53 @@ export const deleteFile: DeleteFile<DeleteFileInput, File> = async (
   }
 
   return deletedFile;
+};
+
+// ============================================
+// GET CLIENT AVATAR UPLOAD URL
+// ============================================
+const getClientAvatarUploadUrlSchema = z.object({
+  fileName: z.string().min(1, "File name is required"),
+  fileType: z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]),
+});
+
+type GetClientAvatarUploadUrlInput = z.infer<
+  typeof getClientAvatarUploadUrlSchema
+>;
+
+export const getClientAvatarUploadUrl: GetClientAvatarUploadUrl<
+  GetClientAvatarUploadUrlInput,
+  {
+    uploadUrl: string;
+    s3Key: string;
+  }
+> = async (rawArgs, context) => {
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to upload client avatars");
+  }
+
+  // Verify user is a coach
+  if (context.user.role !== "COACH") {
+    throw new HttpError(
+      403,
+      "Only coaches can upload client avatars"
+    );
+  }
+
+  const { fileName, fileType } = ensureArgsSchemaOrThrowHttpError(
+    getClientAvatarUploadUrlSchema,
+    rawArgs
+  );
+
+  const result = await getUploadFileSignedURLFromS3({
+    fileType,
+    fileName,
+    userId: context.user.id,
+    prefix: "client-avatars",
+  });
+
+  return {
+    uploadUrl: result.s3UploadUrl,
+    s3Key: result.s3Key,
+  };
 };

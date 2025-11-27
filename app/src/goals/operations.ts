@@ -88,7 +88,7 @@ export const createGoal: CreateGoal<any, any> = async (args, context) => {
   // Verify access: either the client themselves or their coach
   const isClient =
     context.user.id === clientProfile.userId &&
-    clientProfile.user.role === "CLIENT";
+    clientProfile.user?.role === "CLIENT";
   const isCoach =
     clientProfile.coachId &&
     context.user.id === clientProfile.coach?.userId &&

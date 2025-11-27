@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
   inviteClient,
@@ -14,22 +15,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { CheckCircle, Mail, Clock, Users, Calendar } from "lucide-react";
+import { CheckCircle, Mail, Clock, Users, Calendar, Plus, Lock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import UpcomingSessions from "./components/UpcomingSessions";
 import OnboardingModal from "../components/OnboardingModal";
+import AddOfflineClientDialog from "./components/AddOfflineClientDialog";
 
 export default function CoachDashboardPage({ user }: { user: User }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAddOfflineDialog, setShowAddOfflineDialog] = useState(false);
 
   const inviteClientFn = useAction(inviteClient);
   const { data: pendingInvitations, refetch } = useQuery(getPendingInvitations);
-  const { data: clients } = useQuery(getClientsForCoach);
+  const { data: clients, refetch: refetchClients } = useQuery(getClientsForCoach);
   const { data: onboardingStatus } = useQuery(getOnboardingStatus);
   const updateOnboarding = useAction(updateOnboardingStatus);
 
@@ -80,6 +84,12 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         onMarkComplete={handleOnboardingComplete}
       />
 
+      <AddOfflineClientDialog
+        isOpen={showAddOfflineDialog}
+        onClose={() => setShowAddOfflineDialog(false)}
+        onSuccess={() => refetchClients()}
+      />
+
       <div className="mt-10 px-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
@@ -107,40 +117,55 @@ export default function CoachDashboardPage({ user }: { user: User }) {
           <CardContent>
             {clients && clients.length > 0 ? (
               <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {clients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => {
-                      navigate(`/coach/client/${client.id}`);
-                    }}
-                  >
-                    <div className="font-medium text-sm">
-                      {client.username || client.email || "Client"}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {client.email}
-                    </div>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle className="h-3 w-3" />
-                        {client.somaticLogCount} logs
-                      </span>
-                      {client.lastLogDate && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(client.lastLogDate), {
-                            addSuffix: true,
-                          })}
-                        </span>
+                {clients.map((client) => {
+                  const isOffline = !client.userId;
+                  const displayName = client.username || client.displayName || "Client";
+
+                  return (
+                    <div
+                      key={client.id}
+                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        navigate(`/coach/client/${client.id}`);
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="font-medium text-sm">
+                          {displayName}
+                        </div>
+                        {isOffline && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                            <Lock className="h-2.5 w-2.5" />
+                            Offline
+                          </span>
+                        )}
+                      </div>
+                      {client.email && (
+                        <div className="text-xs text-muted-foreground">
+                          {client.email}
+                        </div>
                       )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <CheckCircle className="h-3 w-3" />
+                          {client.somaticLogCount} logs
+                        </span>
+                        {client.lastLogDate && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDistanceToNow(new Date(client.lastLogDate), {
+                              addSuffix: true,
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-muted-foreground text-sm">
-                No clients yet. Send an invitation to get started!
+                No clients yet. Send an invitation or add an offline client to get started!
               </p>
             )}
           </CardContent>
@@ -185,6 +210,28 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                 </AlertDescription>
               </Alert>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Add Offline Client Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add Offline Client
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-4">
+              {t("coach.addOfflineClientHelp", "Create a client profile for someone who won't use the app themselves.")}
+            </p>
+            <Button
+              onClick={() => setShowAddOfflineDialog(true)}
+              className="w-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t("coach.addOfflineClientButton", "Add Offline Client")}
+            </Button>
           </CardContent>
         </Card>
 

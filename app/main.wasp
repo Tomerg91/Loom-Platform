@@ -146,6 +146,26 @@ query getClientsForCoach {
   entities: [User, CoachProfile, ClientProfile, SomaticLog, CoachSession]
 }
 
+query getClientProfile {
+  fn: import { getClientProfile } from "@src/coach/operations",
+  entities: [CoachProfile, ClientProfile, User]
+}
+
+action createOfflineClient {
+  fn: import { createOfflineClient } from "@src/coach/operations",
+  entities: [CoachProfile, ClientProfile]
+}
+
+action updateOfflineClient {
+  fn: import { updateOfflineClient } from "@src/coach/operations",
+  entities: [ClientProfile]
+}
+
+action deleteOfflineClient {
+  fn: import { deleteOfflineClient } from "@src/coach/operations",
+  entities: [ClientProfile, CoachSession, SomaticLog, Goal]
+}
+
 route ClientDetailsRoute { path: "/coach/client/:clientId", to: ClientDetailsPage }
 page ClientDetailsPage {
   authRequired: true,
@@ -369,6 +389,11 @@ query getDownloadFileSignedURL {
 action deleteFile {
   fn: import { deleteFile } from "@src/file-upload/operations",
   entities: [User, File]
+}
+
+query getClientAvatarUploadUrl {
+  fn: import { getClientAvatarUploadUrl } from "@src/file-upload/operations",
+  entities: [User]
 }
 //#endregion
 
