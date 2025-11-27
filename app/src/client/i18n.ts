@@ -258,6 +258,9 @@ const resources = {
         noSessionsYet: "No Sessions Yet",
         noSessionsDescription: "Your session history will appear here as you complete sessions with your coach.",
         notSetupAsClient: "You are not set up as a client. Please contact your coach.",
+        deleteSession: "Delete Session",
+        deleteConfirm: "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
+        deleteSessionConfirm: "Delete Session",
       },
       resources: {
         resourcesLibrary: "Resources Library",
@@ -589,6 +592,9 @@ const resources = {
         noSessionsYet: "אין הפעלות עדיין",
         noSessionsDescription: "היסטוריית ההפעלות שלך תופיע כאן כאשר תשלים הפעלות עם המאמן שלך.",
         notSetupAsClient: "אתה לא הוגדרת כלקוח. אנא צור קשר עם המאמן שלך.",
+        deleteSession: "מחק הפעלה",
+        deleteConfirm: "האם אתה בטוח שברצונך למחוק את ההפעלה מ-{{date}}? לא ניתן לבטל פעולה זו.",
+        deleteSessionConfirm: "מחק הפעלה",
       },
       resources: {
         resourcesLibrary: "ספריית משאבים",

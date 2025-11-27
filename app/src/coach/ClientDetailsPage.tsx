@@ -82,7 +82,9 @@ function ClientDetailsPageContent({ user }: { user: User }) {
   const [sessionSuccess, setSessionSuccess] = useState<string | null>(null);
   const [isSubmittingSession, setIsSubmittingSession] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [sessionToDelete, setSessionToDelete] = useState<
+    Pick<SessionResponse, "id" | "sessionDate"> | null
+  >(null);
   const itemsPerPage = 10;
 
   // State for schedule modal
@@ -408,73 +410,138 @@ function ClientDetailsPageContent({ user }: { user: User }) {
               No somatic logs yet for this client.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b">
-                  <tr className="text-left text-sm text-muted-foreground">
-                    <th className="pb-3 font-medium">Date</th>
-                    <th className="pb-3 font-medium">Zone</th>
-                    <th className="pb-3 font-medium">Sensation</th>
-                    <th className="pb-3 font-medium">Intensity</th>
-                    <th className="pb-3 font-medium">Note</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {somaticLogs.map((log) => (
-                    <tr key={log.id} className="text-sm">
-                      <td className="py-3">
-                        <div>
-                          <div className="font-medium">
-                            {format(new Date(log.createdAt), "MMM d, yyyy")}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {format(new Date(log.createdAt), "h:mm a")}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3">
-                        <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded">
-                          {log.bodyZone.replace(/_/g, " ")}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <span className="inline-block px-2 py-1 bg-secondary text-secondary-foreground text-xs font-medium rounded">
-                          {log.sensation}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex gap-0.5">
-                            {Array.from({ length: 10 }, (_, i) => (
-                              <div
-                                key={i}
-                                className={`w-1.5 h-4 rounded-sm ${
-                                  i < log.intensity ? "bg-primary" : "bg-gray-200"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs font-medium">
-                            {log.intensity}/10
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 max-w-xs">
-                        {log.note ? (
-                          <p className="text-xs text-muted-foreground italic truncate">
-                            {log.note}
-                          </p>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">
-                            No note
-                          </span>
-                        )}
-                      </td>
+            <>
+              {/* Desktop Table */}
+              <div className="overflow-x-auto hidden md:block">
+                <table className="w-full">
+                  <thead className="border-b">
+                    <tr className="text-left text-sm text-muted-foreground">
+                      <th className="pb-3 font-medium">Date</th>
+                      <th className="pb-3 font-medium">Zone</th>
+                      <th className="pb-3 font-medium">Sensation</th>
+                      <th className="pb-3 font-medium">Intensity</th>
+                      <th className="pb-3 font-medium">Note</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y">
+                    {somaticLogs.map((log) => (
+                      <tr key={log.id} className="text-sm">
+                        <td className="py-3">
+                          <div>
+                            <div className="font-medium">
+                              {format(new Date(log.createdAt), "MMM d, yyyy")}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {format(new Date(log.createdAt), "h:mm a")}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3">
+                          <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded">
+                            {log.bodyZone.replace(/_/g, " ")}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <span className="inline-block px-2 py-1 bg-secondary text-secondary-foreground text-xs font-medium rounded">
+                            {log.sensation}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-0.5">
+                              {Array.from({ length: 10 }, (_, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-1.5 h-4 rounded-sm ${
+                                    i < log.intensity ? "bg-primary" : "bg-gray-200"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs font-medium">
+                              {log.intensity}/10
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 max-w-xs">
+                          {log.note ? (
+                            <p className="text-xs text-muted-foreground italic truncate">
+                              {log.note}
+                            </p>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              No note
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="block md:hidden space-y-3">
+                {somaticLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className="border rounded-lg p-4 space-y-3 bg-card"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {format(new Date(log.createdAt), "MMM d, yyyy")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(log.createdAt), "h:mm a")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded">
+                        {log.bodyZone.replace(/_/g, " ")}
+                      </span>
+                      <span className="inline-block px-2 py-1 bg-secondary text-secondary-foreground text-xs font-medium rounded">
+                        {log.sensation}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Intensity:
+                        </span>
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 10 }, (_, i) => (
+                            <div
+                              key={i}
+                              className={`w-1 h-3 rounded-sm ${
+                                i < log.intensity ? "bg-primary" : "bg-gray-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs font-medium">
+                          {log.intensity}/10
+                        </span>
+                      </div>
+                    </div>
+
+                    {log.note && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          Note:
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {log.note}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -493,8 +560,9 @@ function ClientDetailsPageContent({ user }: { user: User }) {
               No sessions logged yet. Click "Log Session" to create one.
             </p>
           ) : (
-            <div>
-              <div className="overflow-x-auto">
+            <>
+              {/* Desktop Table */}
+              <div className="overflow-x-auto hidden md:block">
                 <table className="w-full">
                   <thead className="border-b">
                     <tr className="text-left text-sm text-muted-foreground">
@@ -544,36 +612,88 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                             >
                               <Edit2 className="h-4 w-4 text-blue-600" />
                             </button>
-                            {deleteConfirm === session.id ? (
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => handleDeleteSession(session.id)}
-                                  className="px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded"
-                                >
-                                  Confirm
-                                </button>
-                                <button
-                                  onClick={() => setDeleteConfirm(null)}
-                                  className="px-2 py-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => setDeleteConfirm(session.id)}
-                                className="p-2 hover:bg-gray-100 rounded transition-colors"
-                                title="Delete session"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </button>
-                            )}
+                            <button
+                              onClick={() =>
+                                setSessionToDelete({
+                                  id: session.id,
+                                  sessionDate: session.sessionDate,
+                                })
+                              }
+                              className="p-2 hover:bg-gray-100 rounded transition-colors"
+                              title="Delete session"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </button>
                           </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="block md:hidden space-y-3">
+                {sessionsResponse.sessions.map((session: any) => (
+                  <div
+                    key={session.id}
+                    className="border rounded-lg p-4 space-y-3 bg-card"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {format(new Date(session.sessionDate), "MMM d, yyyy")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(session.sessionDate), "h:mm a")}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleOpenSessionDialog(session)}
+                          className="p-2 hover:bg-gray-100 rounded transition-colors"
+                          title="Edit session"
+                        >
+                          <Edit2 className="h-4 w-4 text-blue-600" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            setSessionToDelete({
+                              id: session.id,
+                              sessionDate: session.sessionDate,
+                            })
+                          }
+                          className="p-2 hover:bg-gray-100 rounded transition-colors"
+                          title="Delete session"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {session.privateNotes && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          Private Notes:
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {session.privateNotes}
+                        </p>
+                      </div>
+                    )}
+
+                    {session.sharedSummary && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          Shared Summary:
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {session.sharedSummary}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
               {/* Pagination */}
@@ -602,7 +722,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                   </div>
                 </div>
               )}
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -727,6 +847,49 @@ function ClientDetailsPageContent({ user }: { user: User }) {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Session Confirmation Dialog */}
+      <Dialog
+        open={!!sessionToDelete}
+        onOpenChange={(open) => !open && setSessionToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("session.deleteSession", "Delete Session")}</DialogTitle>
+            <DialogDescription>
+              {t(
+                "session.deleteConfirm",
+                "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
+                {
+                  date: sessionToDelete
+                    ? format(new Date(sessionToDelete.sessionDate), "MMM d, yyyy")
+                    : "",
+                }
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSessionToDelete(null)}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                if (sessionToDelete) {
+                  handleDeleteSession(sessionToDelete.id);
+                }
+              }}
+            >
+              {t("session.deleteSessionConfirm", "Delete Session")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
