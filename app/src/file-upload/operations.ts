@@ -110,11 +110,37 @@ type GetDownloadFileSignedURLInput = z.infer<
 export const getDownloadFileSignedURL: GetDownloadFileSignedURL<
   GetDownloadFileSignedURLInput,
   string
-> = async (rawArgs, _context) => {
+> = async (rawArgs, context) => {
+  // Authentication check - require logged in user
+  if (!context.user) {
+    throw new HttpError(401, "Unauthorized. Please log in to download files.");
+  }
+
   const { s3Key } = ensureArgsSchemaOrThrowHttpError(
     getDownloadFileSignedURLInputSchema,
     rawArgs,
   );
+
+  // Authorization check - verify the user owns this file
+  const file = await context.entities.File.findUnique({
+    where: { s3Key },
+    include: { user: true },
+  });
+
+  // If file doesn't exist in database, deny access
+  if (!file) {
+    throw new HttpError(
+      404,
+      "File not found or you do not have permission to access it.",
+    );
+  }
+
+  // Verify ownership - only the file owner can download
+  if (file.userId !== context.user.id) {
+    throw new HttpError(403, "Forbidden. You do not own this file.");
+  }
+
+  // Generate and return signed download URL
   return await getDownloadFileSignedURLFromS3({ s3Key });
 };
 
