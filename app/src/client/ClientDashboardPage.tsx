@@ -9,6 +9,7 @@ import { formatDistanceToNow, format, startOfToday, startOfWeek, startOfMonth } 
 import { Calendar, Zap, BookOpen, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
+import { toast } from "../hooks/use-toast";
 
 export default function ClientDashboardPage({ user }: { user: User }) {
   const { data: somaticLogs, refetch } = useQuery(getSomaticLogs);
@@ -60,9 +61,19 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         logId,
         sharedWithCoach: !currentSharedStatus,
       });
+      toast({
+        title: t('sharing.visibilityUpdated'),
+        description: t('sharing.visibilityUpdateSuccess'),
+      });
       refetch(); // Refresh logs to show updated status
     } catch (error) {
       console.error('Failed to update sharing status:', error);
+      const errorMessage = error instanceof Error ? error.message : t('sharing.visibilityUpdateError');
+      toast({
+        title: t('sharing.visibilityUpdateError'),
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 

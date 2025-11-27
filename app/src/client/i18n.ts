@@ -312,6 +312,13 @@ const resources = {
       goals: {
         failedLoadGoals: "Failed to load goals. Please try again.",
       },
+      sharing: {
+        sharedWithCoach: "Shared with coach",
+        private: "Private",
+        visibilityUpdated: "Visibility updated",
+        visibilityUpdateSuccess: "Log visibility changed successfully",
+        visibilityUpdateError: "Failed to update visibility",
+      },
     },
   },
   he: {
@@ -623,6 +630,13 @@ const resources = {
       },
       goals: {
         failedLoadGoals: "נכשל בטעינת יעדים. אנא נסה שוב.",
+      },
+      sharing: {
+        sharedWithCoach: "משותף עם המאמן",
+        private: "פרטי",
+        visibilityUpdated: "הנראות עודכנה",
+        visibilityUpdateSuccess: "הנראות של הרישום שונתה בהצלחה",
+        visibilityUpdateError: "נכשל בעדכון הנראות",
       },
     },
   },
