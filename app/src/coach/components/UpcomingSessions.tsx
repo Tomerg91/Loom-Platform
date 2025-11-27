@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "wasp/client/operations";
-import { getUpcomingSessions } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Calendar, Clock, Users } from "lucide-react";

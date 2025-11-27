@@ -249,27 +249,7 @@ query getRecentSessionsForClient {
   entities: [User, ClientProfile, CoachProfile, CoachSession]
 }
 
-query getSessionContext {
-  fn: import { getSessionContext } from "@src/session/operations",
-  entities: [User, CoachProfile, ClientProfile, SomaticLog]
-}
-
 //#region Module 10: Recurring Sessions
-action updateClientSchedule {
-  fn: import { updateClientSchedule } from "@src/session/operations",
-  entities: [User, CoachProfile, ClientProfile]
-}
-
-action logSession {
-  fn: import { logSession } from "@src/session/operations",
-  entities: [User, CoachProfile, ClientProfile, CoachSession]
-}
-
-query getUpcomingSessions {
-  fn: import { getUpcomingSessions } from "@src/session/operations",
-  entities: [User, CoachProfile, ClientProfile]
-}
-
 route LogSessionRoute { path: "/coach/client/:clientId/log-session", to: LogSessionPage }
 page LogSessionPage {
   authRequired: true,
@@ -312,18 +292,6 @@ action toggleMilestone {
 action updateGoalProgress {
   fn: import { updateGoalProgress } from "@src/goals/operations",
   entities: [User, ClientProfile, CoachProfile, Goal, Milestone]
-}
-
-route ClientGoalsRoute { path: "/client/goals", to: ClientGoalsPage }
-page ClientGoalsPage {
-  authRequired: true,
-  component: import ClientGoals from "@src/client/GoalsPage"
-}
-
-route CoachClientGoalsRoute { path: "/coach/client/:clientId/goals", to: CoachClientGoalsPage }
-page CoachClientGoalsPage {
-  authRequired: true,
-  component: import CoachClientGoals from "@src/coach/ClientGoalsPage"
 }
 //#endregion Module 11
 //#endregion

@@ -3,11 +3,9 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
-  logSession,
   useQuery,
   useAction,
   getSessionsForClient,
-  getSessionContext,
   getCoachResources,
 } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";

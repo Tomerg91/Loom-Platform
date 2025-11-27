@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
-import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession, updateClientSchedule } from "wasp/client/operations";
+import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
