@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { acceptInvitation, useAction } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -7,10 +8,13 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { UserPlus } from "lucide-react";
+import { useToast } from "../hooks/use-toast";
 
 export default function AcceptInvitePage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { toast } = useToast();
 
   const [token, setToken] = useState<string | null>(null);
   const [username, setUsername] = useState("");
@@ -50,8 +54,10 @@ export default function AcceptInvitePage() {
       setIsSubmitting(true);
       await acceptInvitationFn({ token, password, username });
 
-      // Success! Redirect to login
-      alert("Account created successfully! Please log in.");
+      // Success! Show toast and redirect to login
+      toast({
+        title: t("auth.accountCreatedSuccess"),
+      });
       navigate("/login");
     } catch (error: any) {
       setErrorMessage(error.message || "Failed to accept invitation");

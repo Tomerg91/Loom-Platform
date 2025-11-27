@@ -53,6 +53,7 @@ const resources = {
         sendVerification: "Send Verification Email",
         createAccount: "Create Account",
         logIn: "Log In",
+        accountCreatedSuccess: "Account created successfully! Please log in.",
       },
       somatic: {
         logSensation: "Log Sensation",
@@ -364,6 +365,7 @@ const resources = {
         sendVerification: "שלח דוא\"ל אימות",
         createAccount: "צור חשבון",
         logIn: "התחבר",
+        accountCreatedSuccess: "החשבון נוצר בהצלחה! אנא התחבר.",
       },
       somatic: {
         logSensation: "רישום תחושה",
