@@ -1,5 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 interface NavigationItem {
-  name: string;
+  nameKey?: string;
+  name?: string;
   href: string;
 }
 
@@ -11,6 +14,8 @@ export default function Footer({
     company: NavigationItem[];
   };
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="dark:bg-boxdark-2 mx-auto mt-6 max-w-7xl px-6 lg:px-8">
       <footer
@@ -18,21 +23,21 @@ export default function Footer({
         className="relative border-t border-gray-900/10 py-24 sm:mt-32 dark:border-gray-200/10"
       >
         <h2 id="footer-heading" className="sr-only">
-          Footer
+          {t("landing.footer.app")}
         </h2>
         <div className="mt-10 flex items-start justify-end gap-20">
           <div>
             <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-              App
+              {t("landing.footer.app")}
             </h3>
             <ul role="list" className="mt-6 space-y-4">
               {footerNavigation.app.map((item) => (
-                <li key={item.name}>
+                <li key={item.nameKey || item.name}>
                   <a
                     href={item.href}
                     className="text-sm leading-6 text-gray-600 hover:text-gray-900 dark:text-white"
                   >
-                    {item.name}
+                    {item.nameKey ? t(item.nameKey) : item.name}
                   </a>
                 </li>
               ))}
@@ -40,16 +45,16 @@ export default function Footer({
           </div>
           <div>
             <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
-              Company
+              {t("landing.footer.company")}
             </h3>
             <ul role="list" className="mt-6 space-y-4">
               {footerNavigation.company.map((item) => (
-                <li key={item.name}>
+                <li key={item.nameKey || item.name}>
                   <a
                     href={item.href}
                     className="text-sm leading-6 text-gray-600 hover:text-gray-900 dark:text-white"
                   >
-                    {item.name}
+                    {item.nameKey ? t(item.nameKey) : item.name}
                   </a>
                 </li>
               ))}

@@ -8,6 +8,7 @@ import {
 import { cn } from "../../lib/utils";
 import { Feature } from "./Features";
 import SectionTitle from "./SectionTitle";
+import { useTranslation } from "react-i18next";
 
 export interface GridFeature extends Omit<Feature, "icon"> {
   icon?: React.ReactNode;
@@ -24,14 +25,16 @@ interface FeaturesGridProps {
 }
 
 const FeaturesGrid = ({ features, className = "" }: FeaturesGridProps) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className="mx-auto my-16 flex max-w-7xl flex-col gap-4 md:my-24 lg:my-40"
       id="features"
     >
       <SectionTitle
-        title="Features"
-        description="These are some of the features of the product."
+        title={t("landing.features.sectionTitle")}
+        description={t("landing.features.sectionDescription")}
       />
       <div
         className={cn(
@@ -61,6 +64,11 @@ function FeaturesGridItem({
   size = "medium",
   fullWidthIcon = true,
 }: GridFeature) {
+  const { t } = useTranslation();
+
+  // Translate name and description if they're translation keys
+  const translatedName = name && name.startsWith("landing.") ? t(name) : name;
+  const translatedDescription = description && description.startsWith("landing.") ? t(description) : description;
   const gridFeatureSizeToClasses: Record<GridFeature["size"], string> = {
     small: "col-span-1",
     medium: "col-span-2 md:col-span-2 lg:col-span-2",
@@ -114,12 +122,12 @@ function FeaturesGridItem({
             <CardTitle
               className={cn(align === "center" ? "text-center" : "text-left")}
             >
-              {name}
+              {translatedName}
             </CardTitle>
           </div>
         )}
         {fullWidthIcon && (icon || emoji) && (
-          <CardTitle className="mb-2 text-center">{name}</CardTitle>
+          <CardTitle className="mb-2 text-center">{translatedName}</CardTitle>
         )}
         <CardDescription
           className={cn(
@@ -129,7 +137,7 @@ function FeaturesGridItem({
               : "text-left",
           )}
         >
-          {description}
+          {translatedDescription}
         </CardDescription>
       </CardContent>
     </Card>

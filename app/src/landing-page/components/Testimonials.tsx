@@ -7,13 +7,17 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import SectionTitle from "./SectionTitle";
+import { useTranslation } from "react-i18next";
 
 interface Testimonial {
-  name: string;
-  role: string;
+  nameKey?: string;
+  name?: string;
+  roleKey?: string;
+  role?: string;
   avatarSrc: string;
   socialUrl: string;
-  quote: string;
+  quoteKey?: string;
+  quote?: string;
 }
 
 export default function Testimonials({
@@ -21,6 +25,7 @@ export default function Testimonials({
 }: {
   testimonials: Testimonial[];
 }) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldShowExpand = testimonials.length > 5;
   const mobileItemsToShow = 3;
@@ -29,7 +34,7 @@ export default function Testimonials({
 
   return (
     <div className="mx-auto mt-32 max-w-7xl sm:mt-56 sm:px-6 lg:px-8">
-      <SectionTitle title="What Our Users Say" />
+      <SectionTitle title={t("landing.testimonials.title")} />
 
       <div className="relative z-10 w-full columns-1 gap-2 px-4 md:columns-2 md:gap-6 md:px-0 lg:columns-3">
         {testimonials.slice(0, itemsToShow).map((testimonial, idx) => (
@@ -37,7 +42,7 @@ export default function Testimonials({
             <Card className="flex flex-col justify-between">
               <CardContent className="p-6">
                 <blockquote className="mb-4 leading-6">
-                  <p className="text-sm italic">{testimonial.quote}</p>
+                  <p className="text-sm italic">{testimonial.quoteKey ? t(testimonial.quoteKey) : testimonial.quote}</p>
                 </blockquote>
               </CardContent>
               <CardFooter className="flex flex-col pt-0">
@@ -48,15 +53,15 @@ export default function Testimonials({
                   <img
                     src={testimonial.avatarSrc}
                     loading="lazy"
-                    alt={`${testimonial.name}'s avatar`}
+                    alt={`${testimonial.nameKey ? t(testimonial.nameKey) : testimonial.name}'s avatar`}
                     className="ring-border/20 group-hover:ring-primary/30 h-10 w-10 flex-shrink-0 rounded-full ring-2 transition-all duration-200"
                   />
                   <div className="min-w-0 flex-1">
                     <CardTitle className="group-hover:text-card-foreground truncate text-sm font-semibold transition-colors duration-200">
-                      {testimonial.name}
+                      {testimonial.nameKey ? t(testimonial.nameKey) : testimonial.name}
                     </CardTitle>
                     <CardDescription className="truncate text-xs">
-                      {testimonial.role}
+                      {testimonial.roleKey ? t(testimonial.roleKey) : testimonial.role}
                     </CardDescription>
                   </div>
                 </a>
@@ -73,8 +78,8 @@ export default function Testimonials({
             className="text-primary bg-primary/10 hover:bg-primary/20 rounded-lg px-6 py-3 text-sm font-medium transition-colors duration-200"
           >
             {isExpanded
-              ? "Show Less"
-              : `Show ${testimonials.length - mobileItemsToShow} More`}
+              ? t("landing.testimonials.showLess")
+              : t("landing.testimonials.showMore", { count: testimonials.length - mobileItemsToShow })}
           </button>
         </div>
       )}

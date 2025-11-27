@@ -142,6 +142,10 @@ const resources = {
           subtitle: "Somatic coaching platform for the Satya Method",
           cta: "Get Started",
           description: "Transform your coaching practice with our somatic logging and body mapping system.",
+          mainTitle: "Stop Guessing How Your Clients Feel",
+          mainSubtitle: "The first platform built for Somatic Coaching. Track sensations on a visual Body Map, manage session history automatically, and deepen your container.",
+          seePricingBtn: "See Pricing",
+          startTrialBtn: "Start Free Trial",
         },
         personas: {
           coach: {
@@ -163,6 +167,20 @@ const resources = {
         },
         features: {
           title: "Features",
+          sectionTitle: "Features",
+          sectionDescription: "These are some of the features of the product.",
+          sensoryLayer: {
+            title: "The Sensory Layer",
+            description: "Clients don't just tell you they are tight—they show you. Our interactive Body Map tracks heat, tension, and vibration over time.",
+          },
+          infiniteSession: {
+            title: "The Infinite Session",
+            description: "Never ask 'What session number is this?' again. Loom automatically tracks session counts and connects previous homework to current insights.",
+          },
+          frictionlessBusiness: {
+            title: "Frictionless Business",
+            description: "You pay, they heal. Invite unlimited clients for free. Integrated payments and simple scheduling rules keep the admin out of the therapy room.",
+          },
           bodyMapping: {
             title: "Body Mapping",
             description: "Intuitive body zone selection for precise somatic tracking",
@@ -183,6 +201,65 @@ const resources = {
         cta: {
           title: "Ready to Transform Your Coaching Practice?",
           button: "Start Free Trial",
+        },
+        testimonials: {
+          title: "What Our Users Say",
+          showLess: "Show Less",
+          showMore: "Show {{count}} More",
+          sarahCohen: {
+            name: "Dr. Sarah Cohen",
+            role: "Senior Satya Method Coach, Tel Aviv",
+            quote: "The Body Map changed everything. Clients can finally show me their 'red chest' instead of struggling to describe it. It's like having X-ray vision into their nervous system.",
+          },
+          michaelLevi: {
+            name: "Michael Levi",
+            role: "Satya Method Practitioner, 8 Years",
+            quote: "I was drowning in session notes. Loom's automatic tracking means I can stay present with my clients instead of frantically scribbling 'Session 7' in my notebook.",
+          },
+        },
+        faqs: {
+          title: "Frequently asked questions",
+          learnMore: "Learn more",
+          clientsPay: {
+            question: "Do my clients have to pay?",
+            answer: "No! You subscribe to Loom, and your clients get free access. They can log their sensations and view their session history at no cost. You're paying for the container, not per-seat.",
+          },
+          hebrewAvailable: {
+            question: "Is it available in Hebrew?",
+            answer: "Yes. Loom is fully localized in Hebrew and English. Your clients can switch languages instantly from their dashboard.",
+          },
+          pricingWorks: {
+            question: "How does pricing work?",
+            answer: "Hobby plan (₪99/mo) supports up to 5 clients. Pro plan (₪199/mo) includes unlimited clients plus the Resource Library for sharing materials. Both include all core features.",
+          },
+        },
+        examples: {
+          usedBy: "Used by:",
+          rachel: {
+            name: "Rachel T.",
+            description: "Went from scattered notes to organized insights. Now tracks 12 clients effortlessly with Loom's Session Tracker.",
+          },
+          david: {
+            name: "David K.",
+            description: "Body Map helped him identify a pattern across 3 clients - tension migrating from shoulders to chest after Session 4.",
+          },
+          yael: {
+            name: "Yael M.",
+            description: "Switched from paper logs to Loom. Her clients love seeing their progress visualized on the heat map.",
+          },
+        },
+        bodyMapShowcase: {
+          title: "Feel It. Map It. Track It.",
+          description: "The interactive Body Map turns sensations into insights. Heat, tension, vibration — all tracked over time. Click a zone to explore what you're feeling, then save it to your journal.",
+        },
+        footer: {
+          app: "App",
+          company: "Company",
+          pricing: "Pricing",
+          signUp: "Sign Up",
+          aboutSatyaMethod: "About Satya Method",
+          privacy: "Privacy",
+          termsOfService: "Terms of Service",
         },
       },
       pricing: {
@@ -480,6 +557,10 @@ const resources = {
           subtitle: "פלטפורמת אימון סומטי עבור שיטת Satya",
           cta: "התחל",
           description: "שנה את תרגול האימון שלך עם מערכת רישום סומטי ומיפוי גוף מתקדמת.",
+          mainTitle: "חדלו מהדיסות איך הלקוחות שלכם מרגישים",
+          mainSubtitle: "הפלטפורמה הראשונה שנבנתה עבור אימון סומטי. עקוב אחרי תחושות במפת גוף ויזואלית, נהל היסטוריית פגישות באופן אוטומטי, וחזק את המכל שלך.",
+          seePricingBtn: "ראה תמחור",
+          startTrialBtn: "התחל ניסיון חינם",
         },
         personas: {
           coach: {
@@ -501,6 +582,20 @@ const resources = {
         },
         features: {
           title: "תכונות",
+          sectionTitle: "תכונות",
+          sectionDescription: "אלה חלק מהתכונות של המוצר.",
+          sensoryLayer: {
+            title: "שכבת החוש",
+            description: "הלקוחות לא רק אומרים לך שהם הדוקים — הם מראים לך. מפת הגוף האינטראקטיבית שלנו עוקבת אחרי חום, מתח וגלישה לאורך זמן.",
+          },
+          infiniteSession: {
+            title: "הפגישה האינסופית",
+            description: "אל תעזבו שוב בספק איזה מספר פגישה זו. Loom עוקב אוטומטית אחר ספירת הפגישות ומחבר שיעורי בית קודמים להבנות נוכחיות.",
+          },
+          frictionlessBusiness: {
+            title: "עסקים ללא חיכוך",
+            description: "אתה משלם, הם מתרפאים. הזמן לקוחות ללא הגבלה בחינם. תשלומים משולבים וכללי תזמון פשוטים מעיקים את הניהול מחדר הטיפול.",
+          },
           bodyMapping: {
             title: "מיפוי גוף",
             description: "בחירת אזור גוף אינטואיטיבית למעקב סומטי מדויק",
@@ -521,6 +616,65 @@ const resources = {
         cta: {
           title: "מוכנים לשנות את תרגול האימון שלכם?",
           button: "התחל ניסיון חינם",
+        },
+        testimonials: {
+          title: "מה אומרים המשתמשים שלנו",
+          showLess: "הראה פחות",
+          showMore: "הראה {{count}} נוסף",
+          sarahCohen: {
+            name: "ד"ר שרה כהן",
+            role: "מאמנת בכיר בשיטת Satya, תל אביב",
+            quote: "מפת הגוף שינתה את הכל. לקוחות יכולים סוף סוף להראות לי את ה'חזה אדום' שלהם במקום להאבק להסביר זאת. זה כמו לקבל חזון בעינת רנטגן לתוך מערכת העצבים שלהם.",
+          },
+          michaelLevi: {
+            name: "מיכאל לוי",
+            role: "פרקטיקנט בשיטת Satya, 8 שנים",
+            quote: "טבעתי בהערות על הפגישות. המעקב האוטומטי של Loom פירושו שאני יכול להישאר נוכח עם הלקוחות שלי במקום לצרום בפיקניק 'פגישה 7' במחברת.",
+          },
+        },
+        faqs: {
+          title: "שאלות נפוצות",
+          learnMore: "למד עוד",
+          clientsPay: {
+            question: "האם הלקוחות שלי חייבים לשלם?",
+            answer: "לא! אתה מנוי ל-Loom, והלקוחות שלך מקבלים גישה בחינם. הם יכולים לרשום את התחושות שלהם ולצפות בהיסטוריית הפגישות שלהם ללא עלות. אתה משלם עבור המכל, לא לכל מושב.",
+          },
+          hebrewAvailable: {
+            question: "האם זה זמין בעברית?",
+            answer: "כן. Loom מתורגם במלואו לעברית ואנגלית. הלקוחות שלך יכולים לעבור בין שפות באופן מיידי מלוח הבקרה שלהם.",
+          },
+          pricingWorks: {
+            question: "איך התמחור פועל?",
+            answer: "תוכנית חובי (₪99/חודש) תומכת עד 5 לקוחות. תוכנית Pro (₪199/חודש) כוללת לקוחות ללא הגבלה בתוספת ספריית המשאבים לשיתוף חומרים. שתיהן כוללות את כל התכונות הליבה.",
+          },
+        },
+        examples: {
+          usedBy: "בשימוש על ידי:",
+          rachel: {
+            name: "Rachel T.",
+            description: "עברה מהערות פזורות להבנות מאורגנות. כעת עוקבת אחרי 12 לקוחות ללא מאמץ עם Loom's Session Tracker.",
+          },
+          david: {
+            name: "David K.",
+            description: "מפת הגוף עזרה לו לזהות דפוס על פני 3 לקוחות - מתח נעקר מהכתפיים לחזה לאחר פגישה 4.",
+          },
+          yael: {
+            name: "Yael M.",
+            description: "עברה מרישומי נייר ל-Loom. הלקוחות שלה אוהבים לראות את ההתקדמות שלהם מוגדלת במפת החום.",
+          },
+        },
+        bodyMapShowcase: {
+          title: "הרגש אותה. תעד אותה. עקוב אחריה.",
+          description: "מפת הגוף האינטראקטיבית הופכת תחושות להבנות. חום, מתח, גלישה — כל זה עוקב לאורך זמן. לחץ על אזור כדי לחקור מה אתה מרגיש, ואז שמור אותו ביומן שלך.",
+        },
+        footer: {
+          app: "אפליקציה",
+          company: "חברה",
+          pricing: "תמחור",
+          signUp: "הרשמה",
+          aboutSatyaMethod: "על שיטת Satya",
+          privacy: "פרטיות",
+          termsOfService: "תנאי שירות",
         },
       },
       pricing: {

@@ -1,17 +1,21 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const EXAMPLES_CAROUSEL_INTERVAL = 3000;
 const EXAMPLES_CAROUSEL_SCROLL_TIMEOUT = 200;
 
 interface ExampleApp {
-  name: string;
-  description: string;
+  nameKey?: string;
+  name?: string;
+  descriptionKey?: string;
+  description?: string;
   imageSrc: string;
   href: string;
 }
 
 const ExamplesCarousel = ({ examples }: { examples: ExampleApp[] }) => {
+  const { t } = useTranslation();
   const [currentExample, setCurrentExample] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -109,7 +113,7 @@ const ExamplesCarousel = ({ examples }: { examples: ExampleApp[] }) => {
       className="relative left-1/2 my-16 flex w-screen -translate-x-1/2 flex-col items-center"
     >
       <h2 className="text-muted-foreground mb-6 text-center font-semibold tracking-wide">
-        Used by:
+        {t("landing.examples.usedBy")}
       </h2>
       <div className="w-full max-w-full overflow-hidden">
         <div
@@ -123,6 +127,7 @@ const ExamplesCarousel = ({ examples }: { examples: ExampleApp[] }) => {
               index={index}
               isCurrent={index === currentExample}
               onMouseEnter={handleMouseEnter}
+              t={t}
             />
           ))}
         </div>
@@ -136,10 +141,14 @@ interface ExampleCardProps {
   index: number;
   isCurrent: boolean;
   onMouseEnter: (index: number) => void;
+  t: (key: string) => string;
 }
 
 const ExampleCard = forwardRef<HTMLDivElement, ExampleCardProps>(
-  ({ example, index, isCurrent, onMouseEnter }, ref) => {
+  ({ example, index, isCurrent, onMouseEnter, t }, ref) => {
+    const name = example.nameKey ? t(example.nameKey) : example.name;
+    const description = example.descriptionKey ? t(example.descriptionKey) : example.description;
+
     return (
       <a
         href={example.href}
@@ -156,13 +165,13 @@ const ExampleCard = forwardRef<HTMLDivElement, ExampleCardProps>(
           <CardContent className="h-full p-0">
             <img
               src={example.imageSrc}
-              alt={example.name}
+              alt={name}
               className="aspect-video h-auto w-full"
             />
             <div className="p-4">
-              <p className="font-bold">{example.name}</p>
+              <p className="font-bold">{name}</p>
               <p className="text-muted-foreground text-xs">
-                {example.description}
+                {description}
               </p>
             </div>
           </CardContent>

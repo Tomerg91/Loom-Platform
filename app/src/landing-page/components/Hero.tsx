@@ -1,8 +1,11 @@
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
 import { Button } from "../../components/ui/button";
 import BodyMapSelector from "../../client/components/BodyMapSelector";
+import { useTranslation } from "react-i18next";
 
 export default function Hero() {
+  const { t } = useTranslation();
+
   return (
     <div className="relative w-full pt-14">
       <TopGradient />
@@ -11,20 +14,20 @@ export default function Hero() {
         <div className="max-w-8xl mx-auto px-6 lg:px-8">
           <div className="lg:mb-18 mx-auto max-w-3xl text-center">
             <h1 className="text-foreground text-5xl font-bold sm:text-6xl">
-              Stop Guessing <span className="text-gradient-primary">How Your Clients Feel</span>
+              {t("landing.hero.mainTitle")}
             </h1>
             <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg leading-8">
-              The first platform built for Somatic Coaching. Track sensations on a visual Body Map, manage session history automatically, and deepen your container.
+              {t("landing.hero.mainSubtitle")}
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button size="lg" variant="outline" asChild>
                 <WaspRouterLink to={routes.PricingPageRoute.to}>
-                  See Pricing
+                  {t("landing.hero.seePricingBtn")}
                 </WaspRouterLink>
               </Button>
               <Button size="lg" variant="default" asChild>
                 <WaspRouterLink to={routes.SignupRoute.to}>
-                  Start Free Trial <span aria-hidden="true">→</span>
+                  {t("landing.hero.startTrialBtn")} <span aria-hidden="true">→</span>
                 </WaspRouterLink>
               </Button>
             </div>
