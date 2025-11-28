@@ -353,6 +353,8 @@ const resources = {
       session: {
         logSession: "Log Session",
         sessionHistory: "Session History",
+        previousSession: "Previous Session",
+        noPreviousSessions: "No previous sessions yet",
         recentSomaticActivity: "Recent Somatic Activity (Last 14 Days)",
         loadingContext: "Loading client context...",
         unableToLoadLogs: "Unable to load somatic logs. Proceeding with session log...",
@@ -825,6 +827,8 @@ const resources = {
       session: {
         logSession: "רישום הפעלה",
         sessionHistory: "היסטוריית הפעלות",
+        previousSession: "הפעלה קודמת",
+        noPreviousSessions: "אין הפעלות קודמות עדיין",
         recentSomaticActivity: "פעילות סומטית אחרונה (14 ימים אחרונים)",
         loadingContext: "טוען הקשר לקוח...",
         unableToLoadLogs: "לא ניתן לטעון רישומים סומטיים. המשך ברישום הפעלה...",

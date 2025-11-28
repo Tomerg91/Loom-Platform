@@ -484,3 +484,131 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
 
   throw new HttpError(403, "Invalid user role");
 };
+
+// ============================================
+// LOG SESSION (Enhanced operation with all fields)
+// ============================================
+const logSessionSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
+  sessionDate: z.string().or(z.date()).optional(),
+  topic: z.string().optional().nullable(),
+  privateNotes: z.string().optional().nullable(),
+  sharedSummary: z.string().optional().nullable(),
+  somaticAnchor: z.enum(["HEAD", "THROAT", "CHEST", "SOLAR_PLEXUS", "BELLY", "PELVIS", "ARMS", "LEGS", "FULL_BODY"]).optional().nullable(),
+  resourceIds: z.array(z.string()).optional().default([]),
+});
+
+type LogSessionInput = z.infer<typeof logSessionSchema>;
+
+export type LogSessionResponse = {
+  id: string;
+  sessionNumber: number | null;
+  sessionDate: Date;
+  topic: string | null;
+  privateNotes: string | null;
+  sharedSummary: string | null;
+  somaticAnchor: string | null;
+};
+
+export const logSession: any = async (rawArgs: any, context: any): Promise<LogSessionResponse> => {
+  const args = ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
+  const { clientId, sessionDate, topic, privateNotes, sharedSummary, somaticAnchor, resourceIds } = args;
+
+  // ============================================
+  // AUTHENTICATION & AUTHORIZATION
+  // ============================================
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to log sessions");
+  }
+
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can log sessions");
+  }
+
+  // Get the coach profile
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
+
+  // ============================================
+  // VALIDATE CLIENT OWNERSHIP
+  // ============================================
+  const clientProfile = await context.entities.ClientProfile.findUnique({
+    where: { id: clientId },
+  });
+
+  if (!clientProfile || clientProfile.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You do not have access to this client");
+  }
+
+  // ============================================
+  // VALIDATE RESOURCES (if provided)
+  // ============================================
+  if (resourceIds && resourceIds.length > 0) {
+    // Verify all resources exist and belong to this coach
+    const resources = await context.entities.Resource.findMany({
+      where: {
+        id: { in: resourceIds },
+        coachId: coachProfile.id,
+      },
+    });
+
+    if (resources.length !== resourceIds.length) {
+      throw new HttpError(403, "One or more selected resources are not available or do not belong to you");
+    }
+  }
+
+  // ============================================
+  // CALCULATE SESSION NUMBER (auto-increment)
+  // ============================================
+  const lastSession = await context.entities.CoachSession.findFirst({
+    where: { clientId: clientId },
+    orderBy: { sessionNumber: "desc" },
+  });
+
+  const sessionNumber = (lastSession?.sessionNumber || 0) + 1;
+
+  // ============================================
+  // CREATE SESSION WITH RESOURCE ATTACHMENT
+  // ============================================
+  const session = await context.entities.CoachSession.create({
+    data: {
+      sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
+      sessionNumber: sessionNumber,
+      topic: topic || null,
+      privateNotes: privateNotes || null,
+      sharedSummary: sharedSummary || null,
+      somaticAnchor: somaticAnchor || null,
+      coachId: coachProfile.id,
+      clientId: clientId,
+      // Attach resources
+      ...(resourceIds && resourceIds.length > 0 && {
+        resources: {
+          connect: resourceIds.map(id => ({ id })),
+        },
+      }),
+    },
+  });
+
+  // ============================================
+  // UPDATE CLIENT ACTIVITY
+  // ============================================
+  await context.entities.ClientProfile.update({
+    where: { id: clientId },
+    data: { lastActivityDate: new Date() },
+  });
+
+  return {
+    id: session.id,
+    sessionNumber: session.sessionNumber,
+    sessionDate: session.sessionDate,
+    topic: session.topic,
+    privateNotes: session.privateNotes,
+    sharedSummary: session.sharedSummary,
+    somaticAnchor: session.somaticAnchor,
+  };
+};

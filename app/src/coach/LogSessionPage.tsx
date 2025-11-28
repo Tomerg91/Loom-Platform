@@ -6,7 +6,9 @@ import {
   useQuery,
   useAction,
   getSessionsForClient,
+  getRecentSessionsForClient,
   getCoachResources,
+  logSession,
 } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -76,16 +78,22 @@ function LogSessionPageContent({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // NOTE: logSession operation was removed (Module 10 - incomplete)
+  // Fetch sessions list for refetching after successful submission
   const { refetch: refetchSessions } = useQuery(getSessionsForClient, {
     clientId: clientId || "",
   });
 
-  // NOTE: getSessionContext operation was removed (Module 10 - incomplete)
-  // Placeholder data until the feature is restored
-  const contextData = {};
-  const isContextLoading = false;
-  const contextError = null;
+  // Fetch previous session context (last session)
+  const {
+    data: previousSessions,
+    isLoading: isContextLoading,
+    error: contextError,
+  } = useQuery(getRecentSessionsForClient, {
+    clientId: clientId || "",
+  });
+
+  // Get the logSession action
+  const logSessionFn = useAction(logSession);
 
   // Fetch available resources for this coach
   const {
@@ -101,29 +109,8 @@ function LogSessionPageContent({
     }
   }, [sessionNumberParam]);
 
-  // Calculate heatmap data from somatic logs
-  // NOTE: getSessionContext was removed (Module 10 - incomplete)
-  const calculateHeatmapData = () => {
-    // NOTE: contextData.somaticLogs no longer available
-    return [];
-
-    // if (!contextData?.somaticLogs) return [];
-
-    // const zones = new Map<string, { sum: number; count: number }>();
-
-    // contextData.somaticLogs.forEach((log) => {
-    //   const existing = zones.get(log.bodyZone) || { sum: 0, count: 0 };
-    //   zones.set(log.bodyZone, {
-    //     sum: existing.sum + log.intensity,
-    //     count: existing.count + 1,
-    //   });
-    // });
-
-    // return Array.from(zones.entries()).map(([zone, data]) => ({
-    //   zone: zone as any,
-    //   intensity: Math.round(data.sum / data.count),
-    // }));
-  };
+  // Get previous session (if any)
+  const previousSession = previousSessions && previousSessions.length > 0 ? previousSessions[0] : null;
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = e.target.value;
@@ -157,27 +144,19 @@ function LogSessionPageContent({
     setSuccessMessage(null);
 
     try {
-      // NOTE: Using createSession instead of logSession (Module 10 removed)
-      setErrorMessage("Session logging feature is currently unavailable. Please use the client details page to log sessions.");
-      setIsSubmitting(false);
-      return;
+      const result = await logSessionFn({
+        clientId,
+        sessionDate: new Date(formData.sessionDate),
+        topic: formData.topic || null,
+        privateNotes: formData.privateNotes || null,
+        sharedSummary: formData.sharedSummary || null,
+        somaticAnchor: (formData.somaticAnchor || null) as any,
+        resourceIds: formData.resourceIds,
+      });
 
-      // const result = await logSessionFn({
-      //   clientId,
-      //   sessionDate: new Date(formData.sessionDate),
-      //   topic: formData.topic || null,
-      //   privateNotes: formData.privateNotes || null,
-      //   sharedSummary: formData.sharedSummary || null,
-      //   somaticAnchor: (formData.somaticAnchor || null) as any,
-      //   resourceIds: formData.resourceIds,
-      // });
-
-      // setSuccessMessage(
-      //   t("session.sessionLoggedSuccess", { number: result.sessionNumber })
-      // );
-      // if (result.dateWarning) {
-      //   setDateWarning(result.dateWarning);
-      // }
+      setSuccessMessage(
+        t("session.sessionLoggedSuccess", { number: result.sessionNumber })
+      );
 
       // Reset form
       setFormData({
@@ -216,12 +195,12 @@ function LogSessionPageContent({
 
       {/* Two-Column Layout: Desktop 2 cols, Mobile 1 col */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN: The Briefing */}
+        {/* LEFT COLUMN: Previous Session Context */}
         <div>
           <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-lg">
-                {t("session.recentSomaticActivity")}
+                {t("session.previousSession")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -229,15 +208,49 @@ function LogSessionPageContent({
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    {t("session.loadingContext")}
+                    {t("common.loading")}
                   </p>
                 </div>
+              ) : previousSession ? (
+                <div className="space-y-4">
+                  {/* Session Date */}
+                  <div>
+                    <p className="text-xs text-muted-foreground font-semibold">
+                      {t("session.sessionDate")}
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {format(new Date(previousSession.sessionDate), "MMM d, yyyy 'at' h:mm a")}
+                    </p>
+                  </div>
+
+                  {/* Somatic Anchor */}
+                  {(previousSession as any).somaticAnchor && (
+                    <div>
+                      <p className="text-xs text-muted-foreground font-semibold">
+                        {t("session.bodyZoneDiscussed")}
+                      </p>
+                      <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mt-1">
+                        {t(`somatic.bodyZones.${(previousSession as any).somaticAnchor}`)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Shared Summary */}
+                  {previousSession.sharedSummary && (
+                    <div>
+                      <p className="text-xs text-muted-foreground font-semibold">
+                        {t("session.sessionSummary")}
+                      </p>
+                      <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap line-clamp-4">
+                        {previousSession.sharedSummary}
+                      </p>
+                    </div>
+                  )}
+                </div>
               ) : (
-                // NOTE: contextData.somaticLogs no longer available (Module 10 - incomplete)
-                // Hiding heatmap visualization until feature is restored
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">
-                    {t("session.noLogsRecent")}
+                    {t("session.noPreviousSessions")}
                   </p>
                 </div>
               )}
@@ -270,22 +283,15 @@ function LogSessionPageContent({
                   {/* Timezone Indicator */}
                   <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
                     <p className="text-xs font-semibold text-blue-900 mb-1">
-                      {t("session.timezoneInfo", "Timezone Information")}
+                      {t("session.timezoneInfo")}
                     </p>
                     <div className="space-y-1 text-xs text-blue-800">
                       <p>
-                        {t("session.yourTimezone", "Your timezone")}:
+                        {t("session.yourTimezone")}:
                         <span className="font-semibold ml-1">{getBrowserTimezone()}</span>
                       </p>
-                      {/* NOTE: contextData.clientTimezone no longer available (Module 10 - incomplete) */}
-                      {/* {contextData?.clientTimezone && (
-                        <p>
-                          {t("session.clientTimezone", "Client's timezone")}:
-                          <span className="font-semibold ml-1">{contextData.clientTimezone}</span>
-                        </p>
-                      )} */}
                       <p className="mt-2 italic text-blue-700">
-                        {t("session.timezoneNote", "Session time will be saved as entered in your timezone")}
+                        {t("session.timezoneNote")}
                       </p>
                     </div>
                   </div>

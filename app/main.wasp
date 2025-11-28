@@ -272,6 +272,11 @@ action deleteSession {
   entities: [User, CoachProfile, CoachSession]
 }
 
+action logSession {
+  fn: import { logSession } from "@src/session/operations",
+  entities: [User, CoachProfile, ClientProfile, CoachSession, Resource]
+}
+
 query getSessionsForClient {
   fn: import { getSessionsForClient } from "@src/session/operations",
   entities: [User, ClientProfile, CoachProfile, CoachSession]
