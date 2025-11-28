@@ -241,6 +241,11 @@ action updateSomaticLogVisibility {
   fn: import { updateSomaticLogVisibility } from "@src/somatic-logs/operations",
   entities: [User, ClientProfile, SomaticLog]
 }
+
+query getClientAnalytics {
+  fn: import { getClientAnalytics } from "@src/somatic-logs/operations",
+  entities: [SomaticLogAnalytics, ClientProfile, CoachProfile, SomaticLog]
+}
 //#endregion
 
 //#region Insights
@@ -468,6 +473,17 @@ job checkExpiredSubscriptionsJob {
     cron: "0 2 * * *" // Daily at 2 AM
   },
   entities: [User]
+}
+
+job computeSomaticAnalyticsJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { computeAllClientAnalytics } from "@src/somatic-logs/analytics"
+  },
+  schedule: {
+    cron: "0 * * * *" // Every hour at minute 0
+  },
+  entities: [ClientProfile, SomaticLog, SomaticLogAnalytics]
 }
 //#endregion
 

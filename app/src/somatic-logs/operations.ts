@@ -3,9 +3,11 @@ import type {
   CreateSomaticLog,
   GetSomaticLogs,
   UpdateSomaticLogVisibility,
+  GetClientAnalytics,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
+import { computeClientAnalytics, type ClientAnalyticsResult } from "./analytics";
 
 // BodyZone type definition matching Prisma schema
 type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
@@ -267,4 +269,93 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
     note: updatedLog.note,
     sharedWithCoach: updatedLog.sharedWithCoach,
   };
+};
+
+// ============================================
+// GET CLIENT ANALYTICS
+// ============================================
+const getClientAnalyticsSchema = z.object({
+  clientId: z.string().min(1, "Client ID is required"),
+  period: z.enum(["30d", "90d", "365d"]),
+});
+
+type GetClientAnalyticsInput = z.infer<typeof getClientAnalyticsSchema>;
+
+export const getClientAnalytics: GetClientAnalytics<
+  GetClientAnalyticsInput,
+  any
+> = async (rawArgs, context) => {
+  const { clientId, period } = ensureArgsSchemaOrThrowHttpError(
+    getClientAnalyticsSchema,
+    rawArgs
+  );
+
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to view analytics");
+  }
+
+  // Get the client profile
+  const clientProfile = await context.entities.ClientProfile.findUnique({
+    where: { id: clientId },
+  });
+
+  if (!clientProfile) {
+    throw new HttpError(404, "Client not found");
+  }
+
+  // Authorization: coaches can view their clients' analytics, admins can view any
+  if (context.user.role === "COACH") {
+    // Check if this coach is the client's coach
+    if (!clientProfile.coachId) {
+      throw new HttpError(403, "Client has no assigned coach");
+    }
+    const coach = await context.entities.CoachProfile.findUnique({
+      where: { id: clientProfile.coachId },
+    });
+    if (!coach || coach.userId !== context.user.id) {
+      throw new HttpError(
+        403,
+        "You do not have permission to view this client's analytics"
+      );
+    }
+  } else if (context.user.role === "CLIENT") {
+    throw new HttpError(
+      403,
+      "Clients cannot view analytics data"
+    );
+  } else if (context.user.role !== "ADMIN") {
+    throw new HttpError(403, "Invalid user role");
+  }
+
+  // Try to get cached analytics from SomaticLogAnalytics table
+  const cached = await context.entities.SomaticLogAnalytics.findUnique({
+    where: {
+      clientId_period: {
+        clientId,
+        period,
+      },
+    },
+  });
+
+  // If cache exists and is fresh (less than 1 hour old), return it
+  if (cached) {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    if (cached.computedAt > oneHourAgo) {
+      return {
+        topBodyZones: cached.topBodyZones as any[],
+        topSensations: cached.topSensations as any[],
+        intensityTrendOverTime: cached.intensityTrendOverTime as any[],
+        totalLogsInPeriod: cached.totalLogsInPeriod,
+      };
+    }
+  }
+
+  // Cache is stale or missing, compute on-demand
+  const analytics = await computeClientAnalytics(
+    context.entities,
+    clientId,
+    period
+  );
+
+  return analytics;
 };
