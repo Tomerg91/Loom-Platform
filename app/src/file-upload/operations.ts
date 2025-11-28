@@ -122,9 +122,8 @@ export const getDownloadFileSignedURL: GetDownloadFileSignedURL<
   );
 
   // Authorization check - verify the user owns this file
-  const file = await context.entities.File.findUnique({
-    where: { s3Key },
-    include: { user: true },
+  const file = await context.entities.File.findFirst({
+    where: { s3Key, userId: context.user.id },
   });
 
   // If file doesn't exist in database, deny access
