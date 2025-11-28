@@ -12,6 +12,7 @@ import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { ClientAnalyticsDashboard } from "./components/ClientAnalyticsDashboard";
 import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import type { SessionResponse } from "../session/operations";
@@ -436,6 +437,9 @@ function ClientDetailsPageContent({ user }: { user: User }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Analytics Dashboard */}
+      <ClientAnalyticsDashboard clientId={clientId} />
 
       {/* Somatic Logs History */}
       <Card className="mt-6">

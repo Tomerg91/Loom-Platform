@@ -141,6 +141,35 @@ model ClientProfile {
 
   // MODULE 11: Goals & Milestones
   goals            Goal[]
+
+  // ANALYTICS: Somatic pattern insights (cached)
+  analytics        SomaticLogAnalytics[]
+}
+
+// ============================================
+// SOMATIC LOG ANALYTICS (Cached Insights)
+// ============================================
+model SomaticLogAnalytics {
+  id                    String        @id @default(uuid())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  client                ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId              String
+
+  period                String        // "30d", "90d", "365d"
+  computedAt            DateTime      // When this snapshot was computed
+  periodStartDate       DateTime      // Analysis window start
+  periodEndDate         DateTime      // Analysis window end
+
+  topBodyZones          Json          // [{zone: string, count: int, avgIntensity: float}]
+  topSensations         Json          // [{sensation: string, count: int, avgIntensity: float}]
+  intensityTrendOverTime Json         // [{weekStart: ISO date, avgIntensity: float}]
+  totalLogsInPeriod     Int           // Total somatic logs in this period
+
+  @@unique([clientId, period])
+  @@index([clientId])
+  @@index([computedAt])
 }
 
 // ============================================

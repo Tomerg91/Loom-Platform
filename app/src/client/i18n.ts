@@ -92,6 +92,22 @@ const resources = {
         intensityMedium: "Medium (4-6)",
         intensityHigh: "High (7-10)",
         clickToSelect: "Click on a body zone to select",
+        analytics: {
+          title: "Somatic Patterns",
+          topZones: "Most Active Body Zones",
+          topSensations: "Common Sensations",
+          intensityTrend: "Intensity Over Time",
+          period: {
+            "30d": "Last 30 Days",
+            "90d": "Last 90 Days",
+            "365d": "Last Year",
+          },
+          empty: "No somatic logs recorded yet. Client logs will appear here.",
+          loading: "Loading analytics...",
+          error: "Error loading analytics. Please try again.",
+          noData: "No data available for this period.",
+          totalLogs: "Total logs in period: {{count}}",
+        },
       },
       coach: {
         dashboard: "Coach Dashboard",
