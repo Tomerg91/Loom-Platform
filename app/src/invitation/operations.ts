@@ -3,6 +3,7 @@ import type {
   InviteClient,
   AcceptInvitation,
   GetPendingInvitations,
+  CancelInvitation,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
@@ -59,14 +60,15 @@ export const inviteClient: InviteClient<InviteClientInput, void> = async (
   }
 
   // Check if invitation already exists and is pending
-  const existingInvitation = await context.entities.ClientInvitation.findFirst({
+  // Note: CANCELED invitations can be re-invited, ACCEPTED cannot
+  const existingPendingInvitation = await context.entities.ClientInvitation.findFirst({
     where: {
       email,
       status: "PENDING",
     },
   });
 
-  if (existingInvitation) {
+  if (existingPendingInvitation) {
     throw new HttpError(
       400,
       "An invitation has already been sent to this email."
@@ -208,6 +210,65 @@ export const acceptInvitation: AcceptInvitation<
   await context.entities.ClientInvitation.update({
     where: { id: invitation.id },
     data: { status: "ACCEPTED" },
+  });
+};
+
+// ============================================
+// CANCEL INVITATION (coach cancels pending invite)
+// ============================================
+const cancelInvitationSchema = z.object({
+  invitationId: z.string().nonempty("Invitation ID is required"),
+});
+
+type CancelInvitationInput = z.infer<typeof cancelInvitationSchema>;
+
+export const cancelInvitation: CancelInvitation<CancelInvitationInput, void> = async (
+  rawArgs,
+  context
+) => {
+  const { invitationId } = ensureArgsSchemaOrThrowHttpError(
+    cancelInvitationSchema,
+    rawArgs
+  );
+
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to cancel invitations");
+  }
+
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can cancel invitations");
+  }
+
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
+
+  const invitation = await context.entities.ClientInvitation.findUnique({
+    where: { id: invitationId },
+  });
+
+  if (!invitation) {
+    throw new HttpError(404, "Invitation not found");
+  }
+
+  if (invitation.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You can only cancel your own invitations");
+  }
+
+  if (invitation.status !== "PENDING") {
+    throw new HttpError(
+      400,
+      `Cannot cancel invitation with status ${invitation.status}`
+    );
+  }
+
+  await context.entities.ClientInvitation.update({
+    where: { id: invitationId },
+    data: { status: "CANCELED" },
   });
 };
 

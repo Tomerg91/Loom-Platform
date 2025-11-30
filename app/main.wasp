@@ -223,6 +223,11 @@ action acceptInvitation {
   entities: [User, ClientProfile, ClientInvitation, CoachProfile]
 }
 
+action cancelInvitation {
+  fn: import { cancelInvitation } from "@src/invitation/operations",
+  entities: [ClientInvitation, CoachProfile]
+}
+
 query getPendingInvitations {
   fn: import { getPendingInvitations } from "@src/invitation/operations",
   entities: [CoachProfile, ClientInvitation]
@@ -253,6 +258,11 @@ action updateSomaticLogVisibility {
 query getClientAnalytics {
   fn: import { getClientAnalytics } from "@src/somatic-logs/operations",
   entities: [SomaticLogAnalytics, ClientProfile, CoachProfile, SomaticLog]
+}
+
+action generateClientExportPdf {
+  fn: import { generateClientExportPdf } from "@src/analytics/exportOperations",
+  entities: [ClientProfile, CoachProfile, CoachSession, SomaticLogAnalytics, SomaticLog]
 }
 //#endregion
 
@@ -435,7 +445,7 @@ action getUploadUrl {
 
 action createResource {
   fn: import { createResource } from "@src/resources/operations",
-  entities: [User, CoachProfile, Resource]
+  entities: [User, CoachProfile, ClientProfile, Resource]
 }
 
 query getCoachResources {
@@ -492,6 +502,44 @@ job computeSomaticAnalyticsJob {
     cron: "0 * * * *" // Every hour at minute 0
   },
   entities: [ClientProfile, SomaticLog, SomaticLogAnalytics]
+}
+//#endregion
+
+//#region Notifications (Phase 3)
+query getNotifications {
+  fn: import { getNotifications } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+action markNotificationRead {
+  fn: import { markNotificationRead } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+action markAllNotificationsRead {
+  fn: import { markAllNotificationsRead } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+query getNotificationPreferences {
+  fn: import { getNotificationPreferences } from "@src/notifications/operations",
+  entities: [User, NotificationPreferences]
+}
+
+action updateNotificationPreferences {
+  fn: import { updateNotificationPreferences } from "@src/notifications/operations",
+  entities: [User, NotificationPreferences]
+}
+
+job sessionRemindersJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { checkUpcomingSessionsJob } from "@src/notifications/jobs"
+  },
+  schedule: {
+    cron: "0 9 * * *" // Daily at 9 AM
+  },
+  entities: [ClientProfile, User, Notification, NotificationPreferences]
 }
 //#endregion
 

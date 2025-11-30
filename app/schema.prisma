@@ -87,8 +87,12 @@ model User {
   onboardingCompleted Boolean @default(false)
   onboardingSteps     Json? // Tracks completed onboarding steps per role
 
-  contactFormMessages ContactFormMessage[]
-  files               File[]
+  // NOTIFICATIONS (Phase 3)
+  notifications             Notification[]
+  notificationPreferences   NotificationPreferences?
+
+  contactFormMessages       ContactFormMessage[]
+  files                     File[]
 }
 
 // ============================================
@@ -369,6 +373,44 @@ model ContactFormMessage {
   content   String
   isRead    Boolean   @default(false)
   repliedAt DateTime?
+}
+
+// ============================================
+// NOTIFICATIONS (Phase 3)
+// ============================================
+model Notification {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  type      String   // "SESSION_REMINDER", "SESSION_SUMMARY_POSTED", "RESOURCE_SHARED"
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  metadata  Json?    // {sessionId, resourceId, clientId, etc}
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model NotificationPreferences {
+  id     String  @id @default(uuid())
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String  @unique
+
+  emailSessionReminders     Boolean @default(true)
+  emailSessionSummaries     Boolean @default(true)
+  emailResourceShared       Boolean @default(true)
+
+  inAppSessionReminders     Boolean @default(true)
+  inAppSessionSummaries     Boolean @default(true)
+  inAppResourceShared       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ============================================

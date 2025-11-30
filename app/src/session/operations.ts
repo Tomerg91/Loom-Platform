@@ -11,6 +11,7 @@ import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 import { addDays, setHours, setMinutes, format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { notificationEmitter, NotificationEventType } from "../notifications/eventEmitter";
 
 // ============================================
 // SESSION RESPONSE TYPE
@@ -630,6 +631,23 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
     where: { id: clientId },
     data: { lastActivityDate: new Date() },
   });
+
+  // ============================================
+  // EMIT NOTIFICATION EVENT (if summary provided)
+  // ============================================
+  if (sharedSummary) {
+    try {
+      await notificationEmitter.emit(NotificationEventType.SESSION_SUMMARY_POSTED, {
+        clientId: clientId,
+        sessionId: session.id,
+        topic: topic || undefined,
+        sharedSummary: sharedSummary,
+      });
+    } catch (error) {
+      console.error("Error emitting session summary notification:", error);
+      // Don't fail the operation if notification fails
+    }
+  }
 
   return {
     id: session.id,
