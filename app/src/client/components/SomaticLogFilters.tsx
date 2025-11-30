@@ -35,31 +35,6 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Calculate date range
-  const getDateRange = (range: string) => {
-    const now = new Date();
-    const startDate = new Date();
-
-    switch (range) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'thisWeek':
-        const day = now.getDay();
-        startDate.setDate(now.getDate() - day);
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'thisMonth':
-        startDate.setDate(1);
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'allTime':
-        return { startDate: null, endDate: null };
-    }
-
-    return { startDate, endDate: now };
-  };
-
   const handleDateRangeChange = (range: 'today' | 'thisWeek' | 'thisMonth' | 'allTime') => {
     onFiltersChange({
       ...filters,

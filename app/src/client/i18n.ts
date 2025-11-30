@@ -478,6 +478,19 @@ const resources = {
         visibilityUpdateSuccess: "Log visibility changed successfully",
         visibilityUpdateError: "Failed to update visibility",
       },
+      filters: {
+        dateRange: "Date range",
+        today: "Today",
+        thisWeek: "This week",
+        thisMonth: "This month",
+        allTime: "All time",
+        bodyZone: "Body zone",
+        intensity: "Intensity",
+        minIntensity: "Min intensity",
+        maxIntensity: "Max intensity",
+        clearFilters: "Clear filters",
+        noResults: "No logs match your filters",
+      },
       errors: {
         errorBoundary: {
           title: "Oops! Something went wrong",
@@ -951,6 +964,19 @@ const resources = {
         visibilityUpdated: "הנראות עודכנה",
         visibilityUpdateSuccess: "הנראות של הרישום שונתה בהצלחה",
         visibilityUpdateError: "נכשל בעדכון הנראות",
+      },
+      filters: {
+        dateRange: "טווח תאריכים",
+        today: "היום",
+        thisWeek: "השבוע",
+        thisMonth: "החודש",
+        allTime: "כל הזמנים",
+        bodyZone: "אזור גוף",
+        intensity: "עוצמה",
+        minIntensity: "עוצמה מינימלית",
+        maxIntensity: "עוצמה מקסימלית",
+        clearFilters: "איפוס מסננים",
+        noResults: "אין תוצאות עבור המסננים הנוכחיים",
       },
       errors: {
         errorBoundary: {
