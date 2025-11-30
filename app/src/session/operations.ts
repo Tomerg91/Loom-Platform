@@ -5,6 +5,7 @@ import type {
   DeleteSession,
   GetSessionsForClient,
   GetRecentSessionsForClient,
+  LogSession,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
@@ -510,7 +511,7 @@ export type LogSessionResponse = {
   somaticAnchor: string | null;
 };
 
-export const logSession: any = async (rawArgs: any, context: any): Promise<LogSessionResponse> => {
+export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
   const { clientId, sessionDate, topic, privateNotes, sharedSummary, somaticAnchor, resourceIds } = args;
 

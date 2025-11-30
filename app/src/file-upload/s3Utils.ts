@@ -23,14 +23,16 @@ type S3Upload = {
   fileType: string;
   fileName: string;
   userId: string;
+  prefix?: string;
 };
 
 export const getUploadFileSignedURLFromS3 = async ({
   fileName,
   fileType,
   userId,
+  prefix,
 }: S3Upload) => {
-  const s3Key = getS3Key(fileName, userId);
+  const s3Key = getS3Key(fileName, userId, prefix);
 
   const { url: s3UploadUrl, fields: s3UploadFields } =
     await createPresignedPost(s3Client, {
@@ -82,7 +84,8 @@ export const checkFileExistsInS3 = async ({ s3Key }: { s3Key: string }) => {
   }
 };
 
-function getS3Key(fileName: string, userId: string) {
+function getS3Key(fileName: string, userId: string, prefix?: string) {
   const ext = path.extname(fileName).slice(1);
-  return `${userId}/${randomUUID()}.${ext}`;
+  const basePath = prefix ? `${prefix}/${userId}` : userId;
+  return `${basePath}/${randomUUID()}.${ext}`;
 }

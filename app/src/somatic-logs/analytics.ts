@@ -66,14 +66,14 @@ function getWeekStart(date: Date): Date {
 // MAIN: Compute analytics for a single client
 // ============================================
 export async function computeClientAnalytics(
-  prisma: PrismaClient,
+  entities: any,
   clientId: string,
   period: "30d" | "90d" | "365d"
 ): Promise<ClientAnalyticsResult> {
   const { startDate, endDate } = getDateRange(period);
 
   // Fetch all somatic logs for this client in the period
-  const logs = await prisma.somaticLog.findMany({
+  const logs = await entities.somaticLog.findMany({
     where: {
       clientId,
       sharedWithCoach: true,
@@ -184,7 +184,7 @@ export const computeAllClientAnalytics: Job<
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const activeClients = await prisma.clientProfile.findMany({
+    const activeClients = await entities.clientProfile.findMany({
       where: {
         lastActivityDate: {
           gte: sevenDaysAgo,
@@ -215,7 +215,7 @@ export const computeAllClientAnalytics: Job<
           const { startDate, endDate } = getDateRange(period);
 
           // Upsert the analytics record
-          await prisma.somaticLogAnalytics.upsert({
+          await entities.somaticLogAnalytics.upsert({
             where: {
               clientId_period: {
                 clientId: client.id,

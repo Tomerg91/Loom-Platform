@@ -7,11 +7,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@src/components/ui/dialog";
-import { Button } from "@src/components/ui/button";
-import { Input } from "@src/components/ui/input";
-import { Label } from "@src/components/ui/label";
-import { Alert, AlertDescription } from "@src/components/ui/alert";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Loader2, Upload, X } from "lucide-react";
 import {
   createOfflineClient,
