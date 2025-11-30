@@ -29,9 +29,9 @@ enum BodyZone {
 }
 
 enum ClientType {
-  REGISTERED  // Has User account (accepted invitation)
-  OFFLINE     // Manually added, no User account
-  INVITED     // Invitation sent but not yet accepted
+  REGISTERED // Has User account (accepted invitation)
+  OFFLINE // Manually added, no User account
+  INVITED // Invitation sent but not yet accepted
 }
 
 enum GoalType {
@@ -50,57 +50,57 @@ enum GoalStatus {
 // USER & AUTHENTICATION
 // ============================================
 model User {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  email                     String?         @unique
-  username                  String?         @unique
+  email    String? @unique
+  username String? @unique
 
   // ROLE MANAGEMENT
-  role                      UserRole        @default(COACH) // Public signups default to COACH
-  isAdmin                   Boolean         @default(false)
+  role    UserRole @default(COACH) // Public signups default to COACH
+  isAdmin Boolean  @default(false)
 
   // INTERNATIONALIZATION
-  preferredLanguage         String?         @default("he")
+  preferredLanguage String? @default("he")
 
   // PROFILE RELATIONS (1:1)
-  coachProfile              CoachProfile?
-  clientProfile             ClientProfile?
+  coachProfile  CoachProfile?
+  clientProfile ClientProfile?
 
   // SUBSCRIPTION (Relevant for COACH only)
-  paymentProcessorUserId    String?         @unique
+  paymentProcessorUserId        String?   @unique
   lemonSqueezyCustomerPortalUrl String?
-  subscriptionStatus        String?         // 'active', 'cancel_at_period_end', 'past_due', 'deleted'
-  subscriptionPlan          String?         // 'starter', 'pro'
-  datePaid                  DateTime?
-  credits                   Int             @default(3)
+  subscriptionStatus            String? // 'active', 'cancel_at_period_end', 'past_due', 'deleted'
+  subscriptionPlan              String? // 'starter', 'pro'
+  datePaid                      DateTime?
+  credits                       Int       @default(3)
 
   // TRANZILLA TOKENIZATION
-  tranzillaToken            String?         // TranzilaTK for auto-renewal
+  tranzillaToken String? // TranzilaTK for auto-renewal
 
   // BOILERPLATE FIELDS
-  isEmailVerified           Boolean         @default(false)
-  emailVerificationToken    String?
-  passwordResetToken        String?
+  isEmailVerified        Boolean @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
 
   // ONBOARDING
-  onboardingCompleted       Boolean         @default(false)
-  onboardingSteps           Json?           // Tracks completed onboarding steps per role
+  onboardingCompleted Boolean @default(false)
+  onboardingSteps     Json? // Tracks completed onboarding steps per role
 
-  contactFormMessages       ContactFormMessage[]
-  files                     File[]
+  contactFormMessages ContactFormMessage[]
+  files               File[]
 }
 
 // ============================================
 // ROLE-SPECIFIC PROFILES
 // ============================================
 model CoachProfile {
-  id      String          @id @default(uuid())
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String          @unique
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
 
   // A Coach manages many Clients
-  clients ClientProfile[]
+  clients     ClientProfile[]
   invitations ClientInvitation[]
 
   // Sessions logged by this Coach
@@ -111,20 +111,20 @@ model CoachProfile {
 }
 
 model ClientProfile {
-  id      String          @id @default(uuid())
-  user    User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String?         @unique
+  id     String  @id @default(uuid())
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @unique
 
   // A Client belongs to one Coach
-  coach   CoachProfile?   @relation(fields: [coachId], references: [id])
+  coach   CoachProfile? @relation(fields: [coachId], references: [id])
   coachId String?
 
   // OFFLINE CLIENT SUPPORT
-  clientType       ClientType  @default(OFFLINE)  // REGISTERED, OFFLINE, or INVITED
-  displayName      String?                        // Name for offline clients
-  contactEmail     String?                        // Optional contact email (not for auth)
-  avatarS3Key      String?                        // S3 key for client avatar photo
-  lastActivityDate DateTime?                      // Track for "Inactive" status badge
+  clientType       ClientType @default(OFFLINE) // REGISTERED, OFFLINE, or INVITED
+  displayName      String? // Name for offline clients
+  contactEmail     String? // Optional contact email (not for auth)
+  avatarS3Key      String? // S3 key for client avatar photo
+  lastActivityDate DateTime? // Track for "Inactive" status badge
 
   // The Core Feature: Somatic Logs (replaces Tasks)
   somaticLogs SomaticLog[]
@@ -133,39 +133,41 @@ model ClientProfile {
   sessions CoachSession[]
 
   // MODULE 10: Recurring Session Schedule
-  scheduleDay      Int?      // 0-6 (Sunday-Saturday)
-  scheduleTime     String?   // "14:00" (24h format)
-  scheduleTimezone String?   // IANA timezone (e.g., "America/New_York")
+  scheduleDay      Int? // 0-6 (Sunday-Saturday)
+  scheduleTime     String? // "14:00" (24h format)
+  scheduleTimezone String? // IANA timezone (e.g., "America/New_York")
   nextSessionDate  DateTime? // Computed next session date in UTC
   sessionCount     Int       @default(0) // Total sessions completed
 
   // MODULE 11: Goals & Milestones
-  goals            Goal[]
+  goals Goal[]
 
   // ANALYTICS: Somatic pattern insights (cached)
-  analytics        SomaticLogAnalytics[]
+  analytics SomaticLogAnalytics[]
+
+  @@index([coachId])
 }
 
 // ============================================
 // SOMATIC LOG ANALYTICS (Cached Insights)
 // ============================================
 model SomaticLogAnalytics {
-  id                    String        @id @default(uuid())
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  client                ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId              String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
 
-  period                String        // "30d", "90d", "365d"
-  computedAt            DateTime      // When this snapshot was computed
-  periodStartDate       DateTime      // Analysis window start
-  periodEndDate         DateTime      // Analysis window end
+  period          String // "30d", "90d", "365d"
+  computedAt      DateTime // When this snapshot was computed
+  periodStartDate DateTime // Analysis window start
+  periodEndDate   DateTime // Analysis window end
 
-  topBodyZones          Json          // [{zone: string, count: int, avgIntensity: float}]
-  topSensations         Json          // [{sensation: string, count: int, avgIntensity: float}]
-  intensityTrendOverTime Json         // [{weekStart: ISO date, avgIntensity: float}]
-  totalLogsInPeriod     Int           // Total somatic logs in this period
+  topBodyZones           Json // [{zone: string, count: int, avgIntensity: float}]
+  topSensations          Json // [{sensation: string, count: int, avgIntensity: float}]
+  intensityTrendOverTime Json // [{weekStart: ISO date, avgIntensity: float}]
+  totalLogsInPeriod      Int // Total somatic logs in this period
 
   @@unique([clientId, period])
   @@index([clientId])
@@ -185,176 +187,188 @@ model ClientInvitation {
   expiresAt DateTime
 
   // Link to coach so they can see pending invites
-  coach     CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coach CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@index([coachId, status])
 }
 
 // ============================================
 // SOMATIC LOGS (Core Feature)
 // ============================================
 model SomaticLog {
-  id                String      @id @default(uuid())
-  createdAt         DateTime    @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
   // The Data Point
-  bodyZone          BodyZone
-  sensation         String      // e.g., "Tight", "Hot", "Vibrating"
-  intensity         Int         // 1-10 scale
-  note              String?     @db.Text
+  bodyZone  BodyZone
+  sensation String // e.g., "Tight", "Hot", "Vibrating"
+  intensity Int // 1-10 scale
+  note      String?  @db.Text
 
   // SHARING CONTROL
-  sharedWithCoach   Boolean     @default(true) // Controls coach visibility
+  sharedWithCoach Boolean @default(true) // Controls coach visibility
 
-  client            ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId          String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+
+  @@index([clientId, createdAt])
 }
 
 // ============================================
 // COACH SESSIONS (Module 9: Session Recaps)
 // ============================================
 model CoachSession {
-  id            String        @id @default(uuid())
-  createdAt     DateTime      @default(now())
-  sessionDate   DateTime      @default(now())
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  sessionDate DateTime @default(now())
 
   // MODULE 10: Session tracking
-  sessionNumber Int?          // Auto-incremented for each client's sessions
-  topic         String?       // e.g., "Work Stress"
+  sessionNumber Int? // Auto-incremented for each client's sessions
+  topic         String? // e.g., "Work Stress"
 
   // Coach-visible only
-  privateNotes  String?       @db.Text
+  privateNotes String? @db.Text
 
   // Visible to both Coach and Client
-  sharedSummary String?       @db.Text
+  sharedSummary String? @db.Text
 
   // HARMONY UPDATE: Somatic Anchor & Resource Attachments
-  somaticAnchor BodyZone?     // Body zone discussed in session
-  resources     Resource[]    // Resources attached as homework
+  somaticAnchor BodyZone? // Body zone discussed in session
+  resources     Resource[] // Resources attached as homework
 
   // Relations
-  coach         CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
-  coachId       String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
 
-  client        ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId      String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+
+  @@index([coachId, sessionDate])
+  @@index([clientId, sessionDate])
 }
 
 // ============================================
 // GOALS & MILESTONES (Module 11)
 // ============================================
 model Goal {
-  id            String        @id @default(uuid())
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  title         String
-  type          GoalType      @default(OKR)
-  status        GoalStatus    @default(NOT_STARTED)
-  progress      Int           @default(0)  // 0-100, calculated from milestones
-  dueDate       DateTime?
+  title    String
+  type     GoalType   @default(OKR)
+  status   GoalStatus @default(NOT_STARTED)
+  progress Int        @default(0) // 0-100, calculated from milestones
+  dueDate  DateTime?
 
   // Relations
-  client        ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId      String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
 
   // Milestones for this goal
-  milestones    Milestone[]
+  milestones Milestone[]
+
+  @@index([clientId, status])
 }
 
 model Milestone {
-  id            String        @id @default(uuid())
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  text          String
-  completed     Boolean       @default(false)
-  order         Int           @default(0)  // For ordering within a goal
+  text      String
+  completed Boolean @default(false)
+  order     Int     @default(0) // For ordering within a goal
 
   // Relations
-  goal          Goal          @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  goalId        String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId String
 }
 
 // ============================================
 // FILE UPLOADS
 // ============================================
 model File {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  user                      User            @relation(fields: [userId], references: [id])
-  userId                    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-  name                      String
-  type                      String
-  s3Key                     String
+  name  String
+  type  String
+  s3Key String
 }
 
 // ============================================
 // RESOURCE LIBRARY (Module 8)
 // ============================================
 model Resource {
-  id          String        @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  type        String        // MIME type: "application/pdf", "image/jpeg", "audio/mpeg", etc.
+  type        String // MIME type: "application/pdf", "image/jpeg", "audio/mpeg", etc.
   s3Key       String
-  description String?       // Optional description for coaches
-  createdAt   DateTime      @default(now())
+  description String? // Optional description for coaches
+  createdAt   DateTime @default(now())
 
-  coach       CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
-  coachId     String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
 
   // HARMONY UPDATE: Resource can be attached to sessions
-  sessions    CoachSession[] // Sessions where this resource was prescribed
+  sessions CoachSession[] // Sessions where this resource was prescribed
+
+  @@index([coachId])
 }
 
 // ============================================
 // ANALYTICS & ADMIN
 // ============================================
 model DailyStats {
-  id                               Int             @id @default(autoincrement())
-  date                             DateTime        @default(now()) @unique
+  id   Int      @id @default(autoincrement())
+  date DateTime @unique @default(now())
 
-  totalViews                       Int             @default(0)
-  prevDayViewsChangePercent        String          @default("0")
-  userCount                        Int             @default(0)
-  paidUserCount                    Int             @default(0)
-  userDelta                        Int             @default(0)
-  paidUserDelta                    Int             @default(0)
-  totalRevenue                     Float           @default(0)
-  totalProfit                      Float           @default(0)
+  totalViews                Int    @default(0)
+  prevDayViewsChangePercent String @default("0")
+  userCount                 Int    @default(0)
+  paidUserCount             Int    @default(0)
+  userDelta                 Int    @default(0)
+  paidUserDelta             Int    @default(0)
+  totalRevenue              Float  @default(0)
+  totalProfit               Float  @default(0)
 
-  sources                          PageViewSource[]
+  sources PageViewSource[]
 }
 
 model PageViewSource {
+  name String
+  date DateTime @default(now())
+
+  dailyStats   DailyStats? @relation(fields: [dailyStatsId], references: [id])
+  dailyStatsId Int?
+
+  visitors Int
+
   @@id([date, name])
-  name                     String
-  date                     DateTime        @default(now())
-
-  dailyStats               DailyStats?     @relation(fields: [dailyStatsId], references: [id])
-  dailyStatsId             Int?
-
-  visitors                 Int
 }
 
 model Logs {
-  id                       Int             @id @default(autoincrement())
-  createdAt                DateTime        @default(now())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
 
-  message                  String
-  level                    String
+  message String
+  level   String
 }
 
 model ContactFormMessage {
-  id                        String          @id @default(uuid())
-  createdAt                 DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  user                      User            @relation(fields: [userId], references: [id])
-  userId                    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-  content                   String
-  isRead                    Boolean         @default(false)
-  repliedAt                 DateTime?
+  content   String
+  isRead    Boolean   @default(false)
+  repliedAt DateTime?
 }
 
 // ============================================

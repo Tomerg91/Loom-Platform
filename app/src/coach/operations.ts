@@ -16,6 +16,7 @@ type ClientWithStats = {
   userId: string | null;
   email: string | null;
   username: string | null;
+  displayName: string | null;
   somaticLogCount: number;
   lastLogDate: Date | null;
 };
@@ -36,34 +37,46 @@ export const getClientsForCoach: GetClientsForCoach<
   // Get the coach profile with clients
   const coachProfile = await context.entities.CoachProfile.findUnique({
     where: { userId: context.user.id },
-    include: {
-      clients: {
-        include: {
-          user: true,
-          somaticLogs: {
-            orderBy: { createdAt: "desc" },
-            take: 1, // Get the most recent log for lastLogDate
-          },
-          _count: {
-            select: { somaticLogs: true },
-          },
-        },
-      },
-    },
+    select: { id: true },
   });
 
   if (!coachProfile) {
     throw new HttpError(404, "Coach profile not found");
   }
 
+  const clients = await context.entities.ClientProfile.findMany({
+    where: { coachId: coachProfile.id },
+    include: {
+      user: true,
+      _count: {
+        select: { somaticLogs: true },
+      },
+    },
+  });
+
+  const clientIds = clients.map((client) => client.id);
+
+  const lastLogs = clientIds.length
+    ? await context.entities.SomaticLog.groupBy({
+        by: ["clientId"],
+        where: { clientId: { in: clientIds } },
+        _max: { createdAt: true },
+      })
+    : [];
+
+  const lastLogMap = Object.fromEntries(
+    lastLogs.map((log) => [log.clientId, log._max.createdAt ?? null])
+  );
+
   // Transform the data to our return type
-  return coachProfile.clients.map((client) => ({
+  return clients.map((client) => ({
     id: client.id,
     userId: client.user?.id || null,
     email: client.user?.email || null,
     username: client.user?.username || null,
+    displayName: client.displayName || null,
     somaticLogCount: client._count.somaticLogs,
-    lastLogDate: client.somaticLogs[0]?.createdAt || null,
+    lastLogDate: lastLogMap[client.id] || null,
   }));
 };
 
