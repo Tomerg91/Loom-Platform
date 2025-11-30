@@ -90,12 +90,12 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         onSuccess={() => refetchClients()}
       />
 
-      <div className="mt-10 px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
+      <div className="mt-10 px-6 grain">
+        <div className="mb-8 reveal">
+          <h1 className="text-4xl font-display font-bold text-foreground leading-tight">
             Welcome, Coach {user.username || user.email}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-3 font-body text-lg">
             Manage your clients and track their somatic progress
           </p>
         </div>
@@ -105,9 +105,9 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         <UpcomingSessions />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 reveal-stagger">
         {/* My Clients Card */}
-        <Card>
+        <Card className="hover-scale-subtle">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -124,7 +124,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                   return (
                     <div
                       key={client.id}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="p-3 border border-border rounded-xl hover-scale-subtle cursor-pointer bg-card-subtle transition-colors"
                       onClick={() => {
                         navigate(`/coach/client/${client.id}`);
                       }}
@@ -172,9 +172,9 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </Card>
 
         {/* Invite New Client Card */}
-        <Card>
+        <Card className="hover-scale-subtle">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-display">
               <Mail className="h-5 w-5" />
               Invite New Client
             </CardTitle>
@@ -214,9 +214,9 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </Card>
 
         {/* Add Offline Client Card */}
-        <Card>
+        <Card className="hover-scale-subtle">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-display">
               <Plus className="h-5 w-5" />
               Add Offline Client
             </CardTitle>
@@ -236,9 +236,9 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </Card>
 
         {/* Pending Invitations Card */}
-        <Card>
+        <Card className="hover-scale-subtle">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-display">
               <Clock className="h-5 w-5" />
               Pending Invitations
             </CardTitle>
@@ -249,7 +249,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                 {pendingInvitations.map((inv) => (
                   <li
                     key={inv.id}
-                    className="text-sm p-2 bg-gray-50 rounded border"
+                    className="text-sm p-2 bg-card-subtle rounded-lg border border-border"
                   >
                     <div className="font-medium">{inv.email}</div>
                     <div className="text-xs text-muted-foreground">
@@ -267,9 +267,9 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </Card>
 
         {/* Subscription Card */}
-        <Card>
+        <Card className="hover-scale-subtle">
           <CardHeader>
-            <CardTitle>Subscription</CardTitle>
+            <CardTitle className="font-display">Subscription</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm">

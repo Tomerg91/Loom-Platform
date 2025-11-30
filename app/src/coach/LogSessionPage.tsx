@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
+import type { LogSessionResponse } from "../session/operations";
 import {
   useQuery,
   useAction,
@@ -144,7 +145,7 @@ function LogSessionPageContent({
     setSuccessMessage(null);
 
     try {
-      const result = await logSessionFn({
+      const result: LogSessionResponse = await logSessionFn({
         clientId,
         sessionDate: new Date(formData.sessionDate),
         topic: formData.topic || null,

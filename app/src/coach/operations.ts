@@ -16,6 +16,7 @@ type ClientWithStats = {
   userId: string | null;
   email: string | null;
   username: string | null;
+  displayName: string | null;
   somaticLogCount: number;
   lastLogDate: Date | null;
 };
@@ -62,6 +63,7 @@ export const getClientsForCoach: GetClientsForCoach<
     userId: client.user?.id || null,
     email: client.user?.email || null,
     username: client.user?.username || null,
+    displayName: client.displayName || null,
     somaticLogCount: client._count.somaticLogs,
     lastLogDate: client.somaticLogs[0]?.createdAt || null,
   }));

@@ -8,8 +8,8 @@ export default function UpcomingSessions() {
   // NOTE: getUpcomingSessions operation was removed (Module 10 - incomplete)
   // Showing placeholder until recurring sessions feature is restored
   const isLoading = false;
-  const error = null;
-  const upcomingSessions = [];
+  const error: Error | null = null;
+  const upcomingSessions: Array<{ client: { id: string; user: { username?: string } }; nextSessionDate: Date }> = [];
 
   const handleStartSession = (clientId: string, sessionNumber: number) => {
     window.location.href = `/coach/client/${clientId}/log-session?sessionNumber=${sessionNumber}`;

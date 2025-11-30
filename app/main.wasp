@@ -158,12 +158,12 @@ action createOfflineClient {
 
 action updateOfflineClient {
   fn: import { updateOfflineClient } from "@src/coach/operations",
-  entities: [ClientProfile]
+  entities: [CoachProfile, ClientProfile]
 }
 
 action deleteOfflineClient {
   fn: import { deleteOfflineClient } from "@src/coach/operations",
-  entities: [ClientProfile, CoachSession, SomaticLog, Goal]
+  entities: [CoachProfile, ClientProfile, CoachSession, SomaticLog, Goal]
 }
 
 route ClientDetailsRoute { path: "/coach/client/:clientId", to: ClientDetailsPage }

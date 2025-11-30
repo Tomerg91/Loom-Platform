@@ -12,6 +12,11 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        display: ["Crimson Pro", "Georgia", "Cambria", "serif"],
+        body: ["Source Sans 3", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: ["Source Sans 3", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+      },
       colors: {
         current: "currentColor",
         transparent: "transparent",
@@ -230,6 +235,10 @@ export default {
       },
       opacity: {
         65: ".65",
+        4: ".04",
+        5: ".05",
+        6: ".06",
+        8: ".08",
       },
       content: {
         "icon-copy": 'url("../images/icon/icon-copy-alt.svg")',
@@ -237,6 +246,9 @@ export default {
       transitionProperty: {
         width: "width",
         stroke: "stroke",
+      },
+      transitionTimingFunction: {
+        organic: "cubic-bezier(0.34, 1.56, 0.64, 1)",
       },
       borderWidth: {
         6: "6px",
@@ -282,6 +294,24 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        full: "9999px",
+      },
+      keyframes: {
+        ...require("tailwindcss/defaultConfig").theme.keyframes,
+        "reveal-up": {
+          from: {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+      },
+      animation: {
+        ...require("tailwindcss/defaultConfig").theme.animation,
+        "reveal-up": "reveal-up 0.6s ease-organic forwards",
       },
     },
   },
