@@ -8,6 +8,7 @@ import type {
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 import { computeClientAnalytics, type ClientAnalyticsResult } from "./analytics";
+import { isAdmin, isCoach, requireAuth, requireRole } from "../server/rbac";
 
 // BodyZone type definition matching Prisma schema
 type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
@@ -41,19 +42,14 @@ export const createSomaticLog: CreateSomaticLog<
 > = async (rawArgs, context) => {
   const { bodyZone, sensation, intensity, note, sharedWithCoach } =
     ensureArgsSchemaOrThrowHttpError(createSomaticLogSchema, rawArgs);
-
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to create somatic logs");
-  }
-
-  // Ensure user is a CLIENT
-  if (context.user.role !== "CLIENT") {
-    throw new HttpError(403, "Only clients can create somatic logs");
-  }
+  const clientContext = requireRole(context, ["CLIENT"], {
+    unauthenticatedMessage: "You must be logged in to create somatic logs",
+    unauthorizedMessage: "Only clients can create somatic logs",
+  });
 
   // Get the client profile
-  const clientProfile = await context.entities.ClientProfile.findUnique({
-    where: { userId: context.user.id },
+  const clientProfile = await clientContext.entities.ClientProfile.findUnique({
+    where: { userId: clientContext.user.id },
   });
 
   if (!clientProfile) {
@@ -61,7 +57,7 @@ export const createSomaticLog: CreateSomaticLog<
   }
 
   // Create the somatic log
-  await context.entities.SomaticLog.create({
+  await clientContext.entities.SomaticLog.create({
     data: {
       bodyZone,
       sensation,
@@ -73,7 +69,7 @@ export const createSomaticLog: CreateSomaticLog<
   });
 
   // Update client's lastActivityDate
-  await context.entities.ClientProfile.update({
+  await clientContext.entities.ClientProfile.update({
     where: { id: clientProfile.id },
     data: { lastActivityDate: new Date() },
   });
@@ -108,10 +104,10 @@ export const getSomaticLogs: GetSomaticLogs<
   SomaticLogResponse[]
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(getSomaticLogsSchema, rawArgs);
-
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to view somatic logs");
-  }
+  const authenticatedContext = requireAuth(
+    context,
+    "You must be logged in to view somatic logs",
+  );
 
   // Build filter conditions
   const whereConditions: any = {};
@@ -132,9 +128,9 @@ export const getSomaticLogs: GetSomaticLogs<
   }
 
   // If user is CLIENT: return their own logs
-  if (context.user.role === "CLIENT") {
-    const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { userId: context.user.id },
+  if (authenticatedContext.user.role === "CLIENT") {
+    const clientProfile = await authenticatedContext.entities.ClientProfile.findUnique({
+      where: { userId: authenticatedContext.user.id },
       include: {
         somaticLogs: {
           where: whereConditions,
@@ -159,13 +155,13 @@ export const getSomaticLogs: GetSomaticLogs<
   }
 
   // If user is COACH: return only shared logs for their clients
-  if (context.user.role === "COACH") {
+  if (authenticatedContext.user.role === "COACH") {
     if (!args.clientId) {
       throw new HttpError(400, "Client ID is required for coaches");
     }
 
-    const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+    const coachProfile = await authenticatedContext.entities.CoachProfile.findUnique({
+      where: { userId: authenticatedContext.user.id },
       include: {
         clients: {
           where: { id: args.clientId },

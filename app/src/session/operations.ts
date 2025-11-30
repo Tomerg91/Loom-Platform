@@ -246,9 +246,10 @@ export const deleteSession: DeleteSession<DeleteSessionInput, void> = async (
     throw new HttpError(403, "You do not have access to this session");
   }
 
-  // Delete the session
-  await context.entities.CoachSession.delete({
+  // Soft delete the session for GDPR compliance
+  await context.entities.CoachSession.update({
     where: { id: sessionId },
+    data: { deletedAt: new Date() },
   });
 };
 
@@ -291,7 +292,7 @@ export const getSessionsForClient: GetSessionsForClient<
   // If user is CLIENT: return their own sessions with privacy filter
   if (context.user.role === "CLIENT") {
     const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { userId: context.user.id },
+      where: { userId: context.user.id, deletedAt: null },
     });
 
     if (!clientProfile) {
@@ -305,10 +306,10 @@ export const getSessionsForClient: GetSessionsForClient<
 
     const [total, sessions] = await Promise.all([
       context.entities.CoachSession.count({
-        where: { clientId: args.clientId },
+        where: { clientId: args.clientId, deletedAt: null },
       }),
       context.entities.CoachSession.findMany({
-        where: { clientId: args.clientId },
+        where: { clientId: args.clientId, deletedAt: null },
         orderBy: { sessionDate: "desc" },
         skip,
         take: limit,
@@ -345,10 +346,10 @@ export const getSessionsForClient: GetSessionsForClient<
   // If user is COACH: return all fields for their clients
   if (context.user.role === "COACH") {
     const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+      where: { userId: context.user.id, deletedAt: null },
       include: {
         clients: {
-          where: { id: args.clientId },
+          where: { id: args.clientId, deletedAt: null },
         },
       },
     });
@@ -364,10 +365,10 @@ export const getSessionsForClient: GetSessionsForClient<
 
     const [total, sessions] = await Promise.all([
       context.entities.CoachSession.count({
-        where: { clientId: args.clientId },
+        where: { clientId: args.clientId, deletedAt: null },
       }),
       context.entities.CoachSession.findMany({
-        where: { clientId: args.clientId },
+        where: { clientId: args.clientId, deletedAt: null },
         orderBy: { sessionDate: "desc" },
         skip,
         take: limit,
@@ -423,7 +424,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
   // CLIENT users can only view their own sessions
   if (context.user.role === "CLIENT") {
     const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { userId: context.user.id },
+      where: { userId: context.user.id, deletedAt: null },
     });
 
     if (!clientProfile) {
@@ -436,7 +437,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     }
 
     const sessions = await context.entities.CoachSession.findMany({
-      where: { clientId: clientProfile.id },
+      where: { clientId: clientProfile.id, deletedAt: null },
       orderBy: { sessionDate: "desc" },
       take: 3,
       select: {
@@ -471,10 +472,10 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     }
 
     const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+      where: { userId: context.user.id, deletedAt: null },
       include: {
         clients: {
-          where: { id: args.clientId },
+          where: { id: args.clientId, deletedAt: null },
         },
       },
     });
@@ -484,7 +485,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     }
 
     const sessions = await context.entities.CoachSession.findMany({
-      where: { clientId: args.clientId },
+      where: { clientId: args.clientId, deletedAt: null },
       orderBy: { sessionDate: "desc" },
       take: 3,
       select: {
@@ -596,7 +597,7 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
   // CALCULATE SESSION NUMBER (auto-increment)
   // ============================================
   const lastSession = await context.entities.CoachSession.findFirst({
-    where: { clientId: clientId },
+    where: { clientId: clientId, deletedAt: null },
     orderBy: { sessionNumber: "desc" },
   });
 

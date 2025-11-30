@@ -29,7 +29,7 @@ import { toast } from "../hooks/use-toast";
 import { cn } from "../lib/utils";
 import { uploadFileWithProgress } from "../file-upload/fileUploading";
 import { validateResourceFile } from "../resources/validation";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTime } from "@src/shared/date";
 
 export default function CoachResourcesPage({ user }: { user: User }) {
   const { t } = useTranslation();
@@ -269,9 +269,7 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                             )}
                             <div className="text-xs text-muted-foreground mt-2">
                               {t("resources.uploaded")}{" "}
-                              {formatDistanceToNow(new Date(resource.createdAt), {
-                                addSuffix: true,
-                              })}
+                              {formatRelativeTime(resource.createdAt)}
                             </div>
                           </div>
                         </div>

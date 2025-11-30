@@ -10,7 +10,7 @@ import { Download, FileText, Music, Image as ImageIcon, Loader2 } from "lucide-r
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { toast } from "../hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTime } from "@src/shared/date";
 
 export default function ClientResourcesPage({ user }: { user: User }) {
   const { t } = useTranslation();
@@ -89,9 +89,7 @@ export default function ClientResourcesPage({ user }: { user: User }) {
                         )}
                         <div className="text-xs text-muted-foreground mt-2">
                           {t("resources.shared")}{" "}
-                          {formatDistanceToNow(new Date(resource.createdAt), {
-                            addSuffix: true,
-                          })}
+                          {formatRelativeTime(resource.createdAt)}
                         </div>
                       </div>
                     </div>

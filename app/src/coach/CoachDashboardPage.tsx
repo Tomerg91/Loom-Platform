@@ -26,7 +26,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { CheckCircle, Mail, Clock, Users, Calendar, Plus, Lock, X } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeTime } from "@src/shared/date";
 import UpcomingSessions from "./components/UpcomingSessions";
 import OnboardingModal from "../components/OnboardingModal";
 import AddOfflineClientDialog from "./components/AddOfflineClientDialog";
@@ -237,9 +237,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                         {client.lastLogDate && (
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {formatDistanceToNow(new Date(client.lastLogDate), {
-                              addSuffix: true,
-                            })}
+                            {formatRelativeTime(client.lastLogDate)}
                           </span>
                         )}
                       </div>

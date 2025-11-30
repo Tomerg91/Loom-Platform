@@ -15,7 +15,7 @@ import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ClientAnalyticsDashboard } from "./components/ClientAnalyticsDashboard";
 import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle, TrendingUp } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatClockTime, formatDate, formatRelativeTime } from "@src/shared/date";
 import type { SessionResponse } from "../session/operations";
 
 type BodyZone =
@@ -35,41 +35,58 @@ type ZoneHighlight = {
 };
 
 function ClientDetailsPageContent({ user }: { user: User }) {
+  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
+  const clientId = clientIdParam?.trim();
+
+  if (!clientId) {
+    return <MissingClientNotice />;
+  }
+
+  return <ClientDetailsPageView user={user} clientId={clientId} />;
+}
+
+function MissingClientNotice() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
-  const clientId = clientIdParam || "";
 
-  // Validate clientId parameter
-  if (!clientId) {
-    return (
-      <div className="mt-10 px-6 pb-12">
-        <div className="max-w-md mx-auto">
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-5 w-5 text-yellow-600" />
-            <AlertDescription className="text-yellow-800 ml-2">
-              <div className="font-semibold text-lg mb-2">
-                {t("errors.missingClientId.title", "Invalid Client")}
-              </div>
-              <p className="text-sm mb-4">
-                {t(
-                  "errors.missingClientId.message",
-                  "The client ID is missing or invalid. Please select a client from your dashboard."
-                )}
-              </p>
-            </AlertDescription>
-          </Alert>
-          <Button
-            onClick={() => navigate("/coach")}
-            className="w-full mt-4 flex items-center justify-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("common.back", "Go Back")}
-          </Button>
-        </div>
+  return (
+    <div className="mt-10 px-6 pb-12">
+      <div className="max-w-md mx-auto">
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-5 w-5 text-yellow-600" />
+          <AlertDescription className="text-yellow-800 ml-2">
+            <div className="font-semibold text-lg mb-2">
+              {t("errors.missingClientId.title", "Invalid Client")}
+            </div>
+            <p className="text-sm mb-4">
+              {t(
+                "errors.missingClientId.message",
+                "The client ID is missing or invalid. Please select a client from your dashboard."
+              )}
+            </p>
+          </AlertDescription>
+        </Alert>
+        <Button
+          onClick={() => navigate("/coach")}
+          className="w-full mt-4 flex items-center justify-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t("common.back", "Go Back")}
+        </Button>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+function ClientDetailsPageView({
+  user,
+  clientId,
+}: {
+  user: User;
+  clientId: string;
+}) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // State for sessions
   const [isSessionDialogOpen, setIsSessionDialogOpen] = useState(false);
@@ -163,8 +180,8 @@ function ClientDetailsPageContent({ user }: { user: User }) {
     if (session) {
       setEditingSession(session);
       setSessionForm({
-        sessionDate: format(new Date(session.sessionDate), "yyyy-MM-dd"),
-        sessionTime: format(new Date(session.sessionDate), "HH:mm"),
+        sessionDate: formatDate(session.sessionDate, "yyyy-MM-dd"),
+        sessionTime: formatDate(session.sessionDate, "HH:mm"),
         privateNotes: session.privateNotes || "",
         sharedSummary: session.sharedSummary || "",
       });
@@ -377,7 +394,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
             )}
             {clientProfile?.lastActivityDate && (
               <p className="text-muted-foreground text-xs mt-1">
-                Last activity: {formatDistanceToNow(new Date(clientProfile.lastActivityDate), { addSuffix: true })}
+                Last activity: {formatRelativeTime(clientProfile.lastActivityDate)}
               </p>
             )}
             {!clientProfile?.lastActivityDate && (
@@ -464,9 +481,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                       Most Recent Entry
                     </p>
                     <p className="text-lg font-medium">
-                      {formatDistanceToNow(new Date(somaticLogs[0].createdAt), {
-                        addSuffix: true,
-                      })}
+                      {formatRelativeTime(somaticLogs[0].createdAt)}
                     </p>
                   </div>
                   <div>
@@ -520,10 +535,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                         <td className="py-3">
                           <div>
                             <div className="font-medium">
-                              {format(new Date(log.createdAt), "MMM d, yyyy")}
+                              {formatDate(log.createdAt, "MMM d, yyyy")}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(log.createdAt), "h:mm a")}
+                              {formatClockTime(log.createdAt)}
                             </div>
                           </div>
                         </td>
@@ -581,10 +596,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-sm">
-                          {format(new Date(log.createdAt), "MMM d, yyyy")}
+                          {formatDate(log.createdAt, "MMM d, yyyy")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(log.createdAt), "h:mm a")}
+                          {formatClockTime(log.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -669,10 +684,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                         <td className="py-3">
                           <div>
                             <div className="font-medium">
-                              {format(new Date(session.sessionDate), "MMM d, yyyy")}
+                              {formatDate(session.sessionDate, "MMM d, yyyy")}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(session.sessionDate), "h:mm a")}
+                              {formatClockTime(session.sessionDate)}
                             </div>
                           </div>
                         </td>
@@ -733,10 +748,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-sm">
-                          {format(new Date(session.sessionDate), "MMM d, yyyy")}
+                          {formatDate(session.sessionDate, "MMM d, yyyy")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(session.sessionDate), "h:mm a")}
+                          {formatClockTime(session.sessionDate)}
                         </p>
                       </div>
                       <div className="flex gap-1">
@@ -955,7 +970,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                 "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
                 {
                   date: sessionToDelete
-                    ? format(new Date(sessionToDelete.sessionDate), "MMM d, yyyy")
+                    ? formatDate(sessionToDelete.sessionDate, "MMM d, yyyy")
                     : "",
                 }
               )}

@@ -22,48 +22,61 @@ import { format } from "date-fns";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 
-function LogSessionPageContent({
+function LogSessionPageContent({ user }: { user: User }) {
+  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
+  const clientId = clientIdParam?.trim();
+
+  if (!clientId) {
+    return <MissingLogSessionClient />;
+  }
+
+  return <LogSessionForm user={user} clientId={clientId} />;
+}
+
+function MissingLogSessionClient() {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  return (
+    <div className="mt-10 px-6 pb-12">
+      <div className="max-w-md mx-auto">
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-5 w-5 text-yellow-600" />
+          <AlertDescription className="text-yellow-800 ml-2">
+            <div className="font-semibold text-lg mb-2">
+              {t("errors.missingClientId.title", "Invalid Client")}
+            </div>
+            <p className="text-sm mb-4">
+              {t(
+                "errors.missingClientId.message",
+                "The client ID is missing or invalid. Please select a client from your dashboard."
+              )}
+            </p>
+          </AlertDescription>
+        </Alert>
+        <Button
+          onClick={() => navigate("/coach")}
+          className="w-full mt-4 flex items-center justify-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t("common.back", "Go Back")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function LogSessionForm({
   user,
+  clientId,
 }: {
   user: User;
+  clientId: string;
 }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
-  const clientId = clientIdParam || "";
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
-
-  // Validate clientId parameter at the top
-  if (!clientId) {
-    return (
-      <div className="mt-10 px-6 pb-12">
-        <div className="max-w-md mx-auto">
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-5 w-5 text-yellow-600" />
-            <AlertDescription className="text-yellow-800 ml-2">
-              <div className="font-semibold text-lg mb-2">
-                {t("errors.missingClientId.title", "Invalid Client")}
-              </div>
-              <p className="text-sm mb-4">
-                {t(
-                  "errors.missingClientId.message",
-                  "The client ID is missing or invalid. Please select a client from your dashboard."
-                )}
-              </p>
-            </AlertDescription>
-          </Alert>
-          <Button
-            onClick={() => navigate("/coach")}
-            className="w-full mt-4 flex items-center justify-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("common.back", "Go Back")}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   const [formData, setFormData] = useState({
     sessionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
