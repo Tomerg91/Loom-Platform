@@ -4,7 +4,7 @@ import { Bold, Italic, List } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { cn } from '../../lib/utils';
-
+import sanitizeHtml from 'sanitize-html';
 interface RichTextEditorProps {
   label: string;
   description?: string;
@@ -16,15 +16,15 @@ interface RichTextEditorProps {
 
 const sanitize = (value: string) => {
   if (typeof window === 'undefined') {
-    // Apply the replace repeatedly to ensure all <script> blocks are removed.
-    let sanitized = value;
-    let previous;
-    const scriptTagRegex = /<script[^>]*>[\s\S]*?<\/script>/gi;
-    do {
-      previous = sanitized;
-      sanitized = sanitized.replace(scriptTagRegex, '');
-    } while (sanitized !== previous);
-    return sanitized;
+    // Sanitize HTML using sanitize-html to remove script/style tags and dangerous attributes
+    return sanitizeHtml(value, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.filter(tag => tag !== 'script' && tag !== 'style'),
+      allowedAttributes: {
+        a: ['href', 'target', 'rel', 'class', 'id', 'style'],
+        img: ['src', 'class', 'id', 'style'],
+        '*': ['class', 'id', 'style']
+      }
+    });
   }
   const parser = new DOMParser();
   const doc = parser.parseFromString(value, 'text/html');
