@@ -9,6 +9,7 @@ import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { UserPlus } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import FormFieldWithValidation from "../components/FormFieldWithValidation";
 
 export default function AcceptInvitePage() {
   const location = useLocation();
@@ -23,7 +24,102 @@ export default function AcceptInvitePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // ============================================
+  // VALIDATION STATE
+  // ============================================
+  const [touched, setTouched] = useState({
+    username: false,
+    password: false,
+    confirmPassword: false,
+  });
+
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const acceptInvitationFn = useAction(acceptInvitation);
+
+  // ============================================
+  // VALIDATION FUNCTIONS
+  // ============================================
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    switch (name) {
+      case "username":
+        if (!value) {
+          error = t("auth.validation.nameRequired", "Name is required");
+        } else if (value.length < 2) {
+          error = t("auth.validation.nameTooShort", "Name must be at least 2 characters");
+        } else if (value.length > 50) {
+          error = t("auth.validation.nameTooLong", "Name cannot exceed 50 characters");
+        }
+        break;
+
+      case "password":
+        if (!value) {
+          error = t("auth.validation.passwordRequired", "Password is required");
+        } else if (value.length < 8) {
+          error = t("auth.validation.passwordTooShort", "Password must be at least 8 characters");
+        } else if (!/[A-Z]/.test(value)) {
+          error = t(
+            "auth.validation.passwordNeedsUppercase",
+            "Password must contain at least one uppercase letter"
+          );
+        } else if (!/[a-z]/.test(value)) {
+          error = t(
+            "auth.validation.passwordNeedsLowercase",
+            "Password must contain at least one lowercase letter"
+          );
+        } else if (!/[0-9]/.test(value)) {
+          error = t("auth.validation.passwordNeedsNumber", "Password must contain at least one number");
+        }
+        break;
+
+      case "confirmPassword":
+        if (!value) {
+          error = t("auth.validation.confirmPasswordRequired", "Please confirm your password");
+        } else if (value !== password) {
+          error = t("auth.validation.passwordMismatch", "Passwords do not match");
+        }
+        break;
+    }
+
+    return error;
+  };
+
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+    const value =
+      fieldName === "username"
+        ? username
+        : fieldName === "password"
+          ? password
+          : confirmPassword;
+    const error = validateField(fieldName, value);
+    setErrors((prev) => ({ ...prev, [fieldName]: error }));
+  };
+
+  const handleFieldChange = (fieldName: string, value: string) => {
+    // Update state
+    if (fieldName === "username") setUsername(value);
+    else if (fieldName === "password") {
+      setPassword(value);
+      // Re-validate confirm password if it was already touched
+      if (touched.confirmPassword) {
+        const confirmError = validateField("confirmPassword", confirmPassword);
+        setErrors((prev) => ({ ...prev, confirmPassword: confirmError }));
+      }
+    } else if (fieldName === "confirmPassword") setConfirmPassword(value);
+
+    // Validate if already touched
+    if (touched[fieldName as keyof typeof touched]) {
+      const error = validateField(fieldName, value);
+      setErrors((prev) => ({ ...prev, [fieldName]: error }));
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -40,8 +136,26 @@ export default function AcceptInvitePage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match");
+    // ============================================
+    // VALIDATE ALL FIELDS BEFORE SUBMIT
+    // ============================================
+    const newErrors = {
+      username: validateField("username", username),
+      password: validateField("password", password),
+      confirmPassword: validateField("confirmPassword", confirmPassword),
+    };
+
+    setErrors(newErrors);
+    setTouched({
+      username: true,
+      password: true,
+      confirmPassword: true,
+    });
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some((error) => error !== "");
+    if (hasErrors) {
+      setErrorMessage(t("auth.validation.fixErrors", "Please fix validation errors before submitting"));
       return;
     }
 
@@ -97,46 +211,76 @@ export default function AcceptInvitePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Your Name</Label>
+            <FormFieldWithValidation
+              label="Your Name"
+              error={errors.username}
+              touched={touched.username}
+              success={touched.username && !errors.username && username.length > 0}
+              hint="2-50 characters"
+              required={true}
+            >
               <Input
                 id="username"
                 type="text"
                 placeholder="John Doe"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                onChange={(e) => handleFieldChange("username", e.target.value)}
+                onBlur={() => handleFieldBlur("username")}
                 disabled={isSubmitting}
+                className={`${
+                  touched.username && errors.username ? "border-red-500" : ""
+                } ${
+                  touched.username && !errors.username && username ? "border-green-500" : ""
+                }`}
               />
-            </div>
+            </FormFieldWithValidation>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <FormFieldWithValidation
+              label="Password"
+              error={errors.password}
+              touched={touched.password}
+              success={touched.password && !errors.password && password.length > 0}
+              hint="Minimum 8 characters with uppercase, lowercase, and number"
+              required={true}
+            >
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimum 8 characters"
+                placeholder="Enter a secure password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
+                onChange={(e) => handleFieldChange("password", e.target.value)}
+                onBlur={() => handleFieldBlur("password")}
                 disabled={isSubmitting}
+                className={`${
+                  touched.password && errors.password ? "border-red-500" : ""
+                } ${
+                  touched.password && !errors.password && password ? "border-green-500" : ""
+                }`}
               />
-            </div>
+            </FormFieldWithValidation>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <FormFieldWithValidation
+              label="Confirm Password"
+              error={errors.confirmPassword}
+              touched={touched.confirmPassword}
+              success={touched.confirmPassword && !errors.confirmPassword && confirmPassword.length > 0}
+              required={true}
+            >
               <Input
                 id="confirmPassword"
                 type="password"
                 placeholder="Re-enter your password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={8}
+                onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                onBlur={() => handleFieldBlur("confirmPassword")}
                 disabled={isSubmitting}
+                className={`${
+                  touched.confirmPassword && errors.confirmPassword ? "border-red-500" : ""
+                } ${
+                  touched.confirmPassword && !errors.confirmPassword && confirmPassword ? "border-green-500" : ""
+                }`}
               />
-            </div>
+            </FormFieldWithValidation>
 
             {errorMessage && (
               <Alert className="bg-red-50 border-red-200">

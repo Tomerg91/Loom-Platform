@@ -12,6 +12,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Slider } from "../components/ui/slider";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import FormFieldWithValidation from "../components/FormFieldWithValidation";
 
 const SENSATIONS = [
   "Tight",
@@ -37,20 +38,113 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  // ============================================
+  // VALIDATION STATE
+  // ============================================
+  const [touched, setTouched] = useState({
+    bodyZone: false,
+    sensation: false,
+    note: false,
+  });
+
+  const [errors, setErrors] = useState({
+    bodyZone: "",
+    sensation: "",
+    note: "",
+  });
+
   const createSomaticLogFn = useAction(createSomaticLog);
+
+  // ============================================
+  // VALIDATION FUNCTIONS
+  // ============================================
+  const validateField = (name: string, value: any) => {
+    let error = "";
+
+    switch (name) {
+      case "bodyZone":
+        if (!value) {
+          error = t("somatic.validation.bodyZoneRequired", "Please select a body zone");
+        }
+        break;
+
+      case "sensation":
+        if (!value) {
+          error = t("somatic.validation.sensationRequired", "Please select a sensation");
+        }
+        break;
+
+      case "note":
+        if (value && value.length > 1000) {
+          error = t("somatic.validation.noteTooLong", "Notes cannot exceed 1000 characters");
+        }
+        break;
+    }
+
+    return error;
+  };
+
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+    const value =
+      fieldName === "bodyZone"
+        ? selectedZone
+        : fieldName === "sensation"
+          ? selectedSensation
+          : note;
+    const error = validateField(fieldName, value);
+    setErrors((prev) => ({ ...prev, [fieldName]: error }));
+  };
+
+  const handleZoneChange = (zone: BodyZone | undefined) => {
+    setSelectedZone(zone);
+    if (touched.bodyZone) {
+      const error = validateField("bodyZone", zone);
+      setErrors((prev) => ({ ...prev, bodyZone: error }));
+    }
+  };
+
+  const handleSensationChange = (sensation: string) => {
+    setSelectedSensation(sensation);
+    if (touched.sensation) {
+      const error = validateField("sensation", sensation);
+      setErrors((prev) => ({ ...prev, sensation: error }));
+    }
+  };
+
+  const handleNoteChange = (value: string) => {
+    setNote(value);
+    if (touched.note) {
+      const error = validateField("note", value);
+      setErrors((prev) => ({ ...prev, note: error }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!selectedZone) {
-      setErrorMessage("Please select a body zone");
-      return;
-    }
+    // ============================================
+    // VALIDATE ALL FIELDS BEFORE SUBMIT
+    // ============================================
+    const newErrors = {
+      bodyZone: validateField("bodyZone", selectedZone),
+      sensation: validateField("sensation", selectedSensation),
+      note: validateField("note", note),
+    };
 
-    if (!selectedSensation) {
-      setErrorMessage("Please select a sensation");
+    setErrors(newErrors);
+    setTouched({
+      bodyZone: true,
+      sensation: true,
+      note: true,
+    });
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some((error) => error !== "");
+    if (hasErrors) {
+      setErrorMessage(t("somatic.validation.fixErrors", "Please fix validation errors before submitting"));
       return;
     }
 
@@ -73,6 +167,18 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
       setNote("");
       setSharedWithCoach(true);
 
+      // Reset validation state
+      setTouched({
+        bodyZone: false,
+        sensation: false,
+        note: false,
+      });
+      setErrors({
+        bodyZone: "",
+        sensation: "",
+        note: "",
+      });
+
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
@@ -92,25 +198,35 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Body Map Selector */}
-          <div className="space-y-2">
-            <Label>Select Body Zone</Label>
-            <div className="flex justify-center py-4 bg-gray-50 rounded-lg">
+          <FormFieldWithValidation
+            label="Select Body Zone"
+            error={errors.bodyZone}
+            touched={touched.bodyZone}
+            success={touched.bodyZone && !errors.bodyZone && selectedZone}
+            required={true}
+          >
+            <div className="flex justify-center py-4 bg-gray-50 rounded-lg" onBlur={() => handleFieldBlur("bodyZone")}>
               <BodyMapSelector
                 selectedZone={selectedZone}
-                onZoneSelect={setSelectedZone}
+                onZoneSelect={handleZoneChange}
               />
             </div>
-          </div>
+          </FormFieldWithValidation>
 
           {/* Sensation Chips */}
-          <div className="space-y-2">
-            <Label>What are you feeling?</Label>
-            <div className="flex flex-wrap gap-2">
+          <FormFieldWithValidation
+            label="What are you feeling?"
+            error={errors.sensation}
+            touched={touched.sensation}
+            success={touched.sensation && !errors.sensation && selectedSensation}
+            required={true}
+          >
+            <div className="flex flex-wrap gap-2" onBlur={() => handleFieldBlur("sensation")}>
               {SENSATIONS.map((sensation) => (
                 <button
                   key={sensation}
                   type="button"
-                  onClick={() => setSelectedSensation(sensation)}
+                  onClick={() => handleSensationChange(sensation)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     selectedSensation === sensation
                       ? "bg-primary text-primary-foreground shadow-md"
@@ -127,7 +243,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
                 Selected: <span className="font-medium">{selectedSensation}</span>
               </p>
             )}
-          </div>
+          </FormFieldWithValidation>
 
           {/* Intensity Slider */}
           <div className="space-y-3">
@@ -153,18 +269,28 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
           </div>
 
           {/* Optional Note */}
-          <div className="space-y-2">
-            <Label htmlFor="note">Notes (Optional)</Label>
+          <FormFieldWithValidation
+            label="Notes (Optional)"
+            error={errors.note}
+            touched={touched.note}
+            success={touched.note && !errors.note && note.length > 0}
+            hint={`${note.length}/1000 characters`}
+          >
             <Textarea
               id="note"
               placeholder="Any additional details about this sensation..."
               value={note}
-              onChange={(e) => setNote(e.target.value)}
+              onChange={(e) => handleNoteChange(e.target.value)}
+              onBlur={() => handleFieldBlur("note")}
               disabled={isSubmitting}
               rows={3}
-              className="resize-none"
+              className={`resize-none ${
+                touched.note && errors.note ? "border-red-500" : ""
+              } ${
+                touched.note && !errors.note && note ? "border-green-500" : ""
+              }`}
             />
-          </div>
+          </FormFieldWithValidation>
 
           {/* Share with Coach Toggle */}
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
