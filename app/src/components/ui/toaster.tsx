@@ -20,9 +20,16 @@ export function Toaster({
     | "bottom-right";
 }) {
   const { toasts } = useToast();
+  const direction =
+    typeof document !== "undefined" && document.documentElement.dir === "rtl"
+      ? "rtl"
+      : "ltr";
+  const swipeDirection = direction === "rtl" ? "left" : "right";
+  const resolvedPosition =
+    position ?? (direction === "rtl" ? "bottom-left" : "bottom-right");
 
   return (
-    <ToastProvider>
+    <ToastProvider duration={5000} swipeDirection={swipeDirection}>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
@@ -37,7 +44,7 @@ export function Toaster({
           </Toast>
         );
       })}
-      <ToastViewport position={position} />
+      <ToastViewport position={resolvedPosition} />
     </ToastProvider>
   );
 }
