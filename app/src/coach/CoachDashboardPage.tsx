@@ -10,12 +10,21 @@ import {
   useAction,
   getOnboardingStatus,
   updateOnboardingStatus,
+  cancelInvitation,
 } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { CheckCircle, Mail, Clock, Users, Calendar, Plus, Lock } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
+import { CheckCircle, Mail, Clock, Users, Calendar, Plus, Lock, X } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
 import { formatDistanceToNow } from "date-fns";
 import UpcomingSessions from "./components/UpcomingSessions";
@@ -37,6 +46,16 @@ export default function CoachDashboardPage({ user }: { user: User }) {
   // ============================================
   const [emailTouched, setEmailTouched] = useState(false);
   const [emailError, setEmailError] = useState("");
+
+  // ============================================
+  // CANCEL INVITATION STATE
+  // ============================================
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [invitationToCancel, setInvitationToCancel] = useState<{
+    id: string;
+    email: string;
+  } | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const validateEmail = (value: string): string => {
     if (!value) {
@@ -65,6 +84,7 @@ export default function CoachDashboardPage({ user }: { user: User }) {
   };
 
   const inviteClientFn = useAction(inviteClient);
+  const cancelInvitationFn = useAction(cancelInvitation);
   const { data: pendingInvitations, refetch } = useQuery(getPendingInvitations);
   const { data: clients, refetch: refetchClients } = useQuery(getClientsForCoach);
   const { data: onboardingStatus } = useQuery(getOnboardingStatus);
@@ -102,6 +122,27 @@ export default function CoachDashboardPage({ user }: { user: User }) {
       setErrorMessage(error.message || "Failed to send invitation");
     } finally {
       setIsInviting(false);
+    }
+  };
+
+  const handleCancelClick = (inv: { id: string; email: string }) => {
+    setInvitationToCancel(inv);
+    setCancelError(null);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!invitationToCancel) return;
+
+    try {
+      setCancelingId(invitationToCancel.id);
+      setCancelError(null);
+      await cancelInvitationFn({ invitationId: invitationToCancel.id });
+      setInvitationToCancel(null);
+      refetch(); // Refresh pending invitations list
+    } catch (error: any) {
+      setCancelError(error.message || "Failed to cancel invitation");
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -312,9 +353,22 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                     key={inv.id}
                     className="text-sm p-2 bg-card-subtle rounded-lg border border-border"
                   >
-                    <div className="font-medium">{inv.email}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Sent {new Date(inv.createdAt).toLocaleDateString()}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="font-medium">{inv.email}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Sent {new Date(inv.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCancelClick({ id: inv.id, email: inv.email })}
+                        disabled={cancelingId === inv.id}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   </li>
                 ))}
@@ -323,6 +377,13 @@ export default function CoachDashboardPage({ user }: { user: User }) {
               <p className="text-muted-foreground text-sm">
                 No pending invitations
               </p>
+            )}
+            {cancelError && (
+              <Alert className="mt-4 bg-red-50 border-red-200">
+                <AlertDescription className="text-red-800">
+                  {cancelError}
+                </AlertDescription>
+              </Alert>
             )}
           </CardContent>
         </Card>
@@ -342,6 +403,30 @@ export default function CoachDashboardPage({ user }: { user: User }) {
         </Card>
       </div>
       </div>
+
+      {/* Cancel Invitation Confirmation Dialog */}
+      <AlertDialog open={!!invitationToCancel} onOpenChange={(open) => {
+        if (!open) setInvitationToCancel(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Cancel Invitation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to cancel the invitation to{" "}
+            <strong>{invitationToCancel?.email}</strong>? They will no longer be
+            able to use this link to join.
+          </AlertDialogDescription>
+          <div className="flex gap-2 justify-end mt-4">
+            <AlertDialogCancel>Keep Invitation</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancel}
+              disabled={cancelingId !== null}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelingId ? "Canceling..." : "Yes, Cancel Invitation"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

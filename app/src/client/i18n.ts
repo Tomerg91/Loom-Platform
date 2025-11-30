@@ -147,6 +147,10 @@ const resources = {
             createFailed: "Failed to create client",
           },
         },
+        cancelInvitation: "Cancel Invitation",
+        cancelInvitationConfirmTitle: "Cancel Invitation?",
+        cancelInvitationConfirmMessage: "Are you sure you want to cancel the invitation to {email}? They will no longer be able to use this link to join.",
+        confirmCancel: "Yes, Cancel Invitation",
       },
       client: {
         dashboard: "Client Dashboard",
@@ -621,6 +625,10 @@ const resources = {
             createFailed: "יצירת לקוח נכשלה",
           },
         },
+        cancelInvitation: "בטל הזמנה",
+        cancelInvitationConfirmTitle: "בטל הזמנה?",
+        cancelInvitationConfirmMessage: "האם אתה בטוח שברצונך לבטל את ההזמנה ל-{email}? הם לא יוכלו עוד להשתמש בקישור זה כדי להצטרף.",
+        confirmCancel: "כן, בטל הזמנה",
       },
       client: {
         dashboard: "לוח בקרה של לקוח",

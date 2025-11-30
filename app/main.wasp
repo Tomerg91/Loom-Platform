@@ -215,6 +215,11 @@ action acceptInvitation {
   entities: [User, ClientProfile, ClientInvitation, CoachProfile]
 }
 
+action cancelInvitation {
+  fn: import { cancelInvitation } from "@src/invitation/operations",
+  entities: [ClientInvitation, CoachProfile]
+}
+
 query getPendingInvitations {
   fn: import { getPendingInvitations } from "@src/invitation/operations",
   entities: [CoachProfile, ClientInvitation]
