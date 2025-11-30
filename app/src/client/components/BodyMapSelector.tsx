@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // BodyZone type definition matching Prisma schema
@@ -96,6 +96,47 @@ export default function BodyMapSelector({
     label: t(zone.labelKey),
   }));
 
+  const handleZoneActivate = (zone: BodyZone) => {
+    if (mode === "interactive" && onZoneSelect) {
+      onZoneSelect(zone);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<SVGPathElement>, zone: BodyZone) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleZoneActivate(zone);
+    }
+  };
+
+  const getZoneAriaLabel = (zone: BodyZone): string => {
+    const zoneLabel = zones.find((z) => z.zone === zone)?.label || zone;
+
+    if (mode === "readonly") {
+      const highlight = highlightedZones.find((h) => h.zone === zone);
+      if (highlight) {
+        return t("somatic.accessibility.bodyZoneWithIntensity", {
+          defaultValue: `${zoneLabel} with intensity ${highlight.intensity}`,
+          zone: zoneLabel,
+          intensity: highlight.intensity,
+        });
+      }
+      return zoneLabel;
+    }
+
+    if (selectedZone === zone) {
+      return t("somatic.accessibility.bodyZoneSelected", {
+        defaultValue: `${zoneLabel} selected. Press Enter or Space to change selection`,
+        zone: zoneLabel,
+      });
+    }
+
+    return t("somatic.accessibility.bodyZone", {
+      defaultValue: `${zoneLabel}. Press Enter or Space to select`,
+      zone: zoneLabel,
+    });
+  };
+
   // Get heat map color based on intensity (1-10 scale)
   const getHeatMapColor = (intensity: number): string => {
     // Green (low) → Yellow (medium) → Red (high)
@@ -144,6 +185,10 @@ export default function BodyMapSelector({
         viewBox="0 0 300 360"
         className="max-w-full h-auto"
         xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label={t("somatic.accessibility.bodyMap", {
+          defaultValue: "Body map selector",
+        })}
       >
         {zones.map((zoneData) => (
           <g key={zoneData.zone}>
@@ -157,6 +202,10 @@ export default function BodyMapSelector({
                   ? "cursor-pointer transition-all duration-200"
                   : "transition-all duration-200"
               }
+              role={mode === "interactive" ? "button" : "presentation"}
+              tabIndex={mode === "interactive" ? 0 : -1}
+              aria-label={getZoneAriaLabel(zoneData.zone)}
+              aria-pressed={mode === "interactive" ? selectedZone === zoneData.zone : undefined}
               onMouseEnter={
                 mode === "interactive"
                   ? () => setHoveredZone(zoneData.zone)
@@ -167,7 +216,12 @@ export default function BodyMapSelector({
               }
               onClick={
                 mode === "interactive" && onZoneSelect
-                  ? () => onZoneSelect(zoneData.zone)
+                  ? () => handleZoneActivate(zoneData.zone)
+                  : undefined
+              }
+              onKeyDown={
+                mode === "interactive"
+                  ? (event) => handleKeyDown(event, zoneData.zone)
                   : undefined
               }
             />
