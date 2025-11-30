@@ -8,24 +8,59 @@ import OnboardingModal from "../components/OnboardingModal";
 import { formatDistanceToNow, format, startOfToday, startOfWeek, startOfMonth } from "date-fns";
 import { Calendar, Zap, BookOpen, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "../hooks/use-toast";
 
 export default function ClientDashboardPage({ user }: { user: User }) {
-  const { data: somaticLogs, refetch } = useQuery(getSomaticLogs);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [filters, setFilters] = useState<SomaticLogFiltersState>({
+    dateRange: "allTime",
+    bodyZones: [],
+    minIntensity: 1,
+    maxIntensity: 10,
+  });
+
+  const somaticLogQueryFilters = useMemo(() => {
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    switch (filters.dateRange) {
+      case "today":
+        startDate = startOfToday();
+        endDate = new Date();
+        break;
+      case "thisWeek":
+        startDate = startOfWeek(new Date());
+        endDate = new Date();
+        break;
+      case "thisMonth":
+        startDate = startOfMonth(new Date());
+        endDate = new Date();
+        break;
+      default:
+        break;
+    }
+
+    return {
+      startDate,
+      endDate,
+      bodyZones: filters.bodyZones.length > 0 ? filters.bodyZones : undefined,
+      minIntensity: filters.minIntensity > 1 ? filters.minIntensity : undefined,
+      maxIntensity: filters.maxIntensity < 10 ? filters.maxIntensity : undefined,
+    };
+  }, [filters]);
+
+  const {
+    data: somaticLogs,
+    isLoading: somaticLogsLoading,
+    error: somaticLogsError,
+    refetch,
+  } = useQuery(getSomaticLogs, somaticLogQueryFilters);
   const { data: recentSessions } = useQuery(getRecentSessionsForClient);
   const { data: onboardingStatus } = useQuery(getOnboardingStatus);
   const updateOnboarding = useAction(updateOnboardingStatus);
   const updateVisibility = useAction(updateSomaticLogVisibility);
   const { t } = useTranslation();
-
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [filters, setFilters] = useState<SomaticLogFiltersState>({
-    dateRange: 'allTime',
-    bodyZones: [],
-    minIntensity: 1,
-    maxIntensity: 10,
-  });
 
   useEffect(() => {
     // Show onboarding if not completed
@@ -77,38 +112,13 @@ export default function ClientDashboardPage({ user }: { user: User }) {
     }
   };
 
-  // Apply filters to somatic logs
-  const filteredLogs = somaticLogs?.filter((log) => {
-    // Date range filter
-    if (filters.dateRange !== 'allTime') {
-      const logDate = new Date(log.createdAt);
-      let startDate: Date;
+  const hasActiveFilters =
+    filters.dateRange !== "allTime" ||
+    filters.bodyZones.length > 0 ||
+    filters.minIntensity > 1 ||
+    filters.maxIntensity < 10;
 
-      if (filters.dateRange === 'today') {
-        startDate = startOfToday();
-      } else if (filters.dateRange === 'thisWeek') {
-        startDate = startOfWeek(new Date());
-      } else if (filters.dateRange === 'thisMonth') {
-        startDate = startOfMonth(new Date());
-      } else {
-        startDate = new Date(0);
-      }
-
-      if (logDate < startDate) return false;
-    }
-
-    // Body zone filter
-    if (filters.bodyZones.length > 0 && !filters.bodyZones.includes(log.bodyZone)) {
-      return false;
-    }
-
-    // Intensity filter
-    if (log.intensity < filters.minIntensity || log.intensity > filters.maxIntensity) {
-      return false;
-    }
-
-    return true;
-  }) || [];
+  const logs = somaticLogs || [];
 
   return (
     <>
@@ -142,37 +152,47 @@ export default function ClientDashboardPage({ user }: { user: User }) {
               <CardTitle>{t("client.recentSensations")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {filteredLogs.length === 0 && (somaticLogs?.length ?? 0) > 0 ? (
+              {somaticLogsLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">{t("filters.noResults")}</p>
+                  <p className="text-muted-foreground">{t("common.loading")}</p>
                 </div>
-              ) : !somaticLogs || somaticLogs.length === 0 ? (
-                <EmptyStateWithHelp
-                  icon={<Zap className="h-8 w-8" />}
-                  title={t("client.noLogsTitle")}
-                  description={t("client.noLogsDescription")}
-                  buttonText={t("client.logFirstSensationBtn")}
-                  helpTitle={t("client.somaticLoggingHelp")}
-                  helpContent={
-                    <div className="space-y-4">
-                      <p>{t("client.somaticLoggingExplanation")}</p>
-                      <div>
-                        <h4 className="font-semibold mb-2">
-                          {t("client.howToLog")}
-                        </h4>
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          <li>{t("client.step1SelectZone")}</li>
-                          <li>{t("client.step2ChooseSensation")}</li>
-                          <li>{t("client.step3SetIntensity")}</li>
-                          <li>{t("client.step4OptionalNotes")}</li>
-                        </ul>
+              ) : somaticLogsError ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">{t("client.unableToLoadLogs")}</p>
+                </div>
+              ) : logs.length === 0 ? (
+                hasActiveFilters ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">{t("filters.noResults")}</p>
+                  </div>
+                ) : (
+                  <EmptyStateWithHelp
+                    icon={<Zap className="h-8 w-8" />}
+                    title={t("client.noLogsTitle")}
+                    description={t("client.noLogsDescription")}
+                    buttonText={t("client.logFirstSensationBtn")}
+                    helpTitle={t("client.somaticLoggingHelp")}
+                    helpContent={
+                      <div className="space-y-4">
+                        <p>{t("client.somaticLoggingExplanation")}</p>
+                        <div>
+                          <h4 className="font-semibold mb-2">
+                            {t("client.howToLog")}
+                          </h4>
+                          <ul className="list-disc list-inside space-y-1 text-sm">
+                            <li>{t("client.step1SelectZone")}</li>
+                            <li>{t("client.step2ChooseSensation")}</li>
+                            <li>{t("client.step3SetIntensity")}</li>
+                            <li>{t("client.step4OptionalNotes")}</li>
+                          </ul>
+                        </div>
                       </div>
-                    </div>
-                  }
-                />
+                    }
+                  />
+                )
               ) : (
                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {filteredLogs.map((log) => (
+                  {logs.map((log) => (
                   <div
                     key={log.id}
                     className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
