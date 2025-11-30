@@ -39,7 +39,9 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to console in development
-    if (process.env.NODE_ENV === "development") {
+    const isDev = typeof import.meta !== "undefined" && import.meta.env?.DEV;
+
+    if (isDev) {
       console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
 

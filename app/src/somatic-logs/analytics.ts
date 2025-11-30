@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import type { Job } from "wasp/server/jobs";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -75,6 +76,7 @@ export async function computeClientAnalytics(
   const logs = await entities.somaticLog.findMany({
     where: {
       clientId,
+      sharedWithCoach: true,
       createdAt: {
         gte: startDate,
         lte: endDate,
@@ -171,10 +173,11 @@ export async function computeClientAnalytics(
 // ============================================
 // CRON JOB: Compute analytics for all active clients
 // ============================================
-export async function computeAllClientAnalytics(
-  entities: any
-): Promise<{ success: boolean; message: string }> {
-  const prisma = entities;
+export const computeAllClientAnalytics: Job<
+  never,
+  { success: boolean; message: string }
+> = async (_args, context) => {
+  const prisma = context.entities;
 
   try {
     // Find all clients with activity in the last 7 days
@@ -266,4 +269,4 @@ export async function computeAllClientAnalytics(
       message: `Cron job failed: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
-}
+};

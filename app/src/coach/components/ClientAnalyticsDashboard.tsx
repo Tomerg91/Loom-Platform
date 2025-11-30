@@ -131,10 +131,11 @@ export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: Cl
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
             </div>
           </CardContent>
         </Card>

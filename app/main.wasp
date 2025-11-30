@@ -22,8 +22,11 @@ app OpenSaaS {
     "<meta name='twitter:image:width' content='800' />",
     "<meta name='twitter:image:height' content='400' />",
     "<meta name='twitter:card' content='summary_large_image' />",
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.js'></script>",
-    "<script defer data-domain='<your-site-id>' src='https://plausible.io/js/script.local.js'></script>",
+    // Plausible Analytics - IMPORTANT: Update 'your-domain.com' with your actual domain before deployment
+    // The data-domain attribute should match your site's domain (e.g., 'loom-platform.com')
+    // Remove or comment out these scripts if you're not using Plausible Analytics
+    // "<script defer data-domain='your-domain.com' src='https://plausible.io/js/script.js'></script>",
+    // "<script defer data-domain='your-domain.com' src='https://plausible.io/js/script.local.js'></script>",
   ],
 
   // 🔐 Auth out of the box! https://wasp.sh/docs/auth/overview
@@ -77,6 +80,11 @@ app OpenSaaS {
       // Creates test coach and clients with realistic sample data for development
       import { seedTestCoachWithClients } from "@src/server/scripts/dbSeeds",
     ]
+  },
+
+  server: {
+    // Add security middleware for Content Security Policy and other security headers
+    setupFn: import { setupServer } from "@src/server/setup",
   },
 
   client: {

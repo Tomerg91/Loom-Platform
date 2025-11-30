@@ -6,6 +6,7 @@ import { getClientInsights, useQuery } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Alert, AlertDescription } from "../components/ui/alert";
+import { Skeleton } from "../components/ui/skeleton";
 import { ArrowLeft, BarChart3, AlertCircle, Loader2, TrendingUp } from "lucide-react";
 import { cn } from "../lib/utils";
 // TODO: Install recharts package to fix this import
@@ -109,7 +110,7 @@ function ClientInsightsPageContent({ user }: { user: User }) {
   if (isLoading) {
     return (
       <div className="mt-10 px-6 pb-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto space-y-4">
           <div className="flex items-center gap-3 mb-6">
             <Button
               variant="ghost"
@@ -118,17 +119,21 @@ function ClientInsightsPageContent({ user }: { user: User }) {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div className="flex-1">
-              <div className="h-6 bg-gray-200 rounded w-48 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
             </div>
           </div>
 
           <Card className="mt-4">
-            <CardContent className="pt-12 pb-12 flex items-center justify-center">
-              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-              <span className="ml-3 text-gray-600">
-                {t("common.loading", "Loading...")}
-              </span>
+            <CardContent className="pt-8 pb-8 space-y-4">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-64 w-full" />
+              <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>{t("common.loading", "Loading...")}</span>
+              </div>
             </CardContent>
           </Card>
         </div>

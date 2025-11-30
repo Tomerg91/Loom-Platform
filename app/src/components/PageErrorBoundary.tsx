@@ -48,7 +48,7 @@ export function PageErrorBoundary({
                   <p className="text-sm font-mono text-destructive line-clamp-3">
                     {error.message}
                   </p>
-                  {process.env.NODE_ENV === "development" && (
+                  {typeof import.meta !== "undefined" && import.meta.env?.DEV && (
                     <details className="mt-2">
                       <summary className="cursor-pointer text-xs text-muted-foreground">
                         Stack trace
