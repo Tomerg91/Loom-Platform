@@ -4,6 +4,7 @@ import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
 import { generateAnalyticsPdf, generatePdfFilename, bufferToBase64 } from "@src/server/pdf/exportPdf";
 import { computeClientAnalytics } from "@src/somatic-logs/analytics";
+import { isAdmin, isCoach, isClient, requireAuth } from "@src/server/rbac";
 import type { GenerateClientExportPdf } from "wasp/server/operations";
 
 // ============================================
@@ -31,9 +32,10 @@ export const generateClientExportPdf: GenerateClientExportPdf<
   );
 
   // ========== AUTHORIZATION ==========
-  if (!context.user) {
-    throw new WaspHttpError(401, "You must be logged in to export data");
-  }
+  const authenticatedContext = requireAuth(
+    context,
+    "You must be logged in to export data",
+  );
 
   // Get the client profile
   const clientProfile = await context.entities.ClientProfile.findUnique({
@@ -53,34 +55,38 @@ export const generateClientExportPdf: GenerateClientExportPdf<
   }
 
   // Authorization: coaches can export their clients' data, admins can export any
-  if (context.user.role === "COACH") {
+  if (isCoach(authenticatedContext.user)) {
     if (!clientProfile.coachId) {
       throw new WaspHttpError(403, "Client has no assigned coach");
     }
 
-    const coach = await context.entities.CoachProfile.findUnique({
+    const coach = await authenticatedContext.entities.CoachProfile.findUnique({
       where: { id: clientProfile.coachId },
     });
 
-    if (!coach || coach.userId !== context.user.id) {
+    if (!coach || coach.userId !== authenticatedContext.user.id) {
       throw new WaspHttpError(
         403,
         "You do not have permission to export this client's data"
       );
     }
-  } else if (context.user.role === "CLIENT") {
+  } else if (isClient(authenticatedContext.user)) {
     throw new WaspHttpError(403, "Clients cannot export analytics data");
-  } else if (context.user.role !== "ADMIN") {
+  } else if (!isAdmin(authenticatedContext.user)) {
     throw new WaspHttpError(403, "Invalid user role");
   }
 
   // ========== FETCH DATA ==========
   try {
     // Compute analytics
-    const analytics = await computeClientAnalytics(context.entities, clientId, period);
+    const analytics = await computeClientAnalytics(
+      authenticatedContext.entities,
+      clientId,
+      period,
+    );
 
     // Get session history
-    const sessions = await context.entities.CoachSession.findMany({
+    const sessions = await authenticatedContext.entities.CoachSession.findMany({
       where: { clientId },
       orderBy: { sessionDate: "desc" },
       select: {

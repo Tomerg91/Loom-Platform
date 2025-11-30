@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { type DailyStatsProps } from "../../../analytics/stats";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
+import { formatCurrency, formatPercentage } from "@src/shared/format";
 
 const TotalRevenueCard = ({
   dailyStats,
@@ -42,7 +43,7 @@ const TotalRevenueCard = ({
       <CardContent className="flex justify-between">
         <div>
           <h4 className="text-title-md text-foreground font-bold">
-            ${dailyStats?.totalRevenue}
+            {formatCurrency(dailyStats?.totalRevenue)}
           </h4>
           <span className="text-muted-foreground text-sm font-medium">
             Total Revenue
@@ -62,7 +63,7 @@ const TotalRevenueCard = ({
           {isLoading
             ? "..."
             : deltaPercentage && deltaPercentage !== 0
-              ? `${deltaPercentage}%`
+              ? formatPercentage(deltaPercentage)
               : "-"}
           {!isLoading &&
             deltaPercentage &&

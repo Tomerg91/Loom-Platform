@@ -4,9 +4,11 @@ import type {
   CreateOfflineClient,
   UpdateOfflineClient,
   DeleteOfflineClient,
+  GetClientProfile,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
+import { requireRole } from "../server/rbac";
 
 // ============================================
 // GET CLIENTS FOR COACH
@@ -24,19 +26,15 @@ type ClientWithStats = {
 export const getClientsForCoach: GetClientsForCoach<
   void,
   ClientWithStats[]
-> = async (args, context) => {
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to view clients");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can view their client list");
-  }
+> = async (_args, context) => {
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in to view clients",
+    unauthorizedMessage: "Only coaches can view their client list",
+  });
 
   // Get the coach profile with clients
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id },
     select: { id: true },
   });
 
@@ -44,7 +42,7 @@ export const getClientsForCoach: GetClientsForCoach<
     throw new HttpError(404, "Coach profile not found");
   }
 
-  const clients = await context.entities.ClientProfile.findMany({
+  const clients = await coachContext.entities.ClientProfile.findMany({
     where: { coachId: coachProfile.id },
     include: {
       user: true,
@@ -57,7 +55,7 @@ export const getClientsForCoach: GetClientsForCoach<
   const clientIds = clients.map((client) => client.id);
 
   const lastLogs = clientIds.length
-    ? await context.entities.SomaticLog.groupBy({
+    ? await coachContext.entities.SomaticLog.groupBy({
         by: ["clientId"],
         where: { clientId: { in: clientIds } },
         _max: { createdAt: true },
@@ -98,18 +96,14 @@ export const createOfflineClient: CreateOfflineClient<
   const { displayName, contactEmail, avatarS3Key } =
     ensureArgsSchemaOrThrowHttpError(createOfflineClientSchema, rawArgs);
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to create clients");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can create clients");
-  }
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in to create clients",
+    unauthorizedMessage: "Only coaches can create clients",
+  });
 
   // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id },
   });
 
   if (!coachProfile) {
@@ -117,7 +111,7 @@ export const createOfflineClient: CreateOfflineClient<
   }
 
   // Create the offline client profile (no userId)
-  await context.entities.ClientProfile.create({
+  await coachContext.entities.ClientProfile.create({
     data: {
       coachId: coachProfile.id,
       clientType: "OFFLINE",
@@ -147,18 +141,14 @@ export const updateOfflineClient: UpdateOfflineClient<
   const { clientId, displayName, contactEmail, avatarS3Key } =
     ensureArgsSchemaOrThrowHttpError(updateOfflineClientSchema, rawArgs);
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to update clients");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can update clients");
-  }
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in to update clients",
+    unauthorizedMessage: "Only coaches can update clients",
+  });
 
   // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id },
   });
 
   if (!coachProfile) {
@@ -166,7 +156,7 @@ export const updateOfflineClient: UpdateOfflineClient<
   }
 
   // Verify the client belongs to this coach
-  const client = await context.entities.ClientProfile.findUnique({
+  const client = await coachContext.entities.ClientProfile.findUnique({
     where: { id: clientId },
   });
 
@@ -180,7 +170,7 @@ export const updateOfflineClient: UpdateOfflineClient<
   }
 
   // Update the client
-  await context.entities.ClientProfile.update({
+  await coachContext.entities.ClientProfile.update({
     where: { id: clientId },
     data: {
       ...(displayName && { displayName }),
@@ -208,18 +198,14 @@ export const deleteOfflineClient: DeleteOfflineClient<
     rawArgs
   );
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to delete clients");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can delete clients");
-  }
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in to delete clients",
+    unauthorizedMessage: "Only coaches can delete clients",
+  });
 
   // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id },
   });
 
   if (!coachProfile) {
@@ -227,7 +213,7 @@ export const deleteOfflineClient: DeleteOfflineClient<
   }
 
   // Verify the client belongs to this coach
-  const client = await context.entities.ClientProfile.findUnique({
+  const client = await coachContext.entities.ClientProfile.findUnique({
     where: { id: clientId },
   });
 
@@ -241,7 +227,7 @@ export const deleteOfflineClient: DeleteOfflineClient<
   }
 
   // Delete the client (cascade delete handles sessions, logs, etc.)
-  await context.entities.ClientProfile.delete({
+  await coachContext.entities.ClientProfile.delete({
     where: { id: clientId },
   });
 };
@@ -268,32 +254,29 @@ const getClientProfileSchema = z.object({
 
 type GetClientProfileInput = z.infer<typeof getClientProfileSchema>;
 
-export const getClientProfile = async (
-  rawArgs: any,
-  context: any
-): Promise<GetClientProfileResponse> => {
+export const getClientProfile: GetClientProfile<
+  GetClientProfileInput,
+  GetClientProfileResponse
+> = async (rawArgs, context) => {
   const { clientId } = ensureArgsSchemaOrThrowHttpError(
     getClientProfileSchema,
     rawArgs
   );
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in");
-  }
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in",
+    unauthorizedMessage: "Only coaches can view client profiles",
+  });
 
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can view client profiles");
-  }
-
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id },
   });
 
   if (!coachProfile) {
     throw new HttpError(404, "Coach profile not found");
   }
 
-  const clientProfile = await context.entities.ClientProfile.findUnique({
+  const clientProfile = await coachContext.entities.ClientProfile.findUnique({
     where: { id: clientId },
     include: { user: true },
   });

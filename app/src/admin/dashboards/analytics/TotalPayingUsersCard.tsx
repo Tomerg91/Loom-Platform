@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { type DailyStatsProps } from "../../../analytics/stats";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
+import { formatNumber } from "@src/shared/format";
 
 const TotalPayingUsersCard = ({ dailyStats, isLoading }: DailyStatsProps) => {
   const isDeltaPositive = useMemo(() => {
@@ -20,7 +21,7 @@ const TotalPayingUsersCard = ({ dailyStats, isLoading }: DailyStatsProps) => {
       <CardContent className="flex justify-between">
         <div>
           <h4 className="text-title-md text-foreground font-bold">
-            {dailyStats?.paidUserCount}
+            {formatNumber(dailyStats?.paidUserCount)}
           </h4>
           <span className="text-muted-foreground text-sm font-medium">
             Total Paying Users
@@ -35,7 +36,7 @@ const TotalPayingUsersCard = ({ dailyStats, isLoading }: DailyStatsProps) => {
             "text-muted-foreground": isLoading || !dailyStats?.paidUserDelta,
           })}
         >
-          {isLoading ? "..." : (dailyStats?.paidUserDelta ?? "-")}
+          {isLoading ? "..." : formatNumber(dailyStats?.paidUserDelta)}
           {!isLoading &&
             (dailyStats?.paidUserDelta ?? 0) !== 0 &&
             (isDeltaPositive ? <ArrowUp /> : <ArrowDown />)}

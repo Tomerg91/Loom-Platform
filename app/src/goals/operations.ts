@@ -173,7 +173,7 @@ export const updateGoal: UpdateGoal<
   }
 
   const goal = await context.entities.Goal.findUnique({
-    where: { id: data.goalId },
+    where: { id: data.goalId, deletedAt: null },
     include: { client: { include: { coach: true } } },
   });
 
@@ -224,7 +224,7 @@ export const deleteGoal: DeleteGoal<DeleteGoalInput, { success: true }> = async 
   }
 
   const goal = await context.entities.Goal.findUnique({
-    where: { id: data.goalId },
+    where: { id: data.goalId, deletedAt: null },
     include: { client: { include: { coach: true } } },
   });
 
@@ -244,8 +244,14 @@ export const deleteGoal: DeleteGoal<DeleteGoalInput, { success: true }> = async 
     throw new HttpError(403, "You don't have permission to delete this goal");
   }
 
-  await context.entities.Goal.delete({
+  await context.entities.Goal.update({
     where: { id: data.goalId },
+    data: { deletedAt: new Date() },
+  });
+
+  await context.entities.Milestone.updateMany({
+    where: { goalId: data.goalId },
+    data: { deletedAt: new Date() },
   });
 
   return { success: true };
@@ -272,7 +278,7 @@ export const getGoals: GetGoals<
     }
 
     const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { id: clientId },
+      where: { id: clientId, deletedAt: null },
       include: { coach: true },
     });
 
@@ -281,7 +287,7 @@ export const getGoals: GetGoals<
     }
 
     const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+      where: { userId: context.user.id, deletedAt: null },
     });
 
     if (!coachProfile || clientProfile.coachId !== coachProfile.id) {
@@ -293,7 +299,7 @@ export const getGoals: GetGoals<
     // Client viewing their own goals
     if (context.user.role === "CLIENT") {
       const clientProfile = await context.entities.ClientProfile.findUnique({
-        where: { userId: context.user.id },
+        where: { userId: context.user.id, deletedAt: null },
       });
 
       if (!clientProfile) {
@@ -309,9 +315,10 @@ export const getGoals: GetGoals<
   }
 
   const goals = await context.entities.Goal.findMany({
-    where: { clientId: targetClientId },
+    where: { clientId: targetClientId, deletedAt: null },
     include: {
       milestones: {
+        where: { deletedAt: null },
         orderBy: { order: "asc" },
       },
     },
@@ -335,7 +342,7 @@ export const toggleMilestone: ToggleMilestone<
   }
 
   const milestone = await context.entities.Milestone.findUnique({
-    where: { id: data.milestoneId },
+    where: { id: data.milestoneId, deletedAt: null },
     include: {
       goal: {
         include: {
@@ -386,6 +393,7 @@ export const toggleMilestone: ToggleMilestone<
     },
     include: {
       milestones: {
+        where: { deletedAt: null },
         orderBy: { order: "asc" },
       },
     },
@@ -411,7 +419,7 @@ export const updateGoalProgress: UpdateGoalProgress<
   );
 
   const goal = await context.entities.Goal.findUnique({
-    where: { id: goalId },
+    where: { id: goalId, deletedAt: null },
     include: { client: { include: { coach: true } } },
   });
 
@@ -437,7 +445,7 @@ export const updateGoalProgress: UpdateGoalProgress<
   const updatedGoal = await context.entities.Goal.update({
     where: { id: goalId },
     data: { progress },
-    include: { milestones: { orderBy: { order: "asc" } } },
+    include: { milestones: { where: { deletedAt: null }, orderBy: { order: "asc" } } },
   });
 
   return updatedGoal;

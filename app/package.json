@@ -5,6 +5,13 @@
     ".wasp/build/*",
     ".wasp/out/*"
   ],
+  "scripts": {
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "simple-git-hooks"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.523.0",
     "@aws-sdk/s3-presigned-post": "^3.750.0",
@@ -48,6 +55,7 @@
     "react": "^18.2.0",
     "react-apexcharts": "1.4.1",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.10",
     "react-hook-form": "^7.60.0",
     "react-i18next": "^16.3.5",
     "react-router-dom": "^6.26.2",
@@ -66,12 +74,23 @@
     "@types/jsdom": "^27.0.0",
     "@types/pdfkit": "^0.17.4",
     "@types/react": "^18.0.37",
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
     "@vitest/coverage-v8": "^4.0.14",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "jsdom": "^27.2.0",
     "pdfkit": "^0.17.2",
     "prisma": "5.19.1",
+    "simple-git-hooks": "^2.11.1",
     "typescript": "5.8.2",
     "vite": "^7.0.6",
     "vitest": "^4.0.14"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run lint && npm run format:check && npm run typecheck"
   }
 }

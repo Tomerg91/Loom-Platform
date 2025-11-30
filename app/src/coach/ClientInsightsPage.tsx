@@ -26,42 +26,59 @@ type BodyZone =
 type TimeRange = "30days" | "3months" | "allTime";
 
 function ClientInsightsPageContent({ user }: { user: User }) {
+  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
+  const clientId = clientIdParam?.trim();
+
+  if (!clientId) {
+    return <MissingClientInsightsNotice />;
+  }
+
+  return <ClientInsightsView user={user} clientId={clientId} />;
+}
+
+function MissingClientInsightsNotice() {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  return (
+    <div className="mt-10 px-6 pb-12">
+      <div className="max-w-md mx-auto">
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-5 w-5 text-yellow-600" />
+          <AlertDescription className="text-yellow-800 ml-2">
+            <div className="font-semibold text-lg mb-2">
+              {t("errors.missingClientId.title", "Invalid Client")}
+            </div>
+            <p className="text-sm mb-4">
+              {t(
+                "errors.missingClientId.message",
+                "The client ID is missing or invalid."
+              )}
+            </p>
+          </AlertDescription>
+        </Alert>
+        <Button
+          onClick={() => navigate("/coach")}
+          className="w-full mt-4 flex items-center justify-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t("common.back", "Go Back")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ClientInsightsView({
+  user,
+  clientId,
+}: {
+  user: User;
+  clientId: string;
+}) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { clientId: clientIdParam } = useParams<{ clientId: string }>();
-  const clientId = clientIdParam || "";
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
-
-  // Validate clientId
-  if (!clientId) {
-    return (
-      <div className="mt-10 px-6 pb-12">
-        <div className="max-w-md mx-auto">
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-5 w-5 text-yellow-600" />
-            <AlertDescription className="text-yellow-800 ml-2">
-              <div className="font-semibold text-lg mb-2">
-                {t("errors.missingClientId.title", "Invalid Client")}
-              </div>
-              <p className="text-sm mb-4">
-                {t(
-                  "errors.missingClientId.message",
-                  "The client ID is missing or invalid."
-                )}
-              </p>
-            </AlertDescription>
-          </Alert>
-          <Button
-            onClick={() => navigate("/coach")}
-            className="w-full mt-4 flex items-center justify-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("common.back", "Go Back")}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   // Fetch insights data
   const { data: insightsData, isLoading, error } = useQuery(getClientInsights, {

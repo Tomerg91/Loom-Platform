@@ -8,6 +8,7 @@
 import React from "react";
 import { cn } from "../lib/utils";
 import { Check, AlertCircle } from "lucide-react";
+import { Label } from "./ui/label";
 
 interface FormFieldWithValidationProps {
   label: string;
@@ -48,10 +49,10 @@ export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = (
   return (
     <div className={cn("space-y-2", className)}>
       {/* Label */}
-      <label className="block text-sm font-medium text-gray-700">
+      <Label className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="ml-1 text-red-500">*</span>}
-      </label>
+      </Label>
 
       {/* Input Wrapper with Validation State */}
       <div className="relative">

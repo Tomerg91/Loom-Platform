@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
+import { formatNumber, formatPercentage } from "@src/shared/format";
 
 type PageViewsStats = {
   totalPageViews: number | undefined;
@@ -27,7 +28,7 @@ const TotalPageViewsCard = ({
       <CardContent className="flex justify-between">
         <div>
           <h4 className="text-title-md text-foreground font-bold">
-            {totalPageViews}
+            {formatNumber(totalPageViews)}
           </h4>
           <span className="text-muted-foreground text-sm font-medium">
             Total page views
@@ -50,7 +51,7 @@ const TotalPageViewsCard = ({
           })}
         >
           {prevDayViewsChangePercent && prevDayViewsChangePercentValue !== 0
-            ? `${prevDayViewsChangePercent}%`
+            ? formatPercentage(prevDayViewsChangePercentValue)
             : "-"}
           {prevDayViewsChangePercent &&
             prevDayViewsChangePercentValue !== 0 &&

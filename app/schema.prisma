@@ -34,6 +34,12 @@ enum ClientType {
   INVITED // Invitation sent but not yet accepted
 }
 
+enum AvailabilityStatus {
+  OPEN
+  HELD
+  BOOKED
+}
+
 enum GoalType {
   OKR
   SMART
@@ -50,8 +56,9 @@ enum GoalStatus {
 // USER & AUTHENTICATION
 // ============================================
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   email    String? @unique
   username String? @unique
@@ -88,20 +95,21 @@ model User {
   onboardingSteps     Json? // Tracks completed onboarding steps per role
 
   // NOTIFICATIONS (Phase 3)
-  notifications             Notification[]
-  notificationPreferences   NotificationPreferences?
+  notifications           Notification[]
+  notificationPreferences NotificationPreferences?
 
-  contactFormMessages       ContactFormMessage[]
-  files                     File[]
+  contactFormMessages ContactFormMessage[]
+  files               File[]
 }
 
 // ============================================
 // ROLE-SPECIFIC PROFILES
 // ============================================
 model CoachProfile {
-  id     String @id @default(uuid())
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
+  id        String    @id @default(uuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String    @unique
+  deletedAt DateTime?
 
   // A Coach manages many Clients
   clients     ClientProfile[]
@@ -112,12 +120,16 @@ model CoachProfile {
 
   // Resources uploaded by this Coach
   resources Resource[]
+
+  // Availability slots for scheduling
+  availabilitySlots AvailabilitySlot[]
 }
 
 model ClientProfile {
-  id     String  @id @default(uuid())
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String? @unique
+  id        String    @id @default(uuid())
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?   @unique
+  deletedAt DateTime?
 
   // A Client belongs to one Coach
   coach   CoachProfile? @relation(fields: [coachId], references: [id])
@@ -148,6 +160,8 @@ model ClientProfile {
 
   // ANALYTICS: Somatic pattern insights (cached)
   analytics SomaticLogAnalytics[]
+
+  availabilitySlots AvailabilitySlot[]
 
   @@index([coachId])
 }
@@ -182,13 +196,14 @@ model SomaticLogAnalytics {
 // CLIENT INVITATIONS
 // ============================================
 model ClientInvitation {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   email     String
-  token     String   @unique
+  token     String    @unique
   coachId   String
-  status    String   @default("PENDING") // PENDING, ACCEPTED
-  createdAt DateTime @default(now())
+  status    String    @default("PENDING") // PENDING, ACCEPTED
+  createdAt DateTime  @default(now())
   expiresAt DateTime
+  deletedAt DateTime?
 
   // Link to coach so they can see pending invites
   coach CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
@@ -200,8 +215,9 @@ model ClientInvitation {
 // SOMATIC LOGS (Core Feature)
 // ============================================
 model SomaticLog {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   // The Data Point
   bodyZone  BodyZone
@@ -216,15 +232,17 @@ model SomaticLog {
   clientId String
 
   @@index([clientId, createdAt])
+  @@index([clientId, sharedWithCoach, deletedAt])
 }
 
 // ============================================
 // COACH SESSIONS (Module 9: Session Recaps)
 // ============================================
 model CoachSession {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now())
-  sessionDate DateTime @default(now())
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  sessionDate DateTime  @default(now())
+  deletedAt   DateTime?
 
   // MODULE 10: Session tracking
   sessionNumber Int? // Auto-incremented for each client's sessions
@@ -249,15 +267,36 @@ model CoachSession {
 
   @@index([coachId, sessionDate])
   @@index([clientId, sessionDate])
+  @@index([clientId, sessionDate, deletedAt])
+}
+
+model AvailabilitySlot {
+  id        String             @id @default(uuid())
+  coach     CoachProfile       @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId   String
+  client    ClientProfile?     @relation(fields: [clientId], references: [id])
+  clientId  String?
+  startTime DateTime
+  endTime   DateTime
+  timezone  String
+  status    AvailabilityStatus @default(OPEN)
+  notes     String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  deletedAt DateTime?
+
+  @@index([coachId, startTime, deletedAt])
+  @@index([clientId, startTime, deletedAt])
 }
 
 // ============================================
 // GOALS & MILESTONES (Module 11)
 // ============================================
 model Goal {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   title    String
   type     GoalType   @default(OKR)
@@ -273,12 +312,15 @@ model Goal {
   milestones Milestone[]
 
   @@index([clientId, status])
+  @@index([clientId, deletedAt])
+  @@index([clientId, dueDate])
 }
 
 model Milestone {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   text      String
   completed Boolean @default(false)
@@ -293,8 +335,9 @@ model Milestone {
 // FILE UPLOADS
 // ============================================
 model File {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
@@ -302,18 +345,21 @@ model File {
   name  String
   type  String
   s3Key String
+
+  @@index([userId, deletedAt])
 }
 
 // ============================================
 // RESOURCE LIBRARY (Module 8)
 // ============================================
 model Resource {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   type        String // MIME type: "application/pdf", "image/jpeg", "audio/mpeg", etc.
   s3Key       String
   description String? // Optional description for coaches
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
 
   coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
   coachId String
@@ -322,6 +368,7 @@ model Resource {
   sessions CoachSession[] // Sessions where this resource was prescribed
 
   @@index([coachId])
+  @@index([coachId, deletedAt])
 }
 
 // ============================================
@@ -379,38 +426,40 @@ model ContactFormMessage {
 // NOTIFICATIONS (Phase 3)
 // ============================================
 model Notification {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  type      String   // "SESSION_REMINDER", "SESSION_SUMMARY_POSTED", "RESOURCE_SHARED"
-  title     String
-  message   String   @db.Text
-  read      Boolean  @default(false)
+  type    String // "SESSION_REMINDER", "SESSION_SUMMARY_POSTED", "RESOURCE_SHARED"
+  title   String
+  message String  @db.Text
+  read    Boolean @default(false)
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
-  metadata  Json?    // {sessionId, resourceId, clientId, etc}
+  metadata Json? // {sessionId, resourceId, clientId, etc}
 
   @@index([userId, read])
   @@index([createdAt])
 }
 
 model NotificationPreferences {
-  id     String  @id @default(uuid())
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String  @unique
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
 
-  emailSessionReminders     Boolean @default(true)
-  emailSessionSummaries     Boolean @default(true)
-  emailResourceShared       Boolean @default(true)
+  emailSessionReminders Boolean @default(true)
+  emailSessionSummaries Boolean @default(true)
+  emailResourceShared   Boolean @default(true)
 
-  inAppSessionReminders     Boolean @default(true)
-  inAppSessionSummaries     Boolean @default(true)
-  inAppResourceShared       Boolean @default(true)
+  inAppSessionReminders Boolean @default(true)
+  inAppSessionSummaries Boolean @default(true)
+  inAppResourceShared   Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 // ============================================

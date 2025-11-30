@@ -20,6 +20,7 @@ import { s3Client } from "../file-upload/s3Utils";
 import { randomUUID } from "crypto";
 import * as path from "path";
 import { notificationEmitter, NotificationEventType } from "../notifications/eventEmitter";
+import { requireAuth, requireRole } from "../server/rbac";
 
 // ============================================
 // getUploadUrl - Generate presigned S3 URL for resource upload
@@ -44,17 +45,17 @@ export const getUploadUrl: GetUploadUrl<
     s3Key: string;
   }
 > = async (rawArgs, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
+  const coachContext = requireRole(context, ["COACH"], {
+    unauthenticatedMessage: "You must be logged in to upload resources",
+    unauthorizedMessage: "Only coaches can upload resources",
+  });
 
-  // Verify user is a coach
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+    where: { userId: coachContext.user.id, deletedAt: null },
   });
 
   if (!coachProfile) {
-    throw new HttpError(403, "Only coaches can upload resources");
+    throw new HttpError(404, "Coach profile not found");
   }
 
   const { fileName, fileType } = ensureArgsSchemaOrThrowHttpError(
@@ -106,20 +107,21 @@ type CreateResourceInput = z.infer<typeof createResourceInputSchema>;
  */
 export const createResource: CreateResource<CreateResourceInput, Resource> =
   async (rawArgs, context) => {
-    if (!context.user) {
-      throw new HttpError(401);
-    }
+    const coachContext = requireRole(context, ["COACH"], {
+      unauthenticatedMessage: "You must be logged in to create resources",
+      unauthorizedMessage: "Only coaches can create resources",
+    });
 
     const { name, type, s3Key, description } =
       ensureArgsSchemaOrThrowHttpError(createResourceInputSchema, rawArgs);
 
     // Verify user is a coach and get their profile
-    const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+    const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+      where: { userId: coachContext.user.id, deletedAt: null },
     });
 
     if (!coachProfile) {
-      throw new HttpError(403, "Only coaches can create resources");
+      throw new HttpError(404, "Coach profile not found");
     }
 
     // Verify file exists in S3
@@ -129,7 +131,7 @@ export const createResource: CreateResource<CreateResourceInput, Resource> =
     }
 
     // Create the resource
-    const resource = await context.entities.Resource.create({
+    const resource = await coachContext.entities.Resource.create({
       data: {
         name,
         type,
@@ -144,8 +146,8 @@ export const createResource: CreateResource<CreateResourceInput, Resource> =
     // ============================================
     try {
       // Get all clients of this coach
-      const clients = await context.entities.ClientProfile.findMany({
-        where: { coachId: coachProfile.id },
+      const clients = await coachContext.entities.ClientProfile.findMany({
+        where: { coachId: coachProfile.id, deletedAt: null },
       });
 
       // Emit RESOURCE_SHARED event for each client
@@ -155,7 +157,8 @@ export const createResource: CreateResource<CreateResourceInput, Resource> =
             clientId: client.id,
             resourceId: resource.id,
             resourceName: name,
-            coachName: context.user?.email?.split("@")[0] || "Your Coach",
+            coachName:
+              coachContext.user.email?.split("@")[0] || "Your Coach",
           });
         } catch (error) {
           console.error(
@@ -186,15 +189,16 @@ export const getCoachResources: GetCoachResources<void, Resource[]> = async (
   _args,
   context,
 ) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
+  const authenticatedContext = requireAuth(
+    context,
+    "You must be logged in to view resources",
+  );
 
   let coachId: string | null = null;
 
   // Determine which coach's resources to fetch
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await authenticatedContext.entities.CoachProfile.findUnique({
+    where: { userId: authenticatedContext.user.id, deletedAt: null },
   });
 
   if (coachProfile) {
@@ -202,9 +206,10 @@ export const getCoachResources: GetCoachResources<void, Resource[]> = async (
     coachId = coachProfile.id;
   } else {
     // User might be a client - check for client profile
-    const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { userId: context.user.id },
-    });
+    const clientProfile =
+      await authenticatedContext.entities.ClientProfile.findUnique({
+        where: { userId: authenticatedContext.user.id, deletedAt: null },
+      });
 
     if (!clientProfile || !clientProfile.coachId) {
       // Not a coach and not linked to a coach
@@ -215,9 +220,10 @@ export const getCoachResources: GetCoachResources<void, Resource[]> = async (
   }
 
   // Fetch resources for the coach
-  return context.entities.Resource.findMany({
+  return authenticatedContext.entities.Resource.findMany({
     where: {
       coachId,
+      deletedAt: null,
     },
     orderBy: {
       createdAt: "desc",
@@ -247,9 +253,10 @@ export const getResourceDownloadUrl: GetResourceDownloadUrl<
   GetResourceDownloadUrlInput,
   string
 > = async (rawArgs, context) => {
-  if (!context.user) {
-    throw new HttpError(401);
-  }
+  const authenticatedContext = requireAuth(
+    context,
+    "You must be logged in to download resources",
+  );
 
   const { resourceId } = ensureArgsSchemaOrThrowHttpError(
     getResourceDownloadUrlInputSchema,
@@ -257,8 +264,8 @@ export const getResourceDownloadUrl: GetResourceDownloadUrl<
   );
 
   // Fetch the resource
-  const resource = await context.entities.Resource.findUnique({
-    where: { id: resourceId },
+  const resource = await authenticatedContext.entities.Resource.findUnique({
+    where: { id: resourceId, deletedAt: null },
     include: { coach: true },
   });
 
@@ -267,12 +274,12 @@ export const getResourceDownloadUrl: GetResourceDownloadUrl<
   }
 
   // Check access permissions
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const coachProfile = await authenticatedContext.entities.CoachProfile.findUnique({
+    where: { userId: authenticatedContext.user.id, deletedAt: null },
   });
 
-  const clientProfile = await context.entities.ClientProfile.findUnique({
-    where: { userId: context.user.id },
+  const clientProfile = await authenticatedContext.entities.ClientProfile.findUnique({
+    where: { userId: authenticatedContext.user.id, deletedAt: null },
   });
 
   // Coach can access their own resources
@@ -311,9 +318,10 @@ type DeleteResourceInput = z.infer<typeof deleteResourceInputSchema>;
  */
 export const deleteResource: DeleteResource<DeleteResourceInput, Resource> =
   async (rawArgs, context) => {
-    if (!context.user) {
-      throw new HttpError(401);
-    }
+    const coachContext = requireRole(context, ["COACH"], {
+      unauthenticatedMessage: "You must be logged in to delete resources",
+      unauthorizedMessage: "Only coaches can delete resources",
+    });
 
     const { resourceId } = ensureArgsSchemaOrThrowHttpError(
       deleteResourceInputSchema,
@@ -321,17 +329,17 @@ export const deleteResource: DeleteResource<DeleteResourceInput, Resource> =
     );
 
     // Verify user is a coach
-    const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
+    const coachProfile = await coachContext.entities.CoachProfile.findUnique({
+      where: { userId: coachContext.user.id },
     });
 
     if (!coachProfile) {
-      throw new HttpError(403, "Only coaches can delete resources");
+      throw new HttpError(404, "Coach profile not found");
     }
 
     // Fetch the resource
-    const resource = await context.entities.Resource.findUnique({
-      where: { id: resourceId },
+    const resource = await coachContext.entities.Resource.findUnique({
+      where: { id: resourceId, deletedAt: null },
     });
 
     if (!resource) {
@@ -344,8 +352,9 @@ export const deleteResource: DeleteResource<DeleteResourceInput, Resource> =
     }
 
     // Delete from database
-    const deletedResource = await context.entities.Resource.delete({
+    const deletedResource = await coachContext.entities.Resource.update({
       where: { id: resourceId },
+      data: { deletedAt: new Date() },
     });
 
     // Delete from S3 (best effort - log errors but don't fail)

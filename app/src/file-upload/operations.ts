@@ -90,9 +90,8 @@ export const getAllFilesByUser: GetAllFilesByUser<void, File[]> = async (
   }
   return context.entities.File.findMany({
     where: {
-      user: {
-        id: context.user.id,
-      },
+      userId: context.user.id,
+      deletedAt: null,
     },
     orderBy: {
       createdAt: "desc",
@@ -124,7 +123,7 @@ export const getDownloadFileSignedURL: GetDownloadFileSignedURL<
 
   // Authorization check - verify the user owns this file
   const file = await context.entities.File.findFirst({
-    where: { s3Key, userId: context.user.id },
+    where: { s3Key, userId: context.user.id, deletedAt: null },
   });
 
   // If file doesn't exist in database, deny access
@@ -158,13 +157,14 @@ export const deleteFile: DeleteFile<DeleteFileInput, File> = async (
     throw new HttpError(401);
   }
 
-  const deletedFile = await context.entities.File.delete({
+  const deletedFile = await context.entities.File.update({
     where: {
       id: args.id,
       user: {
         id: context.user.id,
       },
     },
+    data: { deletedAt: new Date() },
   });
 
   try {

@@ -5,7 +5,8 @@ import SomaticLogForm from "./SomaticLogForm";
 import EmptyStateWithHelp from "./components/EmptyStateWithHelp";
 import SomaticLogFilters, { type SomaticLogFiltersState } from "./components/SomaticLogFilters";
 import OnboardingModal from "../components/OnboardingModal";
-import { formatDistanceToNow, format, startOfToday, startOfWeek, startOfMonth } from "date-fns";
+import { startOfToday, startOfWeek, startOfMonth } from "date-fns";
+import { formatClockTime, formatDate, formatRelativeTime } from "@src/shared/date";
 import { Calendar, Zap, BookOpen, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useMemo } from "react";
@@ -219,9 +220,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                           )}
                         </button>
                         <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(log.createdAt), {
-                            addSuffix: true,
-                          })}
+                          {formatRelativeTime(log.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -312,16 +311,14 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <div className="font-medium text-sm">
-                        {format(new Date(session.sessionDate), "MMMM d, yyyy")}
+                        {formatDate(session.sessionDate, "MMMM d, yyyy")}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {format(new Date(session.sessionDate), "h:mm a")}
+                        {formatClockTime(session.sessionDate)}
                       </div>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(session.sessionDate), {
-                        addSuffix: true,
-                      })}
+                      {formatRelativeTime(session.sessionDate)}
                     </span>
                   </div>
                   {session.sharedSummary && (

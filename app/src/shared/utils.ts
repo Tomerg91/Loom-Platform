@@ -9,20 +9,22 @@ export function assertUnreachable(_: never): never {
 /**
  * Allows for throttling a function call while still allowing the last invocation to be executed after the throttle delay ends.
  */
-export function throttleWithTrailingInvocation(
-  fn: () => void,
+export type AnyFunction = (...args: unknown[]) => void;
+
+export function throttleWithTrailingInvocation<TFn extends AnyFunction>(
+  fn: TFn,
   delayInMilliseconds: number,
-): ((...args: any[]) => void) & { cancel: () => void } {
+): TFn & { cancel: () => void } {
   let fnLastCallTime: number | null = null;
   let trailingInvocationTimeoutId: ReturnType<typeof setTimeout> | null = null;
   let isTrailingInvocationPending = false;
 
-  const callFn = () => {
+  const callFn = (...args: Parameters<TFn>) => {
     fnLastCallTime = Date.now();
-    fn();
+    fn(...args);
   };
 
-  const throttledFn = () => {
+  const throttledFn = (...args: Parameters<TFn>) => {
     const currentTime = Date.now();
     const timeSinceLastExecution = fnLastCallTime
       ? currentTime - fnLastCallTime
@@ -32,7 +34,7 @@ export function throttleWithTrailingInvocation(
       fnLastCallTime === null || timeSinceLastExecution >= delayInMilliseconds;
 
     if (shouldCallImmediately) {
-      callFn();
+      callFn(...args);
       return;
     }
 
@@ -44,7 +46,7 @@ export function throttleWithTrailingInvocation(
       );
 
       trailingInvocationTimeoutId = setTimeout(() => {
-        callFn();
+        callFn(...args);
         isTrailingInvocationPending = false;
       }, remainingDelayTime);
     }
@@ -57,6 +59,5 @@ export function throttleWithTrailingInvocation(
     }
     isTrailingInvocationPending = false;
   };
-
-  return throttledFn as typeof throttledFn & { cancel: () => void };
+  return throttledFn as TFn & { cancel: () => void };
 }
