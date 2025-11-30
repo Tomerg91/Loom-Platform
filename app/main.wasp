@@ -487,6 +487,44 @@ job computeSomaticAnalyticsJob {
 }
 //#endregion
 
+//#region Notifications (Phase 3)
+query getNotifications {
+  fn: import { getNotifications } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+action markNotificationRead {
+  fn: import { markNotificationRead } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+action markAllNotificationsRead {
+  fn: import { markAllNotificationsRead } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
+query getNotificationPreferences {
+  fn: import { getNotificationPreferences } from "@src/notifications/operations",
+  entities: [User, NotificationPreferences]
+}
+
+action updateNotificationPreferences {
+  fn: import { updateNotificationPreferences } from "@src/notifications/operations",
+  entities: [User, NotificationPreferences]
+}
+
+job sessionRemindersJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { checkUpcomingSessionsJob } from "@src/notifications/jobs"
+  },
+  schedule: {
+    cron: "0 9 * * *" // Daily at 9 AM
+  },
+  entities: [ClientProfile, User, Notification, NotificationPreferences]
+}
+//#endregion
+
 //#region Admin Dashboard
 route AdminRoute { path: "/admin", to: AnalyticsDashboardPage }
 page AnalyticsDashboardPage {

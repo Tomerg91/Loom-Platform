@@ -19,6 +19,7 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { s3Client } from "../file-upload/s3Utils";
 import { randomUUID } from "crypto";
 import * as path from "path";
+import { notificationEmitter, NotificationEventType } from "../notifications/eventEmitter";
 
 // ============================================
 // getUploadUrl - Generate presigned S3 URL for resource upload
@@ -128,7 +129,7 @@ export const createResource: CreateResource<CreateResourceInput, Resource> =
     }
 
     // Create the resource
-    return context.entities.Resource.create({
+    const resource = await context.entities.Resource.create({
       data: {
         name,
         type,
@@ -137,6 +138,39 @@ export const createResource: CreateResource<CreateResourceInput, Resource> =
         coach: { connect: { id: coachProfile.id } },
       },
     });
+
+    // ============================================
+    // EMIT NOTIFICATION EVENTS TO ALL CLIENTS
+    // ============================================
+    try {
+      // Get all clients of this coach
+      const clients = await context.entities.ClientProfile.findMany({
+        where: { coachId: coachProfile.id },
+      });
+
+      // Emit RESOURCE_SHARED event for each client
+      for (const client of clients) {
+        try {
+          await notificationEmitter.emit(NotificationEventType.RESOURCE_SHARED, {
+            clientId: client.id,
+            resourceId: resource.id,
+            resourceName: name,
+            coachName: context.user?.email?.split("@")[0] || "Your Coach",
+          });
+        } catch (error) {
+          console.error(
+            `Error emitting resource notification for client ${client.id}:`,
+            error
+          );
+          // Don't fail the operation if notification fails
+        }
+      }
+    } catch (error) {
+      console.error("Error emitting resource notifications:", error);
+      // Don't fail the operation if notification fails
+    }
+
+    return resource;
   };
 
 // ============================================
