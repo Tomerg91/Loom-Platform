@@ -302,19 +302,26 @@ export const getSessionsForClient: GetSessionsForClient<
       throw new HttpError(403, "You do not have access to this client's sessions");
     }
 
-    // Get total count
-    const total = await context.entities.CoachSession.count({
-      where: { clientId: args.clientId },
-    });
-
-    // Get paginated sessions
-    const sessions = await context.entities.CoachSession.findMany({
-      where: { clientId: args.clientId },
-      orderBy: { sessionDate: "desc" },
-      skip,
-      take: limit,
-      include: { resources: true },
-    });
+    const [total, sessions] = await Promise.all([
+      context.entities.CoachSession.count({
+        where: { clientId: args.clientId },
+      }),
+      context.entities.CoachSession.findMany({
+        where: { clientId: args.clientId },
+        orderBy: { sessionDate: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          sessionDate: true,
+          sharedSummary: true,
+          somaticAnchor: true,
+          resources: {
+            select: { id: true, name: true, type: true, s3Key: true },
+          },
+        },
+      }),
+    ]);
 
     // Return ONLY public fields for CLIENT (including harmony features)
     const publicSessions: SessionResponsePublic[] = sessions.map((session) => ({
@@ -354,19 +361,24 @@ export const getSessionsForClient: GetSessionsForClient<
       throw new HttpError(403, "You do not have access to this client's sessions");
     }
 
-    // Get total count
-    const total = await context.entities.CoachSession.count({
-      where: { clientId: args.clientId },
-    });
-
-    // Get paginated sessions
-    const sessions = await context.entities.CoachSession.findMany({
-      where: { clientId: args.clientId },
-      orderBy: { sessionDate: "desc" },
-      skip,
-      take: limit,
-      include: { resources: true },
-    });
+    const [total, sessions] = await Promise.all([
+      context.entities.CoachSession.count({
+        where: { clientId: args.clientId },
+      }),
+      context.entities.CoachSession.findMany({
+        where: { clientId: args.clientId },
+        orderBy: { sessionDate: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          createdAt: true,
+          sessionDate: true,
+          privateNotes: true,
+          sharedSummary: true,
+        },
+      }),
+    ]);
 
     const fullSessions: SessionResponse[] = sessions.map((session) => ({
       id: session.id,
@@ -374,7 +386,7 @@ export const getSessionsForClient: GetSessionsForClient<
       sessionDate: session.sessionDate,
       privateNotes: session.privateNotes,
       sharedSummary: session.sharedSummary,
-    })) as any; // Cast to maintain backward compatibility
+    }));
 
     const totalPages = Math.ceil(total / limit);
     return { sessions: fullSessions, total, page, limit, totalPages };
@@ -426,7 +438,15 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
       where: { clientId: clientProfile.id },
       orderBy: { sessionDate: "desc" },
       take: 3,
-      include: { resources: true },
+      select: {
+        id: true,
+        sessionDate: true,
+        sharedSummary: true,
+        somaticAnchor: true,
+        resources: {
+          select: { id: true, name: true, type: true, s3Key: true },
+        },
+      },
     });
 
     return sessions.map((session) => ({
@@ -466,7 +486,15 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
       where: { clientId: args.clientId },
       orderBy: { sessionDate: "desc" },
       take: 3,
-      include: { resources: true },
+      select: {
+        id: true,
+        sessionDate: true,
+        sharedSummary: true,
+        somaticAnchor: true,
+        resources: {
+          select: { id: true, name: true, type: true, s3Key: true },
+        },
+      },
     });
 
     return sessions.map((session) => ({

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "wasp/client/operations";
 import { getClientAnalytics } from "wasp/client/operations";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Skeleton } from "../../components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
 import { BodyZoneChart } from "./charts/BodyZoneChart";
 import { SensationChart } from "./charts/SensationChart";
@@ -32,10 +34,11 @@ export function ClientAnalyticsDashboard({ clientId }: ClientAnalyticsDashboardP
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
-              <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
             </div>
           </CardContent>
         </Card>
