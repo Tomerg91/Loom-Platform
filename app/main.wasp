@@ -427,7 +427,7 @@ action getUploadUrl {
 
 action createResource {
   fn: import { createResource } from "@src/resources/operations",
-  entities: [User, CoachProfile, Resource]
+  entities: [User, CoachProfile, ClientProfile, Resource]
 }
 
 query getCoachResources {

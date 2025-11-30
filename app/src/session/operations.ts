@@ -612,7 +612,7 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
       await notificationEmitter.emit(NotificationEventType.SESSION_SUMMARY_POSTED, {
         clientId: clientId,
         sessionId: session.id,
-        topic: topic,
+        topic: topic || undefined,
         sharedSummary: sharedSummary,
       });
     } catch (error) {

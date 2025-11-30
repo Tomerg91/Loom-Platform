@@ -41,7 +41,7 @@ export class InAppNotificationHandler {
   /**
    * Handle SESSION_REMINDER event - create in-app notification
    */
-  private async handleSessionReminder: EventHandler<
+  private handleSessionReminder: EventHandler<
     NotificationEventType.SESSION_REMINDER
   > = async (payload) => {
     try {
@@ -98,7 +98,7 @@ export class InAppNotificationHandler {
   /**
    * Handle SESSION_SUMMARY_POSTED event - create in-app notification
    */
-  private async handleSessionSummaryPosted: EventHandler<
+  private handleSessionSummaryPosted: EventHandler<
     NotificationEventType.SESSION_SUMMARY_POSTED
   > = async (payload) => {
     try {
@@ -158,7 +158,7 @@ export class InAppNotificationHandler {
   /**
    * Handle RESOURCE_SHARED event - create in-app notification
    */
-  private async handleResourceShared: EventHandler<
+  private handleResourceShared: EventHandler<
     NotificationEventType.RESOURCE_SHARED
   > = async (payload) => {
     try {

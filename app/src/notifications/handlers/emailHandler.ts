@@ -14,7 +14,6 @@ import {
 import { getSessionReminderEmailContent } from "../templates/sessionReminder";
 import { getSessionSummaryPostedEmailContent } from "../templates/sessionSummaryPosted";
 import { getResourceSharedEmailContent } from "../templates/resourceShared";
-import { formatDateWithTime } from "../../shared/utils";
 
 // ============================================
 // EMAIL HANDLER CLASS
@@ -46,7 +45,7 @@ export class EmailNotificationHandler {
   /**
    * Handle SESSION_REMINDER event
    */
-  private async handleSessionReminder: EventHandler<
+  private handleSessionReminder: EventHandler<
     NotificationEventType.SESSION_REMINDER
   > = async (payload) => {
     try {
@@ -81,12 +80,12 @@ export class EmailNotificationHandler {
       let timeString: string | undefined;
       if (clientProfile.scheduleTime && clientProfile.scheduleTimezone) {
         try {
-          const { utcToZonedTime, format } = await import("date-fns-tz");
-          const zonedDate = utcToZonedTime(
+          const { toZonedTime, format: formatTz } = await import("date-fns-tz");
+          const zonedDate = toZonedTime(
             payload.sessionDate,
             clientProfile.scheduleTimezone
           );
-          timeString = format(zonedDate, "h:mm a zzz", {
+          timeString = formatTz(zonedDate, "h:mm a zzz", {
             timeZone: clientProfile.scheduleTimezone,
           });
         } catch (error) {
@@ -125,7 +124,7 @@ export class EmailNotificationHandler {
   /**
    * Handle SESSION_SUMMARY_POSTED event
    */
-  private async handleSessionSummaryPosted: EventHandler<
+  private handleSessionSummaryPosted: EventHandler<
     NotificationEventType.SESSION_SUMMARY_POSTED
   > = async (payload) => {
     try {
@@ -154,6 +153,18 @@ export class EmailNotificationHandler {
         return;
       }
 
+      // Get session to retrieve session date
+      const session = await this.prisma.coachSession.findUnique({
+        where: { id: payload.sessionId },
+      });
+
+      if (!session) {
+        console.warn(
+          `Session summary: Session ${payload.sessionId} not found`
+        );
+        return;
+      }
+
       // Get coach name
       const coachName =
         clientProfile.coach?.user?.email?.split("@")[0] || "Your Coach";
@@ -162,7 +173,7 @@ export class EmailNotificationHandler {
       const emailContent = getSessionSummaryPostedEmailContent({
         clientName: clientProfile.user.username || "Client",
         coachName,
-        sessionDate: payload.sessionDate,
+        sessionDate: session.sessionDate,
         topic: payload.topic,
         summary: payload.sharedSummary,
         appUrl: `${process.env.WASP_WEB_CLIENT_URL}/client/sessions`,
@@ -191,7 +202,7 @@ export class EmailNotificationHandler {
   /**
    * Handle RESOURCE_SHARED event
    */
-  private async handleResourceShared: EventHandler<
+  private handleResourceShared: EventHandler<
     NotificationEventType.RESOURCE_SHARED
   > = async (payload) => {
     try {
@@ -232,7 +243,7 @@ export class EmailNotificationHandler {
         clientName: clientProfile.user.username || "Client",
         coachName,
         resourceName: resource?.name || payload.resourceName,
-        resourceDescription: resource?.description,
+        resourceDescription: resource?.description || undefined,
         appUrl: `${process.env.WASP_WEB_CLIENT_URL}/client/resources`,
       });
 

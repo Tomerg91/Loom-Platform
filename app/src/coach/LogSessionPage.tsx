@@ -140,10 +140,9 @@ function LogSessionPageContent({
 
   const handleFieldBlur = (fieldName: string) => {
     setTouched((prev) => ({ ...prev, [fieldName]: true }));
-    const error = validateField(
-      fieldName,
-      formData[fieldName as keyof typeof formData] || ""
-    );
+    const value = formData[fieldName as keyof typeof formData];
+    const stringValue = typeof value === "string" ? value : "";
+    const error = validateField(fieldName, stringValue);
     setErrors((prev) => ({ ...prev, [fieldName]: error }));
   };
 

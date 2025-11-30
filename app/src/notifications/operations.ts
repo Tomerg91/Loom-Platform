@@ -34,7 +34,8 @@ export interface NotificationResponse {
   title: string;
   message: string;
   read: boolean;
-  metadata: Record<string, any> | null;
+  metadata: any;
+  [key: string]: any;
 }
 
 type GetNotificationsOutput = {

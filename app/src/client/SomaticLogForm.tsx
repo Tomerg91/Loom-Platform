@@ -151,7 +151,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
     try {
       setIsSubmitting(true);
       await createSomaticLogFn({
-        bodyZone: selectedZone,
+        bodyZone: selectedZone!,
         sensation: selectedSensation,
         intensity,
         note: note.trim() || undefined,
@@ -202,7 +202,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             label="Select Body Zone"
             error={errors.bodyZone}
             touched={touched.bodyZone}
-            success={touched.bodyZone && !errors.bodyZone && selectedZone}
+            success={touched.bodyZone && !errors.bodyZone && !!selectedZone}
             required={true}
           >
             <div className="flex justify-center py-4 bg-gray-50 rounded-lg" onBlur={() => handleFieldBlur("bodyZone")}>
@@ -218,7 +218,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             label="What are you feeling?"
             error={errors.sensation}
             touched={touched.sensation}
-            success={touched.sensation && !errors.sensation && selectedSensation}
+            success={touched.sensation && !errors.sensation && !!selectedSensation}
             required={true}
           >
             <div className="flex flex-wrap gap-2" onBlur={() => handleFieldBlur("sensation")}>

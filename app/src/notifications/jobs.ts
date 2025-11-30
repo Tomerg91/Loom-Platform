@@ -29,20 +29,17 @@ export async function checkUpcomingSessionsJob(
 
     // Find clients with sessions scheduled for tomorrow
     const clientsWithUpcomingSessions =
-      await context.entities.ClientProfile.findMany({
+      await context.entities.clientProfile.findMany({
         where: {
           AND: [
             { nextSessionDate: { gte: tomorrow } },
             { nextSessionDate: { lt: tomorrowEnd } },
-            { user: { isNotNull: true } }, // Only registered clients
+            { userId: { not: null } }, // Only registered clients
           ],
         },
         include: {
           user: {
             include: { notificationPreferences: true },
-          },
-          coach: {
-            include: { user: true },
           },
         },
       });
@@ -55,14 +52,24 @@ export async function checkUpcomingSessionsJob(
     for (const clientProfile of clientsWithUpcomingSessions) {
       if (clientProfile.nextSessionDate) {
         try {
+          // Get coach name if coach is assigned
+          let coachName = "Your Coach";
+          if (clientProfile.coachId) {
+            const coach = await context.entities.coachProfile.findUnique({
+              where: { id: clientProfile.coachId },
+              include: { user: true },
+            });
+            if (coach?.user?.email) {
+              coachName = coach.user.email.split("@")[0];
+            }
+          }
+
           await notificationEmitter.emit(
             NotificationEventType.SESSION_REMINDER,
             {
               clientId: clientProfile.id,
               sessionDate: clientProfile.nextSessionDate,
-              coachName:
-                clientProfile.coach?.user?.email?.split("@")[0] ||
-                "Your Coach",
+              coachName,
             }
           );
 
