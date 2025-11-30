@@ -251,6 +251,11 @@ query getClientAnalytics {
   fn: import { getClientAnalytics } from "@src/somatic-logs/operations",
   entities: [SomaticLogAnalytics, ClientProfile, CoachProfile, SomaticLog]
 }
+
+action generateClientExportPdf {
+  fn: import { generateClientExportPdf } from "@src/analytics/exportOperations",
+  entities: [ClientProfile, CoachProfile, CoachSession, SomaticLogAnalytics, SomaticLog]
+}
 //#endregion
 
 //#region Insights
