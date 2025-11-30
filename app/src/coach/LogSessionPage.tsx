@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
+import FormFieldWithValidation from "../components/FormFieldWithValidation";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 
 function LogSessionPageContent({
@@ -78,6 +79,84 @@ function LogSessionPageContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // ============================================
+  // VALIDATION STATE
+  // ============================================
+  const [touched, setTouched] = useState({
+    sessionDate: false,
+    topic: false,
+    sharedSummary: false,
+    privateNotes: false,
+  });
+
+  const [errors, setErrors] = useState({
+    sessionDate: "",
+    topic: "",
+    sharedSummary: "",
+    privateNotes: "",
+  });
+
+  // Validation functions
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    switch (name) {
+      case "sessionDate":
+        if (!value) {
+          error = "Session date is required";
+        } else {
+          const selectedDate = new Date(value);
+          const now = new Date();
+          if (selectedDate > now) {
+            error = "Session date cannot be in the future";
+          }
+        }
+        break;
+
+      case "topic":
+        if (value && value.length < 3) {
+          error = "Topic must be at least 3 characters";
+        } else if (value && value.length > 100) {
+          error = "Topic cannot exceed 100 characters";
+        }
+        break;
+
+      case "sharedSummary":
+        if (value && value.length > 2000) {
+          error = "Summary cannot exceed 2000 characters";
+        }
+        break;
+
+      case "privateNotes":
+        if (value && value.length > 5000) {
+          error = "Private notes cannot exceed 5000 characters";
+        }
+        break;
+    }
+
+    return error;
+  };
+
+  const handleFieldBlur = (fieldName: string) => {
+    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+    const error = validateField(
+      fieldName,
+      formData[fieldName as keyof typeof formData] || ""
+    );
+    setErrors((prev) => ({ ...prev, [fieldName]: error }));
+  };
+
+  const handleFieldChange = (
+    fieldName: string,
+    value: string
+  ) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    if (touched[fieldName as keyof typeof touched]) {
+      const error = validateField(fieldName, value);
+      setErrors((prev) => ({ ...prev, [fieldName]: error }));
+    }
+  };
 
   // Fetch sessions list for refetching after successful submission
   const { refetch: refetchSessions } = useQuery(getSessionsForClient, {
@@ -139,6 +218,31 @@ function LogSessionPageContent({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // ============================================
+    // VALIDATE ALL FIELDS BEFORE SUBMIT
+    // ============================================
+    const newErrors = {
+      sessionDate: validateField("sessionDate", formData.sessionDate),
+      topic: validateField("topic", formData.topic),
+      sharedSummary: validateField("sharedSummary", formData.sharedSummary),
+      privateNotes: validateField("privateNotes", formData.privateNotes),
+    };
+
+    setErrors(newErrors);
+    setTouched({
+      sessionDate: true,
+      topic: true,
+      sharedSummary: true,
+      privateNotes: true,
+    });
+
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some((error) => error !== "");
+    if (hasErrors) {
+      setErrorMessage("Please fix validation errors before submitting");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -308,22 +412,28 @@ function LogSessionPageContent({
                 )}
 
                 {/* Topic */}
-                <div className="space-y-2">
-                  <Label htmlFor="topic">{t("session.topic")}</Label>
+                <FormFieldWithValidation
+                  label={t("session.topic")}
+                  error={errors.topic}
+                  touched={touched.topic}
+                  success={touched.topic && !errors.topic && formData.topic.length > 0}
+                  hint={t("session.topicHelp")}
+                >
                   <Input
                     type="text"
                     id="topic"
                     placeholder={t("session.topicPlaceholder")}
                     value={formData.topic}
-                    onChange={(e) =>
-                      setFormData({ ...formData, topic: e.target.value })
-                    }
+                    onChange={(e) => handleFieldChange("topic", e.target.value)}
+                    onBlur={() => handleFieldBlur("topic")}
                     disabled={isSubmitting}
+                    className={`${
+                      touched.topic && errors.topic ? "border-red-500" : ""
+                    } ${
+                      touched.topic && !errors.topic && formData.topic ? "border-green-500" : ""
+                    }`}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {t("session.topicHelp")}
-                  </p>
-                </div>
+                </FormFieldWithValidation>
 
                 {/* Somatic Anchor */}
                 <div className="space-y-2">
@@ -356,46 +466,52 @@ function LogSessionPageContent({
                 </div>
 
                 {/* Shared Summary */}
-                <div className="space-y-2">
-                  <Label htmlFor="sharedSummary">
-                    {t("session.sharedSummary")}
-                  </Label>
+                <FormFieldWithValidation
+                  label={t("session.sharedSummary")}
+                  error={errors.sharedSummary}
+                  touched={touched.sharedSummary}
+                  success={touched.sharedSummary && !errors.sharedSummary && formData.sharedSummary.length > 0}
+                  hint={`${t("session.sharedSummaryHelp")} (${formData.sharedSummary.length}/2000)`}
+                >
                   <textarea
                     id="sharedSummary"
                     placeholder={t("session.sharedSummaryPlaceholder")}
                     value={formData.sharedSummary}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sharedSummary: e.target.value })
-                    }
+                    onChange={(e) => handleFieldChange("sharedSummary", e.target.value)}
+                    onBlur={() => handleFieldBlur("sharedSummary")}
                     disabled={isSubmitting}
                     rows={4}
-                    className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      touched.sharedSummary && errors.sharedSummary ? "border-red-500" : ""
+                    } ${
+                      touched.sharedSummary && !errors.sharedSummary && formData.sharedSummary ? "border-green-500" : ""
+                    }`}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {t("session.sharedSummaryHelp")}
-                  </p>
-                </div>
+                </FormFieldWithValidation>
 
                 {/* Private Notes */}
-                <div className="space-y-2">
-                  <Label htmlFor="privateNotes">
-                    {t("session.privateNotes")}
-                  </Label>
+                <FormFieldWithValidation
+                  label={t("session.privateNotes")}
+                  error={errors.privateNotes}
+                  touched={touched.privateNotes}
+                  success={touched.privateNotes && !errors.privateNotes && formData.privateNotes.length > 0}
+                  hint={`${t("session.privateNotesHelp")} (${formData.privateNotes.length}/5000)`}
+                >
                   <textarea
                     id="privateNotes"
                     placeholder={t("session.privateNotesPlaceholder")}
                     value={formData.privateNotes}
-                    onChange={(e) =>
-                      setFormData({ ...formData, privateNotes: e.target.value })
-                    }
+                    onChange={(e) => handleFieldChange("privateNotes", e.target.value)}
+                    onBlur={() => handleFieldBlur("privateNotes")}
                     disabled={isSubmitting}
                     rows={3}
-                    className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      touched.privateNotes && errors.privateNotes ? "border-red-500" : ""
+                    } ${
+                      touched.privateNotes && !errors.privateNotes && formData.privateNotes ? "border-green-500" : ""
+                    }`}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {t("session.privateNotesHelp")}
-                  </p>
-                </div>
+                </FormFieldWithValidation>
 
                 {/* Attach Resources */}
                 <div className="space-y-2">
