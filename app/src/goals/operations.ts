@@ -1,3 +1,4 @@
+import type { Prisma, Milestone } from "@prisma/client";
 import { HttpError } from "wasp/server";
 import type {
   CreateGoal,
@@ -46,18 +47,46 @@ const DeleteGoalSchema = z.object({
   goalId: z.string().min(1, "Goal ID is required"),
 });
 
+const GetGoalsSchema = z.object({
+  clientId: z.string().min(1).optional(),
+});
+
+const UpdateGoalProgressSchema = z.object({
+  goalId: z.string().min(1, "Goal ID is required"),
+});
+
+type CreateGoalInput = z.infer<typeof CreateGoalSchema>;
+type UpdateGoalInput = z.infer<typeof UpdateGoalSchema>;
+type DeleteGoalInput = z.infer<typeof DeleteGoalSchema>;
+type GetGoalsInput = z.infer<typeof GetGoalsSchema>;
+type ToggleMilestoneInput = z.infer<typeof ToggleMilestoneSchema>;
+type UpdateGoalProgressInput = z.infer<typeof UpdateGoalProgressSchema>;
+
+type GoalWithMilestones = Prisma.GoalGetPayload<{ include: { milestones: true } }>;
+
+type MilestoneQueryContext = {
+  Milestone: {
+    findMany: Prisma.MilestoneDelegate<undefined>["findMany"];
+  };
+};
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
 
-async function calculateGoalProgress(goalId: string, prisma: any): Promise<number> {
-  const milestones = await prisma.milestone.findMany({
+async function calculateGoalProgress(
+  goalId: string,
+  prisma: MilestoneQueryContext,
+): Promise<number> {
+  const milestones = await prisma.Milestone.findMany({
     where: { goalId },
   });
 
   if (milestones.length === 0) return 0;
 
-  const completedCount = milestones.filter((m: any) => m.completed).length;
+  const completedCount = milestones.filter(
+    (milestone: Milestone) => milestone.completed,
+  ).length;
   return Math.round((completedCount / milestones.length) * 100);
 }
 
@@ -65,7 +94,10 @@ async function calculateGoalProgress(goalId: string, prisma: any): Promise<numbe
 // OPERATIONS
 // ============================================
 
-export const createGoal: CreateGoal<any, any> = async (args, context) => {
+export const createGoal: CreateGoal<
+  CreateGoalInput,
+  GoalWithMilestones
+> = async (args, context) => {
   const data = await ensureArgsSchemaOrThrowHttpError(
     CreateGoalSchema,
     args
@@ -127,7 +159,10 @@ export const createGoal: CreateGoal<any, any> = async (args, context) => {
   return goal;
 };
 
-export const updateGoal: UpdateGoal<any, any> = async (args, context) => {
+export const updateGoal: UpdateGoal<
+  UpdateGoalInput,
+  GoalWithMilestones
+> = async (args, context) => {
   const data = await ensureArgsSchemaOrThrowHttpError(
     UpdateGoalSchema,
     args
@@ -158,7 +193,7 @@ export const updateGoal: UpdateGoal<any, any> = async (args, context) => {
     throw new HttpError(403, "You don't have permission to update this goal");
   }
 
-  const updateData: any = {};
+  const updateData: Prisma.GoalUpdateInput = {};
   if (data.title !== undefined) updateData.title = data.title;
   if (data.type !== undefined) updateData.type = data.type;
   if (data.dueDate !== undefined) {
@@ -175,7 +210,10 @@ export const updateGoal: UpdateGoal<any, any> = async (args, context) => {
   return updatedGoal;
 };
 
-export const deleteGoal: DeleteGoal<any, any> = async (args, context) => {
+export const deleteGoal: DeleteGoal<DeleteGoalInput, { success: true }> = async (
+  args,
+  context
+) => {
   const data = await ensureArgsSchemaOrThrowHttpError(
     DeleteGoalSchema,
     args
@@ -213,14 +251,17 @@ export const deleteGoal: DeleteGoal<any, any> = async (args, context) => {
   return { success: true };
 };
 
-export const getGoals: GetGoals<any, any> = async (args, context) => {
+export const getGoals: GetGoals<
+  GetGoalsInput,
+  GoalWithMilestones[]
+> = async (args, context) => {
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
   }
 
   // If clientId is provided, coach can view client's goals
   // Otherwise, client sees their own goals
-  const { clientId } = args as any;
+  const { clientId } = ensureArgsSchemaOrThrowHttpError(GetGoalsSchema, args);
 
   let targetClientId: string;
 
@@ -280,10 +321,10 @@ export const getGoals: GetGoals<any, any> = async (args, context) => {
   return goals;
 };
 
-export const toggleMilestone: ToggleMilestone<any, any> = async (
-  args,
-  context
-) => {
+export const toggleMilestone: ToggleMilestone<
+  ToggleMilestoneInput,
+  { milestone: Milestone; goal: GoalWithMilestones }
+> = async (args, context) => {
   const data = await ensureArgsSchemaOrThrowHttpError(
     ToggleMilestoneSchema,
     args
@@ -356,15 +397,18 @@ export const toggleMilestone: ToggleMilestone<any, any> = async (
   };
 };
 
-export const updateGoalProgress: UpdateGoalProgress<any, any> = async (
-  args,
-  context
-) => {
+export const updateGoalProgress: UpdateGoalProgress<
+  UpdateGoalProgressInput,
+  GoalWithMilestones
+> = async (args, context) => {
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
   }
 
-  const { goalId } = args as any;
+  const { goalId } = ensureArgsSchemaOrThrowHttpError(
+    UpdateGoalProgressSchema,
+    args,
+  );
 
   const goal = await context.entities.Goal.findUnique({
     where: { id: goalId },
