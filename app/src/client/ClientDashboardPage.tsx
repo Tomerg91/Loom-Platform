@@ -1,6 +1,7 @@
 import type { User } from "wasp/entities";
-import { getSomaticLogs, getRecentSessionsForClient, useQuery, useAction, getOnboardingStatus, updateOnboardingStatus, updateSomaticLogVisibility } from "wasp/client/operations";
+import { getSomaticLogs, getRecentSessionsForClient, useQuery, useAction, getOnboardingStatus, updateOnboardingStatus, updateSomaticLogVisibility, getGoals } from "wasp/client/operations";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Progress } from "../components/ui/progress";
 import SomaticLogForm from "./SomaticLogForm";
 import EmptyStateWithHelp from "./components/EmptyStateWithHelp";
 import SomaticLogFilters, { type SomaticLogFiltersState } from "./components/SomaticLogFilters";
@@ -58,9 +59,22 @@ export default function ClientDashboardPage({ user }: { user: User }) {
   } = useQuery(getSomaticLogs, somaticLogQueryFilters);
   const { data: recentSessions } = useQuery(getRecentSessionsForClient);
   const { data: onboardingStatus } = useQuery(getOnboardingStatus);
+  const { data: goals, isLoading: goalsLoading } = useQuery(getGoals, {});
   const updateOnboarding = useAction(updateOnboardingStatus);
   const updateVisibility = useAction(updateSomaticLogVisibility);
   const { t } = useTranslation();
+
+  const activeGoals = useMemo(
+    () => (goals || []).filter((goal) => goal.status !== "COMPLETED"),
+    [goals]
+  );
+  const averageGoalProgress = useMemo(() => {
+    if (!activeGoals.length) return 0;
+    return (
+      activeGoals.reduce((acc, goal) => acc + (goal.progress || 0), 0) /
+      activeGoals.length
+    );
+  }, [activeGoals]);
 
   useEffect(() => {
     // Show onboarding if not completed
@@ -259,6 +273,68 @@ export default function ClientDashboardPage({ user }: { user: User }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Goals Overview */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            {t("clientGoals.overviewTitle")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {goalsLoading ? (
+            <div className="text-center py-6 text-muted-foreground">
+              {t("common.loading")}
+            </div>
+          ) : !activeGoals.length ? (
+            <div className="text-center py-6 text-muted-foreground">
+              {t("clientGoals.noGoals")}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {t("clientGoals.activeCount", { count: activeGoals.length })}
+                  </span>
+                  <span className="text-sm font-medium">
+                    {t("clientGoals.averageProgress")}: {Math.round(averageGoalProgress)}%
+                  </span>
+                </div>
+                <Progress value={averageGoalProgress} />
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {activeGoals.slice(0, 4).map((goal) => (
+                  <div key={goal.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-sm">{goal.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("clientGoals.goalType", { type: goal.type })}
+                        </p>
+                      </div>
+                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                        {Math.round(goal.progress || 0)}%
+                      </span>
+                    </div>
+                    <Progress value={goal.progress || 0} />
+                    <p className="text-xs text-muted-foreground">
+                      {goal.milestones?.find((m: any) => !m.completed)?.text ||
+                        t("clientGoals.awaitingCoach")}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {t("clientGoals.lastUpdated", {
+                        date: format(new Date(goal.updatedAt), "MMM d, yyyy"),
+                      })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Filters - Full Width Below */}
       <div className="mt-6">

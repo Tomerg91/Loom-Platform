@@ -7,13 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ClientAnalyticsDashboard } from "./components/ClientAnalyticsDashboard";
+import { RichTextEditor, renderSanitizedHtml } from "./components/RichTextEditor";
 import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import type { SessionResponse } from "../session/operations";
@@ -678,18 +678,20 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                         </td>
                         <td className="py-3 max-w-xs">
                           {session.privateNotes ? (
-                            <p className="text-xs text-muted-foreground italic truncate">
-                              {session.privateNotes}
-                            </p>
+                            <p
+                              className="text-xs text-muted-foreground italic truncate"
+                              dangerouslySetInnerHTML={renderSanitizedHtml(session.privateNotes)}
+                            />
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </td>
                         <td className="py-3 max-w-xs">
                           {session.sharedSummary ? (
-                            <p className="text-xs text-muted-foreground italic truncate">
-                              {session.sharedSummary}
-                            </p>
+                            <p
+                              className="text-xs text-muted-foreground italic truncate"
+                              dangerouslySetInnerHTML={renderSanitizedHtml(session.sharedSummary)}
+                            />
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
@@ -767,9 +769,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           Private Notes:
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {session.privateNotes}
-                        </p>
+                        <div
+                          className="text-xs text-muted-foreground prose prose-sm"
+                          dangerouslySetInnerHTML={renderSanitizedHtml(session.privateNotes)}
+                        />
                       </div>
                     )}
 
@@ -778,9 +781,10 @@ function ClientDetailsPageContent({ user }: { user: User }) {
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           Shared Summary:
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {session.sharedSummary}
-                        </p>
+                        <div
+                          className="text-xs text-muted-foreground prose prose-sm"
+                          dangerouslySetInnerHTML={renderSanitizedHtml(session.sharedSummary)}
+                        />
                       </div>
                     )}
                   </div>
@@ -862,42 +866,28 @@ function ClientDetailsPageContent({ user }: { user: User }) {
             </div>
 
             {/* Private Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="private-notes">Private Notes (Coach Only)</Label>
-              <Textarea
-                id="private-notes"
-                placeholder="Your private observations and thoughts about this session..."
-                value={sessionForm.privateNotes}
-                onChange={(e) =>
-                  setSessionForm({ ...sessionForm, privateNotes: e.target.value })
-                }
-                disabled={isSubmittingSession}
-                rows={3}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                Only you can see these notes.
-              </p>
-            </div>
+            <RichTextEditor
+              label={t('session.privateNotesLabel')}
+              description={t('session.privateNotesDescription')}
+              value={sessionForm.privateNotes}
+              onChange={(value) =>
+                setSessionForm({ ...sessionForm, privateNotes: value })
+              }
+              storageKey={`session-${clientId}-privateNotes`}
+              placeholder={t('session.privateNotesPlaceholder')}
+            />
 
             {/* Shared Summary */}
-            <div className="space-y-2">
-              <Label htmlFor="shared-summary">Shared Summary (Visible to Client)</Label>
-              <Textarea
-                id="shared-summary"
-                placeholder="A summary of the session to share with your client..."
-                value={sessionForm.sharedSummary}
-                onChange={(e) =>
-                  setSessionForm({ ...sessionForm, sharedSummary: e.target.value })
-                }
-                disabled={isSubmittingSession}
-                rows={3}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                The client will see this recap.
-              </p>
-            </div>
+            <RichTextEditor
+              label={t('session.sharedSummaryLabel')}
+              description={t('session.sharedSummaryDescription')}
+              value={sessionForm.sharedSummary}
+              onChange={(value) =>
+                setSessionForm({ ...sessionForm, sharedSummary: value })
+              }
+              storageKey={`session-${clientId}-sharedSummary`}
+              placeholder={t('session.sharedSummaryPlaceholder')}
+            />
 
             {/* Error Message */}
             {sessionError && (
