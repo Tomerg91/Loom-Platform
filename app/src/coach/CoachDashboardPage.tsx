@@ -16,6 +16,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { CheckCircle, Mail, Clock, Users, Calendar, Plus, Lock } from "lucide-react";
+import FormFieldWithValidation from "../components/FormFieldWithValidation";
 import { formatDistanceToNow } from "date-fns";
 import UpcomingSessions from "./components/UpcomingSessions";
 import OnboardingModal from "../components/OnboardingModal";
@@ -30,6 +31,38 @@ export default function CoachDashboardPage({ user }: { user: User }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAddOfflineDialog, setShowAddOfflineDialog] = useState(false);
+
+  // ============================================
+  // EMAIL VALIDATION STATE
+  // ============================================
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (value: string): string => {
+    if (!value) {
+      return "Email is required";
+    }
+
+    // RFC 5322 simplified email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      return "Please enter a valid email address";
+    }
+
+    return "";
+  };
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (emailTouched) {
+      setEmailError(validateEmail(value));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmail(email));
+  };
 
   const inviteClientFn = useAction(inviteClient);
   const { data: pendingInvitations, refetch } = useQuery(getPendingInvitations);
@@ -49,11 +82,21 @@ export default function CoachDashboardPage({ user }: { user: User }) {
     setSuccessMessage(null);
     setErrorMessage(null);
 
+    // Validate email before submitting
+    const error = validateEmail(email);
+    if (error) {
+      setEmailError(error);
+      setEmailTouched(true);
+      return;
+    }
+
     try {
       setIsInviting(true);
       await inviteClientFn({ email });
       setSuccessMessage(`Invitation sent to ${email}!`);
       setEmail("");
+      setEmailTouched(false);
+      setEmailError("");
       refetch(); // Refresh pending invitations list
     } catch (error: any) {
       setErrorMessage(error.message || "Failed to send invitation");
@@ -181,15 +224,33 @@ export default function CoachDashboardPage({ user }: { user: User }) {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleInviteClient} className="space-y-4">
-              <Input
-                type="email"
-                placeholder="client@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isInviting}
-              />
-              <Button type="submit" disabled={isInviting} className="w-full">
+              <FormFieldWithValidation
+                label="Email Address"
+                error={emailError}
+                touched={emailTouched}
+                success={emailTouched && !emailError && email.length > 0}
+                required={true}
+                hint="We'll send an invitation link to this email address"
+              >
+                <Input
+                  type="email"
+                  placeholder="client@example.com"
+                  value={email}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onBlur={handleEmailBlur}
+                  disabled={isInviting}
+                  className={`${
+                    emailTouched && emailError ? "border-red-500" : ""
+                  } ${
+                    emailTouched && !emailError && email ? "border-green-500" : ""
+                  }`}
+                />
+              </FormFieldWithValidation>
+              <Button
+                type="submit"
+                disabled={isInviting || (emailTouched && !!emailError)}
+                className="w-full"
+              >
                 {isInviting ? "Sending..." : "Send Invitation"}
               </Button>
             </form>
