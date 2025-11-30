@@ -16,7 +16,15 @@ interface RichTextEditorProps {
 
 const sanitize = (value: string) => {
   if (typeof window === 'undefined') {
-    return value.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    // Apply the replace repeatedly to ensure all <script> blocks are removed.
+    let sanitized = value;
+    let previous;
+    const scriptTagRegex = /<script[^>]*>[\s\S]*?<\/script>/gi;
+    do {
+      previous = sanitized;
+      sanitized = sanitized.replace(scriptTagRegex, '');
+    } while (sanitized !== previous);
+    return sanitized;
   }
   const parser = new DOMParser();
   const doc = parser.parseFromString(value, 'text/html');
