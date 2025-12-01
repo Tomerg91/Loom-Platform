@@ -30,6 +30,17 @@ const ACCEPTED_AVATAR_TYPES = [
 const MAX_AVATAR_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_AVATAR_DIMENSION = 800;
 
+const getSafeImageUrl = (url: string | null) => {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url, window.location.origin);
+    return ["http:", "https:", "blob:"].includes(parsed.protocol) ? parsed.toString() : null;
+  } catch (err) {
+    return null;
+  }
+};
+
 const SettingsPage = ({ user }: { user: AuthUser }) => {
   const { data, isLoading, error, refetch } = useQuery(getAdminSettings);
   const [formState, setFormState] = useState({
@@ -48,6 +59,8 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const safeAvatarSrc = useMemo(() => getSafeImageUrl(avatarPreview), [avatarPreview]);
 
   const currentSettings = useMemo(() => data, [data]);
 
@@ -393,8 +406,8 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                 <form onSubmit={handleSubmit}>
                   <div className="mb-4 flex items-center gap-3">
                     <div className="h-14 w-14 overflow-hidden rounded-full">
-                      {avatarPreview ? (
-                        <img src={avatarPreview} alt="Admin avatar" className="h-full w-full object-cover" />
+                      {safeAvatarSrc ? (
+                        <img src={safeAvatarSrc} alt="Admin avatar" className="h-full w-full object-cover" />
                       ) : (
                         <div className="bg-muted flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                           No photo
