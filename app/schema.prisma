@@ -374,6 +374,21 @@ model Resource {
 // ============================================
 // ANALYTICS & ADMIN
 // ============================================
+model AdminSettings {
+  id                String   @id
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  fullName          String
+  phoneNumber       String?
+  emailAddress      String
+  username          String
+  bio               String?
+  avatarS3Key       String?
+  privacyPolicyUrl  String
+  termsOfServiceUrl String
+}
+
 model DailyStats {
   id   Int      @id @default(autoincrement())
   date DateTime @unique @default(now())
