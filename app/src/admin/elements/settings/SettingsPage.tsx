@@ -14,11 +14,18 @@ import { Textarea } from "../../../components/ui/textarea";
 import Breadcrumb from "../../layout/Breadcrumb";
 import DefaultLayout from "../../layout/DefaultLayout";
 
+type UserProfile = AuthUser & {
+  fullName?: string;
+  phoneNumber?: string;
+  bio?: string;
+};
+
 const SettingsPage = ({ user }: { user: AuthUser }) => {
+  const profile = user as UserProfile;
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // TODO implement
     event.preventDefault();
-    alert("Not yet implemented");
+    // TODO: wire up persistence once the profile update endpoint is available.
   };
 
   return (
@@ -49,7 +56,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                           type="text"
                           name="fullName"
                           id="full-name"
-                          defaultValue=""
+                          defaultValue={profile.fullName ?? ""}
                         />
                       </div>
                     </div>
@@ -65,7 +72,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="tel"
                         name="phoneNumber"
                         id="phone-number"
-                        defaultValue=""
+                        defaultValue={profile.phoneNumber ?? ""}
                       />
                     </div>
                   </div>
@@ -98,7 +105,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                     </Label>
                     <Input
                       type="text"
-                      name="Username"
+                      name="username"
                       id="username"
                       defaultValue={user.username ?? ""}
                     />
@@ -118,7 +125,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         name="bio"
                         id="bio"
                         rows={6}
-                        defaultValue=""
+                        defaultValue={profile.bio ?? ""}
                       ></Textarea>
                     </div>
                   </div>
