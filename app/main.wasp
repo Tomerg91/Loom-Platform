@@ -588,13 +588,36 @@ page NotFoundPage {
 }
 
 //#region Contact Form Messages
-// TODO:
-// add functionality to allow users to send messages to admin
-// and make them accessible via the admin dashboard
+route ContactAdminRoute { path: "/contact-admin", to: ContactAdminPage }
+page ContactAdminPage {
+  authRequired: true,
+  component: import ContactAdmin from "@src/messages/ContactAdminPage"
+}
+
 route AdminMessagesRoute { path: "/admin/messages", to: AdminMessagesPage }
 page AdminMessagesPage {
   authRequired: true,
   component: import AdminMessages from "@src/admin/dashboards/messages/MessagesPage"
+}
+
+query getContactMessages {
+  fn: import { getContactMessages } from "@src/messages/operations"
+  entities: [ContactFormMessage, User]
+}
+
+query getContactMessageById {
+  fn: import { getContactMessageById } from "@src/messages/operations"
+  entities: [ContactFormMessage, User]
+}
+
+action submitContactFormMessage {
+  fn: import { submitContactFormMessage } from "@src/messages/operations"
+  entities: [ContactFormMessage, User]
+}
+
+action updateContactFormMessageStatus {
+  fn: import { updateContactFormMessageStatus } from "@src/messages/operations"
+  entities: [ContactFormMessage, User]
 }
 //#endregion
 //#endregion
