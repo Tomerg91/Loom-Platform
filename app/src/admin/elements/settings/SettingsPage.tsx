@@ -49,8 +49,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                           type="text"
                           name="fullName"
                           id="full-name"
-                          placeholder="Devid Jhon"
-                          defaultValue="Devid Jhon"
+                          defaultValue=""
                         />
                       </div>
                     </div>
@@ -63,11 +62,10 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         Phone Number
                       </Label>
                       <Input
-                        type=""
+                        type="tel"
                         name="phoneNumber"
                         id="phone-number"
-                        placeholder="+990 3343 7865"
-                        defaultValue="+990 3343 7865"
+                        defaultValue=""
                       />
                     </div>
                   </div>
@@ -86,8 +84,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="email"
                         name="emailAddress"
                         id="email-address"
-                        placeholder="devidjond45@gmail.com"
-                        defaultValue="devidjond45@gmail.com"
+                        defaultValue={user.email ?? ""}
                       />
                     </div>
                   </div>
@@ -103,8 +100,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       type="text"
                       name="Username"
                       id="username"
-                      placeholder="devidjhon24"
-                      defaultValue="devidjhon24"
+                      defaultValue={user.username ?? ""}
                     />
                   </div>
 
@@ -122,8 +118,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         name="bio"
                         id="bio"
                         rows={6}
-                        placeholder="Write your bio here"
-                        defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque posuere fermentum urna, eu condimentum mauris tempus ut. Donec fermentum blandit aliquet."
+                        defaultValue=""
                       ></Textarea>
                     </div>
                   </div>
@@ -146,9 +141,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
               <CardContent>
                 <form action="#">
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="h-14 w-14 rounded-full">
-                      {/* <img src={userThree} alt="User" /> */}
-                    </div>
+                    <div className="bg-muted h-14 w-14 rounded-full" />
                     <div>
                       <span className="text-foreground mb-1.5">
                         Edit your photo
