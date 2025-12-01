@@ -575,6 +575,26 @@ page AdminUIButtonsPage {
   component: import AdminUI from "@src/admin/elements/ui-elements/ButtonsPage"
 }
 
+query getAdminSettings {
+  fn: import { getAdminSettings } from "@src/admin/settings/operations",
+  entities: [AdminSettings]
+}
+
+query getPublicLegalSettings {
+  fn: import { getPublicLegalSettings } from "@src/admin/settings/operations",
+  entities: [AdminSettings]
+}
+
+action updateAdminSettings {
+  fn: import { updateAdminSettings } from "@src/admin/settings/operations",
+  entities: [AdminSettings]
+}
+
+action getAdminAvatarUploadUrl {
+  fn: import { getAdminAvatarUploadUrl } from "@src/admin/settings/operations",
+  entities: [AdminSettings]
+}
+
 //#region Demo Pages (for screenshots)
 route DemoBodyMapRoute { path: "/demo-body-map", to: DemoBodyMapPage }
 page DemoBodyMapPage {
