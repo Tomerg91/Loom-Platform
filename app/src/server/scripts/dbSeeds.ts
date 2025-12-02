@@ -6,7 +6,7 @@ import {
   SubscriptionStatus,
 } from "../../payment/plans";
 
-type MockUserData = Omit<User, "id" | "onboardingSteps">;
+type MockUserData = Omit<User, "id" | "onboardingSteps" | "deletedAt"> & { deletedAt?: null };
 
 /**
  * This function, which we've imported in `app.db.seeds` in the `main.wasp` file,
@@ -68,6 +68,9 @@ function generateMockUserData(): MockUserData {
       ? faker.helpers.arrayElement(getSubscriptionPaymentPlanIds())
       : null,
     tranzillaToken: null, // Mock users don't have Tranzilla tokens
+    subscriptionRetryCount: 0,
+    lastRetryAttempt: null,
+    subscriptionNextRetryDate: null,
     preferredLanguage: "he", // Default language is Hebrew
     onboardingCompleted: false,
   };
@@ -121,6 +124,9 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       datePaid: null,
       subscriptionPlan: null,
       tranzillaToken: null,
+      subscriptionRetryCount: 0,
+      lastRetryAttempt: null,
+      subscriptionNextRetryDate: null,
       preferredLanguage: "he",
       onboardingCompleted: false,
       coachProfile: {
@@ -155,6 +161,9 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       datePaid: null,
       subscriptionPlan: null,
       tranzillaToken: null,
+      subscriptionRetryCount: 0,
+      lastRetryAttempt: null,
+      subscriptionNextRetryDate: null,
       preferredLanguage: "he",
       onboardingCompleted: false,
       clientProfile: {
@@ -326,6 +335,9 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       datePaid: null,
       subscriptionPlan: null,
       tranzillaToken: null,
+      subscriptionRetryCount: 0,
+      lastRetryAttempt: null,
+      subscriptionNextRetryDate: null,
       preferredLanguage: "he",
       onboardingCompleted: false,
       clientProfile: {

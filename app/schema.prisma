@@ -85,6 +85,11 @@ model User {
   // TRANZILLA TOKENIZATION
   tranzillaToken String? // TranzilaTK for auto-renewal
 
+  // SUBSCRIPTION RENEWAL RETRY TRACKING (Tranzilla)
+  subscriptionRetryCount      Int       @default(0) // Number of failed renewal attempts
+  lastRetryAttempt            DateTime? // Timestamp of last renewal attempt
+  subscriptionNextRetryDate    DateTime? // When to attempt next renewal
+
   // BOILERPLATE FIELDS
   isEmailVerified        Boolean @default(false)
   emailVerificationToken String?

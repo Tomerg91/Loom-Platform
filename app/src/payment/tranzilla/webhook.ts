@@ -68,8 +68,11 @@ export const tranzillaWebhook: PaymentsWebhook = async (
       });
     }
 
-    // Security: Validate signature (placeholder implementation)
-    const isValidSignature = validateTranzillaSignature(body);
+    // Security: Validate signature using HMAC-SHA256
+    const isValidSignature = validateTranzillaSignature(
+      request.headers as Record<string, any>,
+      body,
+    );
     if (!isValidSignature) {
       console.error("❌ Invalid Tranzilla webhook signature");
       return response.status(401).json({

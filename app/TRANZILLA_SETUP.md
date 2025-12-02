@@ -15,21 +15,37 @@ Add these to your `.env.server` file:
 # Your Tranzilla terminal name (provided by Tranzilla)
 TRANZILLA_TERMINAL_NAME=your_terminal_name_here
 
-# Your Tranzilla API password (for signature validation)
+# Your Tranzilla API password (for signature validation and API calls)
+# Used for:
+# - HMAC-SHA256 signature validation of incoming webhooks
+# - Authentication headers for outgoing API requests (token charging)
 TRANZILLA_API_PASSWORD=your_api_password_here
 
 # ============================================
 # TRANZILLA PRICING (in ILS)
 # ============================================
 
-# Hobby Plan Price (in ILS)
+# Hobby Plan Price (in ILS) - Used for token charging API calls
 PAYMENTS_TRANZILLA_HOBBY_PRICE=99
 
-# Pro Plan Price (in ILS)
+# Pro Plan Price (in ILS) - Used for token charging API calls
 PAYMENTS_TRANZILLA_PRO_PRICE=100
 
-# Credits Plan Price (in ILS)
+# Credits Plan Price (in ILS) - Used for token charging API calls
 PAYMENTS_TRANZILLA_CREDITS_PRICE=50
+
+# ============================================
+# TRANZILLA WEBHOOK
+# ============================================
+
+# The webhook URL is automatically generated and sent to Tranzilla:
+# {WASP_API_URL}/payments-webhook
+#
+# Tranzilla will POST to this URL with signature headers:
+# - X-tranzila-api-app-key
+# - X-tranzila-api-request-time
+# - X-tranzila-api-nonce
+# - X-tranzila-api-access-token
 ```
 
 ## How It Works
@@ -81,55 +97,153 @@ ngrok http 3001
 
 ## Security Notes
 
-### Signature Validation
-The webhook includes **placeholder signature validation**. You must implement the actual Tranzilla signature algorithm:
+### Signature Validation (Implemented ✓)
+The webhook now includes **real HMAC-SHA256 signature validation** using Tranzilla's authentication headers:
 
-1. Contact Tranzilla support for their signature validation algorithm
-2. Update `validateTranzillaSignature()` in `src/payment/tranzilla/tranzillaClient.ts`
-3. Common algorithms include:
-   - HMAC-SHA256 of specific fields + API password
-   - MD5 hash of concatenated parameters
-   - Custom Tranzilla-specific algorithm
+**Headers validated:**
+- `X-tranzila-api-app-key` - Application identifier
+- `X-tranzila-api-request-time` - Unix timestamp (milliseconds)
+- `X-tranzila-api-nonce` - Random 40-byte string
+- `X-tranzila-api-access-token` - HMAC-SHA256 signature
+
+**Validation logic** (`src/payment/tranzilla/tranzillaClient.ts`):
+```typescript
+const dataToSign = `${appKey}${apiPassword}${requestTime}${nonce}`;
+const expectedSignature = crypto
+  .createHmac("sha256", apiPassword)
+  .update(dataToSign)
+  .digest("hex");
+```
+
+**Security features:**
+- Constant-time comparison to prevent timing attacks
+- Replay attack prevention (5-minute window)
+- Required field validation
+- Detailed error logging
+
+### Automatic Renewal Implementation (Phase 2 - Implemented ✓)
+
+The subscription renewal system is now fully implemented and runs daily at 2 AM:
+
+**Grace Period:** 7 days after subscription expiration (first charge attempt on day 37)
+
+**Retry Strategy:**
+- Maximum 5 daily retry attempts
+- Each failed attempt triggers a 24-hour delay before next retry
+- Subscription marked as `past_due` during retry period
+
+**Failure Handling:**
+- Attempt 1-4: Send failure email, retry next day
+- Attempt 5: Cancel subscription, send cancellation email
+- All failures logged with reason and retry schedule
+
+**Email Notifications:**
+- **Success**: Confirmation with renewal date and next renewal date
+- **Failure**: Reason for failure, retry schedule, and action items
+- **Cancellation**: Final notice with reactivation instructions
+
+**Token Charging API** (`src/payment/tranzilla/chargeTranzillaToken`):
+- Endpoint: `POST https://direct.tranzilla.com/{terminal}/api`
+- Parameters: `TranzilaTK`, `sum`, `cred_type`, `currency`, `pdesc`
+- Authentication: Same headers as webhook validation
+- Response handling: Checks for response code `000` (success)
 
 ### Production Checklist
-- [ ] Implement real signature validation (not placeholder)
+- [x] Implement real signature validation (HMAC-SHA256)
+- [x] Implement token charging API integration
+- [x] Implement retry logic with email notifications
+- [x] Add database fields for retry tracking (subscriptionRetryCount, lastRetryAttempt, subscriptionNextRetryDate)
+- [x] Create email templates (success, failure, cancellation)
 - [ ] Use production Tranzilla terminal credentials
 - [ ] Configure webhook URL in Tranzilla dashboard
 - [ ] Test duplicate transaction prevention
 - [ ] Set up monitoring for failed payments
 - [ ] Test the cron job with users who have expired subscriptions
+- [ ] Test email delivery for renewal notifications
+- [ ] Monitor webhook logs for signature validation failures
 
 ## Cron Job Schedule
 
 **Job Name**: `checkExpiredSubscriptionsJob`
-**Schedule**: Daily at 2 AM (`0 2 * * *`)
-**Current Behavior**: Logs expired subscriptions to console
+**Schedule**: Daily at 2 AM UTC (`0 2 * * *`)
+**Behavior**: Automatically charges expired subscriptions and sends email notifications
 
-### Current Output Example:
+### Output Example (Success):
 ```
 🔄 Starting subscription renewal check...
-⚠️  Found 3 subscription(s) needing renewal:
-────────────────────────────────────────────
-📧 Email:          user@example.com
-🆔 User ID:        abc123
-🔑 Token:          TRZ_TOKEN_12345
-📅 Last Paid:      10/24/2024
-⏰ Days Overdue:   5 days
-📦 Plan:           pro
-────────────────────────────────────────────
+🔄 Found 2 subscription(s) to process...
+💳 Charging user abc123 (user@example.com): ₪100
+✅ Successfully renewed subscription for user abc123
+📧 Success email sent to user@example.com
+
+📊 Subscription Renewal Summary:
+   ✅ Successful: 2
+   ⚠️  Failed: 0
+   ❌ Cancelled: 0
 ```
 
-## Phase 2: Automatic Token Charging
+### Output Example (Retry):
+```
+🔄 Starting subscription renewal check...
+🔄 Found 1 subscription(s) to process...
+💳 Charging user xyz789 (client@test.com): ₪99
+❌ Renewal failed for user xyz789: Card expired. Will retry 4 more time(s).
+📧 Failure email sent to client@test.com
 
-To implement automatic renewal charging:
+📊 Subscription Renewal Summary:
+   ✅ Successful: 0
+   ⚠️  Failed: 1
+   ❌ Cancelled: 0
+```
 
-1. **Tranzilla API Documentation**: Get the endpoint and parameters for token-based charging
-2. **Implement Charging Logic**: In `src/payment/worker.ts`, uncomment and implement `chargeTranzillaToken()`
-3. **Handle Responses**:
-   - Success: Update `user.datePaid` to current date
-   - Failure: Update `user.subscriptionStatus` to "past_due"
-4. **Email Notifications**: Send success/failure emails to users
-5. **Retry Logic**: Implement retry for failed charges (3 attempts over 7 days)
+## Automatic Renewal Flow (Implemented ✓)
+
+### Complete Renewal Lifecycle
+
+**Day 30**: Subscription period ends (user marked as "active" but `datePaid` is 30 days ago)
+
+**Days 31-37**: Grace period (no renewal attempts)
+
+**Day 37+**: First renewal attempt
+- Worker attempts to charge stored TranzilaTK
+- **Success**: Subscription renewed, email sent, clock reset
+- **Failure**: Marked as "past_due", retry scheduled for tomorrow
+
+**Days 38-41**: Retry attempts 2-4
+- Same process: attempt charge, send email notification
+- Each failure schedules next retry for following day
+
+**Day 42**: Final attempt (Attempt 5)
+- **Success**: Subscription renewed, email sent
+- **Failure**: Subscription marked as "cancelled", cancellation email sent
+
+**After Day 42**: Subscription remains cancelled
+- User receives limited access to Loom
+- Data retained for 30 days
+- Can be reactivated if user provides working payment method
+
+### Email Workflow
+
+**Renewal Success Email**
+- Sent immediately upon successful charge
+- Includes: amount charged, renewal date, next renewal date
+- Contains link to Loom dashboard
+
+**Renewal Failure Email (Attempts 1-4)**
+- Sent immediately upon failed charge
+- Includes: failure reason, retry schedule, remaining attempts
+- Provides guidance on resolving payment issues
+- Contains link to support
+
+**Renewal Failure Email (Attempt 5 - Final)**
+- Warns this is the final attempt
+- Emphasizes importance of fixing payment method
+
+**Subscription Cancelled Email**
+- Sent after 5th failed attempt
+- Explains limited access going forward
+- Provides reactivation instructions
+- Contains support contact link
 
 ## Troubleshooting
 
