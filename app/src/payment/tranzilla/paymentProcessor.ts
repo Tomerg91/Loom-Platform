@@ -3,7 +3,11 @@ import type {
   FetchCustomerPortalUrlArgs,
   PaymentProcessor,
 } from "../paymentProcessor";
-import { prettyPaymentPlanName, parsePaymentPlanId, PaymentPlanId } from "../plans";
+import {
+  prettyPaymentPlanName,
+  parsePaymentPlanId,
+  PaymentPlanId,
+} from "../plans";
 import {
   buildTranzillaCheckoutUrl,
   getTranzillaPlanPrice,

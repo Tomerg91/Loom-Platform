@@ -1,18 +1,22 @@
-import type { ConnectGoogleCalendar, DisconnectGoogleCalendar, GetCalendarConnection } from 'wasp/server/operations';
-import { HttpError } from 'wasp/server';
-import { GoogleCalendarService } from './service';
-import type { UserCalendarConnection } from 'wasp/entities';
+import type {
+  ConnectGoogleCalendar,
+  DisconnectGoogleCalendar,
+  GetCalendarConnection,
+} from "wasp/server/operations";
+import { HttpError } from "wasp/server";
+import { GoogleCalendarService } from "./service";
+import type { UserCalendarConnection } from "wasp/entities";
 
 /**
  * Connect user's Google Calendar
  * Creates a new "Loom Platform" calendar and stores the connection
  */
-export const connectGoogleCalendar: ConnectGoogleCalendar<void, { calendarId: string; calendarName: string }> = async (
-  _args,
-  context
-) => {
+export const connectGoogleCalendar: ConnectGoogleCalendar<
+  void,
+  { calendarId: string; calendarName: string }
+> = async (_args, context) => {
   if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
+    throw new HttpError(401, "Unauthorized");
   }
 
   // Check if already connected
@@ -21,16 +25,23 @@ export const connectGoogleCalendar: ConnectGoogleCalendar<void, { calendarId: st
   });
 
   if (existing && existing.isConnected) {
-    throw new HttpError(400, 'Google Calendar already connected');
+    throw new HttpError(400, "Google Calendar already connected");
   }
 
   const service = new GoogleCalendarService();
   let calendarId: string;
 
   try {
-    calendarId = await service.createCalendarForUser(context.user.email || 'user@loom.platform');
+    calendarId = await service.createCalendarForUser(
+      context.user.email || "user@loom.platform",
+    );
   } catch (error) {
-    throw new HttpError(500, `Failed to create calendar: ${error instanceof Error ? error.message : String(error)}`);
+    throw new HttpError(
+      500,
+      `Failed to create calendar: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
   }
 
   // Create or update connection record
@@ -55,7 +66,7 @@ export const connectGoogleCalendar: ConnectGoogleCalendar<void, { calendarId: st
 
   return {
     calendarId: connection.calendarId,
-    calendarName: connection.calendarName || '',
+    calendarName: connection.calendarName || "",
   };
 };
 
@@ -63,12 +74,12 @@ export const connectGoogleCalendar: ConnectGoogleCalendar<void, { calendarId: st
  * Disconnect Google Calendar
  * Sets isConnected to false but keeps the calendar in Google Calendar
  */
-export const disconnectGoogleCalendar: DisconnectGoogleCalendar<void, { success: boolean }> = async (
-  _args,
-  context
-) => {
+export const disconnectGoogleCalendar: DisconnectGoogleCalendar<
+  void,
+  { success: boolean }
+> = async (_args, context) => {
   if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
+    throw new HttpError(401, "Unauthorized");
   }
 
   const connection = await context.entities.UserCalendarConnection.findUnique({
@@ -76,7 +87,7 @@ export const disconnectGoogleCalendar: DisconnectGoogleCalendar<void, { success:
   });
 
   if (!connection) {
-    throw new HttpError(404, 'Calendar connection not found');
+    throw new HttpError(404, "Calendar connection not found");
   }
 
   await context.entities.UserCalendarConnection.update({
@@ -94,17 +105,16 @@ export const disconnectGoogleCalendar: DisconnectGoogleCalendar<void, { success:
  */
 export const getCalendarConnection: GetCalendarConnection<
   void,
-  | {
-      isConnected: boolean;
-      calendarName?: string;
-      lastSyncAt?: Date;
-      syncErrorCount: number;
-      lastError?: string;
-    }
-  | null
+  {
+    isConnected: boolean;
+    calendarName?: string;
+    lastSyncAt?: Date;
+    syncErrorCount: number;
+    lastError?: string;
+  } | null
 > = async (_args, context) => {
   if (!context.user) {
-    throw new HttpError(401, 'Unauthorized');
+    throw new HttpError(401, "Unauthorized");
   }
 
   const connection = await context.entities.UserCalendarConnection.findUnique({
@@ -117,9 +127,9 @@ export const getCalendarConnection: GetCalendarConnection<
 
   return {
     isConnected: connection.isConnected,
-    calendarName: connection.calendarName,
-    lastSyncAt: connection.lastSyncAt,
+    calendarName: connection.calendarName ?? undefined,
+    lastSyncAt: connection.lastSyncAt ?? undefined,
     syncErrorCount: connection.syncErrorCount,
-    lastError: connection.lastError,
+    lastError: connection.lastError ?? undefined,
   };
 };

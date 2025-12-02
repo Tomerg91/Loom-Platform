@@ -47,7 +47,10 @@ export const tranzillaWebhook: PaymentsWebhook = async (
     const body = request.body as Record<string, string>;
 
     if (process.env.NODE_ENV === "development") {
-      console.log("🔔 Tranzilla webhook received:", JSON.stringify(body, null, 2));
+      console.log(
+        "🔔 Tranzilla webhook received:",
+        JSON.stringify(body, null, 2),
+      );
     }
 
     // Extract key fields from Tranzilla response

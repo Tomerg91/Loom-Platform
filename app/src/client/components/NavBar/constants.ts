@@ -33,7 +33,9 @@ export const demoNavigationitems: NavigationItem[] = coachNavigationItems;
 /**
  * Get navigation items based on user's role
  */
-export function getNavigationItemsForUser(user: User | undefined): NavigationItem[] {
+export function getNavigationItemsForUser(
+  user: User | undefined,
+): NavigationItem[] {
   if (!user) {
     return demoNavigationitems;
   }

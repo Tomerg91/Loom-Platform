@@ -6,7 +6,9 @@ import {
   SubscriptionStatus,
 } from "../../payment/plans";
 
-type MockUserData = Omit<User, "id" | "onboardingSteps" | "deletedAt"> & { deletedAt?: null };
+type MockUserData = Omit<User, "id" | "onboardingSteps" | "deletedAt"> & {
+  deletedAt?: null;
+};
 
 /**
  * This function, which we've imported in `app.db.seeds` in the `main.wasp` file,
@@ -22,8 +24,8 @@ export async function seedMockUsers(prismaClient: PrismaClient) {
           // Auto-create CoachProfile for COACH users
           coachProfile: data.role === "COACH" ? { create: {} } : undefined,
         },
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -207,7 +209,9 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
         coachId: coach.coachProfile!.id,
         clientId: client1.clientProfile!.id,
         sessionNumber: i,
-        sessionDate: new Date(now.getTime() - (5 - i) * 14 * 24 * 60 * 60 * 1000),
+        sessionDate: new Date(
+          now.getTime() - (5 - i) * 14 * 24 * 60 * 60 * 1000,
+        ),
         topic: `Session ${i} - Focus Topic`,
         privateNotes: `Private coach notes for session ${i}. Client showing good progress.`,
         sharedSummary: `Session ${i} summary. Key takeaways and action items for next week.`,
@@ -365,7 +369,8 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
       sessionDate: now,
       topic: "Introductory Session",
       privateNotes: "First session. Client interested in somatic practices.",
-      sharedSummary: "Welcome! We discussed your wellness goals and initial direction.",
+      sharedSummary:
+        "Welcome! We discussed your wellness goals and initial direction.",
       somaticAnchor: "CHEST" as BodyZone,
       createdAt: now,
     },
@@ -462,7 +467,9 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
         coachId: coach.coachProfile!.id,
         clientId: client3.clientProfile!.id,
         sessionNumber: i,
-        sessionDate: new Date(now.getTime() - (3 - i) * 14 * 24 * 60 * 60 * 1000),
+        sessionDate: new Date(
+          now.getTime() - (3 - i) * 14 * 24 * 60 * 60 * 1000,
+        ),
         topic: `Session ${i} Focus`,
         privateNotes: `Coach notes from session ${i}.`,
         sharedSummary: `Session ${i} recap and insights.`,
@@ -534,13 +541,21 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
   console.log("=== TEST DATA SEEDING COMPLETE ===");
   console.log("\nTest accounts created with data:");
   console.log("  Coach: coach@test.com");
-  console.log("  Client 1 (Active): client1@test.com - Has 5 sessions, 3 goals, 10 somatic logs");
-  console.log("  Client 2 (New): client2@test.com - Just started, 1 session, 1 goal");
-  console.log("  Client 3 (Progress): client3@test.com - 3 sessions, 2 goals, 5 somatic logs");
+  console.log(
+    "  Client 1 (Active): client1@test.com - Has 5 sessions, 3 goals, 10 somatic logs",
+  );
+  console.log(
+    "  Client 2 (New): client2@test.com - Just started, 1 session, 1 goal",
+  );
+  console.log(
+    "  Client 3 (Progress): client3@test.com - 3 sessions, 2 goals, 5 somatic logs",
+  );
   console.log("\nTo setup passwords and test:");
   console.log("1. Visit http://localhost:3000/signup");
   console.log("2. Sign up with coach@test.com - you'll now own the clients");
-  console.log("3. Visit http://localhost:3000/coach/client/{id} to see client data");
+  console.log(
+    "3. Visit http://localhost:3000/coach/client/{id} to see client data",
+  );
   console.log("\nOr to setup passwords for existing accounts, visit:");
   console.log("http://localhost:3000/forgot-password and reset each account\n");
 }
@@ -552,10 +567,12 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
  * This ensures backward compatibility when clientType was added to the schema.
  */
 export async function migrateClientTypesToRegistered(
-  prismaClient: PrismaClient
+  prismaClient: PrismaClient,
 ) {
   try {
-    console.log("Migrating existing ClientProfiles to clientType=REGISTERED...");
+    console.log(
+      "Migrating existing ClientProfiles to clientType=REGISTERED...",
+    );
 
     const updated = await prismaClient.clientProfile.updateMany({
       where: {
@@ -570,7 +587,7 @@ export async function migrateClientTypesToRegistered(
     });
 
     console.log(
-      `Successfully migrated ${updated.count} existing clients to clientType=REGISTERED`
+      `Successfully migrated ${updated.count} existing clients to clientType=REGISTERED`,
     );
   } catch (error) {
     console.error("Error migrating client types:", error);

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { User } from 'wasp/entities';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { User } from "wasp/entities";
 import {
   createGoal,
   updateGoal,
@@ -9,17 +9,22 @@ import {
   toggleMilestone,
   useQuery,
   useAction,
-} from 'wasp/client/operations';
-import GoalRoadmap from './components/GoalRoadmap';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+} from "wasp/client/operations";
+import GoalRoadmap from "./components/GoalRoadmap";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function ClientGoalsPage({ user }: { user: User }) {
   const { t } = useTranslation();
   const clientId = (user as any).clientProfile?.id;
 
-  const { data: goals = [], isLoading, error, refetch } = useQuery(getGoals, {
-    clientId: clientId || '',
+  const {
+    data: goals = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(getGoals, {
+    clientId: clientId || "",
   });
 
   const createGoalFn = useAction(createGoal);
@@ -58,7 +63,7 @@ export default function ClientGoalsPage({ user }: { user: User }) {
       await createGoalFn(data);
       await refetch();
     } catch (error) {
-      console.error('Failed to create goal:', error);
+      console.error("Failed to create goal:", error);
       throw error;
     }
   };
@@ -68,7 +73,7 @@ export default function ClientGoalsPage({ user }: { user: User }) {
       await updateGoalFn(data);
       await refetch();
     } catch (error) {
-      console.error('Failed to update goal:', error);
+      console.error("Failed to update goal:", error);
       throw error;
     }
   };
@@ -78,17 +83,20 @@ export default function ClientGoalsPage({ user }: { user: User }) {
       await deleteGoalFn({ goalId });
       await refetch();
     } catch (error) {
-      console.error('Failed to delete goal:', error);
+      console.error("Failed to delete goal:", error);
       throw error;
     }
   };
 
-  const handleToggleMilestone = async (milestoneId: string, completed: boolean) => {
+  const handleToggleMilestone = async (
+    milestoneId: string,
+    completed: boolean,
+  ) => {
     try {
       await toggleMilestoneFn({ milestoneId, completed });
       await refetch();
     } catch (error) {
-      console.error('Failed to toggle milestone:', error);
+      console.error("Failed to toggle milestone:", error);
       throw error;
     }
   };

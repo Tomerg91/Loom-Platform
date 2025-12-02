@@ -32,11 +32,13 @@ A lightweight coach insights dashboard that surfaces trends from somatic body ma
 **Audience**: Coaches only (per-client insights)
 
 **Time Ranges**:
+
 - Last 30 days
 - Last 3 months
 - All time
 
 **Key Insights**:
+
 - Top recurring sensations (frequency bar chart)
 - Body zone heat map (activity visualization)
 
@@ -166,16 +168,18 @@ page ClientInsightsPage {
 **File**: `app/src/insights/operations.ts`
 
 **Input Schema (Zod)**:
+
 ```typescript
 const getClientInsightsSchema = z.object({
   clientId: z.string().uuid(),
-  timeRange: z.enum(['30days', '3months', 'allTime'])
+  timeRange: z.enum(["30days", "3months", "allTime"]),
 });
 
 type GetClientInsightsInput = z.infer<typeof getClientInsightsSchema>;
 ```
 
 **Authorization Logic**:
+
 1. Verify user is authenticated
 2. Verify user has COACH role
 3. Fetch ClientProfile with clientId, include coach relation
@@ -185,80 +189,86 @@ type GetClientInsightsInput = z.infer<typeof getClientInsightsSchema>;
 **Data Queries**:
 
 1. **Count Total Logs**:
+
 ```typescript
 const totalLogs = await context.entities.SomaticLog.count({
   where: {
     clientId,
-    createdAt: getDateFilter(timeRange)
-  }
+    createdAt: getDateFilter(timeRange),
+  },
 });
 ```
 
 2. **Early Return for Insufficient Data**:
+
 ```typescript
 if (totalLogs < 5) {
   return {
     hasInsufficientData: true,
     minLogsRequired: 5,
-    totalLogs
+    totalLogs,
   };
 }
 ```
 
 3. **Sensation Frequency Aggregation**:
+
 ```typescript
 const sensationData = await context.entities.SomaticLog.groupBy({
-  by: ['sensation'],
+  by: ["sensation"],
   where: { clientId, createdAt: getDateFilter(timeRange) },
   _count: { sensation: true },
-  orderBy: { _count: { sensation: 'desc' } },
-  take: 10
+  orderBy: { _count: { sensation: "desc" } },
+  take: 10,
 });
 
-const topSensations = sensationData.map(item => ({
+const topSensations = sensationData.map((item) => ({
   sensation: item.sensation,
   count: item._count.sensation,
-  percentage: Math.round((item._count.sensation / totalLogs) * 100)
+  percentage: Math.round((item._count.sensation / totalLogs) * 100),
 }));
 ```
 
 4. **Body Zone Frequency Aggregation**:
+
 ```typescript
 const bodyZoneData = await context.entities.SomaticLog.groupBy({
-  by: ['bodyZone'],
+  by: ["bodyZone"],
   where: { clientId, createdAt: getDateFilter(timeRange) },
-  _count: { bodyZone: true }
+  _count: { bodyZone: true },
 });
 
-const bodyZoneActivity = bodyZoneData.map(item => ({
+const bodyZoneActivity = bodyZoneData.map((item) => ({
   bodyZone: item.bodyZone,
   count: item._count.bodyZone,
-  percentage: Math.round((item._count.bodyZone / totalLogs) * 100)
+  percentage: Math.round((item._count.bodyZone / totalLogs) * 100),
 }));
 ```
 
 5. **Average Intensity**:
+
 ```typescript
 const intensityData = await context.entities.SomaticLog.aggregate({
   where: { clientId, createdAt: getDateFilter(timeRange) },
-  _avg: { intensity: true }
+  _avg: { intensity: true },
 });
 
 const averageIntensity = intensityData._avg.intensity || 0;
 ```
 
 **Time Range Filtering**:
+
 ```typescript
-import { subDays, subMonths } from 'date-fns';
+import { subDays, subMonths } from "date-fns";
 
 const getDateFilter = (timeRange: string) => {
   const now = new Date();
   switch (timeRange) {
-    case '30days':
+    case "30days":
       return { gte: subDays(now, 30) };
-    case '3months':
+    case "3months":
       return { gte: subMonths(now, 3) };
-    case 'allTime':
+    case "allTime":
       return undefined; // No filter
     default:
       return undefined;
@@ -267,6 +277,7 @@ const getDateFilter = (timeRange: string) => {
 ```
 
 **Return Type**:
+
 ```typescript
 type ClientInsightsResponse =
   | {
@@ -279,12 +290,12 @@ type ClientInsightsResponse =
       topSensations: Array<{
         sensation: string;
         count: number;
-        percentage: number
+        percentage: number;
       }>;
       bodyZoneActivity: Array<{
         bodyZone: BodyZone;
         count: number;
-        percentage: number
+        percentage: number;
       }>;
       averageIntensity: number;
       totalLogs: number;
@@ -293,6 +304,7 @@ type ClientInsightsResponse =
 ```
 
 **Error Handling**:
+
 - `401` if not authenticated
 - `403` if coach doesn't own client
 - `404` if client not found
@@ -307,6 +319,7 @@ type ClientInsightsResponse =
 **File**: `app/src/coach/ClientInsightsPage.tsx`
 
 **Key Features**:
+
 - Uses `useQuery(getClientInsights, { clientId, timeRange })`
 - State management for time range toggle
 - Conditional rendering based on `hasInsufficientData`
@@ -315,14 +328,17 @@ type ClientInsightsResponse =
 - i18n throughout
 
 **Component Structure**:
+
 ```typescript
 export default function ClientInsightsPage({ user }: { user: User }) {
   const { clientId } = useParams();
-  const [timeRange, setTimeRange] = useState<'30days' | '3months' | 'allTime'>('30days');
+  const [timeRange, setTimeRange] = useState<"30days" | "3months" | "allTime">(
+    "30days",
+  );
 
   const { data, isLoading, error } = useQuery(getClientInsights, {
     clientId,
-    timeRange
+    timeRange,
   });
 
   // Render logic
@@ -342,6 +358,7 @@ export default function ClientInsightsPage({ user }: { user: User }) {
 - Responsive container
 
 **Example**:
+
 ```typescript
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -367,14 +384,15 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 - Legend component explaining color scale
 
 **Color Mapping Logic**:
+
 ```typescript
 const getColorForFrequency = (count: number, maxCount: number): string => {
   const intensity = count / maxCount;
-  if (intensity < 0.2) return '#dbeafe'; // blue-100
-  if (intensity < 0.4) return '#bfdbfe'; // blue-200
-  if (intensity < 0.6) return '#93c5fd'; // blue-300
-  if (intensity < 0.8) return '#60a5fa'; // blue-400
-  return '#3b82f6'; // blue-500
+  if (intensity < 0.2) return "#dbeafe"; // blue-100
+  if (intensity < 0.4) return "#bfdbfe"; // blue-200
+  if (intensity < 0.6) return "#93c5fd"; // blue-300
+  if (intensity < 0.8) return "#60a5fa"; // blue-400
+  return "#3b82f6"; // blue-500
 };
 ```
 
@@ -387,11 +405,13 @@ const getColorForFrequency = (count: number, maxCount: number): string => {
 **File**: `app/src/coach/ClientDetailsPage.tsx`
 
 **Changes**:
+
 - Add "View Insights" button in header section next to client name
 - Button styling: `variant="outline"`, icon: `TrendingUp` (lucide-react)
 - Link component: `Link to={`/coach/clients/${clientId}/insights`}`
 
 **Example**:
+
 ```typescript
 <div className="flex items-center gap-4">
   <h1>{clientName}</h1>
@@ -417,6 +437,7 @@ Display: `Home > Clients > [Client Name] > Insights`
 ### Optional: Preview Widget
 
 Consider adding a "Quick Insights" card on `ClientDetailsPage` showing:
+
 - Top 3 sensations
 - "See Full Report" link to insights page
 - Creates discoverability without requiring separate navigation
@@ -430,6 +451,7 @@ Consider adding a "Quick Insights" card on `ClientDetailsPage` showing:
 **File**: `app/src/client/i18n.ts`
 
 **New Keys**:
+
 ```typescript
 insights: {
   title: "Client Insights",
@@ -479,6 +501,7 @@ insights: {
 ### Testing Strategy
 
 **Unit Tests**:
+
 - Test `getClientInsights` operation with mock data
 - Authorization checks (coach owns client)
 - Empty data handling (< 5 logs)
@@ -486,6 +509,7 @@ insights: {
 - Percentage calculation correctness
 
 **Integration Tests**:
+
 - Full flow: Create logs → Query insights → Verify aggregations
 - Test with various log distributions (even/uneven)
 - Test with all body zones and sensations
@@ -525,11 +549,13 @@ insights: {
 ### Database Performance
 
 **Current Approach**: Calculate on page load
+
 - Prisma aggregations are efficient
 - Queries are indexed on `clientId` and `createdAt`
 - Expected load time: < 500ms with 100s of logs
 
 **Future Optimization** (if needed):
+
 - Add composite index: `@@index([clientId, createdAt])`
 - Pre-compute insights with cron job (if data becomes very large)
 - Cache results in-memory briefly (e.g., 5 minutes)
@@ -548,22 +574,27 @@ insights: {
 ### Phase 2 Considerations (Not in Scope)
 
 1. **Intensity Trends Over Time**
+
    - Line chart showing average intensity week-over-week
    - Detect increasing/decreasing trends
 
 2. **Session Correlation**
+
    - Show insights relative to session dates
    - "Pre-session vs post-session" patterns
 
 3. **Export Functionality**
+
    - PDF report generation
    - CSV data export
 
 4. **Comparative Insights**
+
    - Compare current period vs previous period
    - Percentage change indicators
 
 5. **Client-Facing Insights**
+
    - Allow clients to see their own insights
    - Personal trend tracking
 
@@ -622,12 +653,14 @@ insights: {
 **Estimated Effort**: 2-3 days
 
 1. **Day 1 - Backend** (4-6 hours)
+
    - Create insights operation
    - Add Wasp configuration
    - Write unit tests
    - Test authorization
 
 2. **Day 2 - Frontend** (4-6 hours)
+
    - Build ClientInsightsPage
    - Create visualization components
    - Add i18n translations
@@ -646,6 +679,7 @@ insights: {
 **Design Status**: ✅ Approved
 
 **Next Actions**:
+
 1. Create implementation plan with detailed tasks
 2. Set up git worktree for isolated development (optional)
 3. Begin backend implementation

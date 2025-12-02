@@ -3,11 +3,22 @@ import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import { getClientInsights, useQuery } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
-import { ArrowLeft, BarChart3, AlertCircle, Loader2, TrendingUp } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  AlertCircle,
+  Loader2,
+  TrendingUp,
+} from "lucide-react";
 import { cn } from "../lib/utils";
 // TODO: Install recharts package to fix this import
 // import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
@@ -53,7 +64,7 @@ function MissingClientInsightsNotice() {
             <p className="text-sm mb-4">
               {t(
                 "errors.missingClientId.message",
-                "The client ID is missing or invalid."
+                "The client ID is missing or invalid.",
               )}
             </p>
           </AlertDescription>
@@ -76,7 +87,11 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
 
   // Fetch insights data
-  const { data: insightsData, isLoading, error } = useQuery(getClientInsights, {
+  const {
+    data: insightsData,
+    isLoading,
+    error,
+  } = useQuery(getClientInsights, {
     clientId,
     timeRange,
   });
@@ -242,10 +257,7 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  {t(
-                    "insights.emptyState.title",
-                    "Not enough data yet"
-                  )}
+                  {t("insights.emptyState.title", "Not enough data yet")}
                 </h2>
                 <p className="text-gray-600 mb-6">
                   {t(
@@ -255,17 +267,14 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
                       clientName: "Client",
                       minLogs: insightsData.minLogsRequired,
                       totalLogs: insightsData.totalLogs,
-                    }
+                    },
                   )}
                 </p>
                 <Button
                   onClick={() => navigate(`/coach/client/${clientId}`)}
                   className="flex items-center gap-2 mx-auto"
                 >
-                  {t(
-                    "insights.emptyState.action",
-                    "View Client Details"
-                  )}
+                  {t("insights.emptyState.action", "View Client Details")}
                 </Button>
               </div>
             </CardContent>
@@ -311,7 +320,7 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
                 "px-4 py-2",
                 timeRange === range
                   ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
+                  : "text-gray-700 hover:bg-gray-100",
               )}
             >
               {timeRangeLabels[range]}
@@ -374,7 +383,10 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
               {sensationChartData.length > 0 ? (
                 <div className="space-y-3">
                   {sensationChartData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-sm text-gray-900">
@@ -419,14 +431,18 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
                     .sort((a, b) => b.count - a.count)
                     .slice(0, 5)
                     .map((item, index) => (
-                      <div key={index} className="flex items-center justify-between">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-medium text-sm text-gray-900">
                               {item.zone}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {item.count} {t("insights.sensations.logs", "logs")}
+                              {item.count}{" "}
+                              {t("insights.sensations.logs", "logs")}
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">

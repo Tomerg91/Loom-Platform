@@ -11,7 +11,10 @@ import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 import { addDays, setHours, setMinutes, format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
-import { notificationEmitter, NotificationEventType } from "../notifications/eventEmitter";
+import {
+  notificationEmitter,
+  NotificationEventType,
+} from "../notifications/eventEmitter";
 import { GoogleCalendarService } from "@src/google-calendar/service";
 
 // ============================================
@@ -24,12 +27,14 @@ import { GoogleCalendarService } from "@src/google-calendar/service";
 async function syncSessionToGoogleCalendar(
   session: any, // CoachSession type
   user: any, // User type
-  context: any // Wasp context
+  context: any, // Wasp context
 ): Promise<void> {
   try {
-    const connection = await context.entities.UserCalendarConnection.findUnique({
-      where: { userId: user.id },
-    });
+    const connection = await context.entities.UserCalendarConnection.findUnique(
+      {
+        where: { userId: user.id },
+      },
+    );
 
     if (!connection?.isConnected) {
       return; // Not connected, skip sync
@@ -38,8 +43,10 @@ async function syncSessionToGoogleCalendar(
     const service = new GoogleCalendarService();
 
     // Format event details
-    const title = session.topic || 'Coaching Session';
-    const description = `Session with client\nTopic: ${session.topic || 'General'}\nNotes: ${session.sharedSummary || 'None'}`;
+    const title = session.topic || "Coaching Session";
+    const description = `Session with client\nTopic: ${
+      session.topic || "General"
+    }\nNotes: ${session.sharedSummary || "None"}`;
 
     // Add 1-hour duration default
     const startTime = new Date(session.sessionDate);
@@ -50,7 +57,7 @@ async function syncSessionToGoogleCalendar(
       title,
       startTime,
       endTime,
-      description
+      description,
     );
 
     // Store the Google Calendar event reference
@@ -70,7 +77,7 @@ async function syncSessionToGoogleCalendar(
     });
   } catch (error) {
     // Log error but don't fail session creation
-    console.error('Google Calendar sync failed:', {
+    console.error("Google Calendar sync failed:", {
       userId: user.id,
       sessionId: session.id,
       error: error instanceof Error ? error.message : String(error),
@@ -87,7 +94,7 @@ async function syncSessionToGoogleCalendar(
         },
       });
     } catch (updateError) {
-      console.error('Failed to update calendar error', updateError);
+      console.error("Failed to update calendar error", updateError);
     }
   }
 }
@@ -122,7 +129,7 @@ function calculateNextSessionDate(
   scheduleDay: number,
   scheduleTime: string,
   scheduleTimezone: string,
-  startDate: Date = new Date()
+  startDate: Date = new Date(),
 ): Date {
   // Parse time (format: "14:00")
   const [hours, minutes] = scheduleTime.split(":").map(Number);
@@ -159,66 +166,68 @@ const createSessionSchema = z.object({
 
 type CreateSessionInput = z.infer<typeof createSessionSchema>;
 
-export const createSession: CreateSession<CreateSessionInput, SessionResponse> =
-  async (rawArgs, context) => {
-    const { clientId, sessionDate, privateNotes, sharedSummary } =
-      ensureArgsSchemaOrThrowHttpError(createSessionSchema, rawArgs);
+export const createSession: CreateSession<
+  CreateSessionInput,
+  SessionResponse
+> = async (rawArgs, context) => {
+  const { clientId, sessionDate, privateNotes, sharedSummary } =
+    ensureArgsSchemaOrThrowHttpError(createSessionSchema, rawArgs);
 
-    if (!context.user) {
-      throw new HttpError(401, "You must be logged in to create sessions");
-    }
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to create sessions");
+  }
 
-    // Ensure user is a COACH
-    if (context.user.role !== "COACH") {
-      throw new HttpError(403, "Only coaches can create sessions");
-    }
+  // Ensure user is a COACH
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can create sessions");
+  }
 
-    // Get the coach profile
-    const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
-    });
+  // Get the coach profile
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
 
-    if (!coachProfile) {
-      throw new HttpError(404, "Coach profile not found");
-    }
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
 
-    // Verify that the client belongs to this coach
-    const clientProfile = await context.entities.ClientProfile.findUnique({
-      where: { id: clientId },
-    });
+  // Verify that the client belongs to this coach
+  const clientProfile = await context.entities.ClientProfile.findUnique({
+    where: { id: clientId },
+  });
 
-    if (!clientProfile || clientProfile.coachId !== coachProfile.id) {
-      throw new HttpError(403, "You do not have access to this client");
-    }
+  if (!clientProfile || clientProfile.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You do not have access to this client");
+  }
 
-    // Create the session
-    const session = await context.entities.CoachSession.create({
-      data: {
-        sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
-        privateNotes: privateNotes || null,
-        sharedSummary: sharedSummary || null,
-        coachId: coachProfile.id,
-        clientId: clientId,
-      },
-    });
+  // Create the session
+  const session = await context.entities.CoachSession.create({
+    data: {
+      sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
+      privateNotes: privateNotes || null,
+      sharedSummary: sharedSummary || null,
+      coachId: coachProfile.id,
+      clientId: clientId,
+    },
+  });
 
-    // Sync to Google Calendar (fire-and-forget, doesn't fail session creation)
-    await syncSessionToGoogleCalendar(session, context.user, context);
+  // Sync to Google Calendar (fire-and-forget, doesn't fail session creation)
+  await syncSessionToGoogleCalendar(session, context.user, context);
 
-    // Update client's lastActivityDate
-    await context.entities.ClientProfile.update({
-      where: { id: clientId },
-      data: { lastActivityDate: new Date() },
-    });
+  // Update client's lastActivityDate
+  await context.entities.ClientProfile.update({
+    where: { id: clientId },
+    data: { lastActivityDate: new Date() },
+  });
 
-    return {
-      id: session.id,
-      createdAt: session.createdAt,
-      sessionDate: session.sessionDate,
-      privateNotes: session.privateNotes,
-      sharedSummary: session.sharedSummary,
-    };
+  return {
+    id: session.id,
+    createdAt: session.createdAt,
+    sessionDate: session.sessionDate,
+    privateNotes: session.privateNotes,
+    sharedSummary: session.sharedSummary,
   };
+};
 
 // ============================================
 // UPDATE SESSION
@@ -232,56 +241,58 @@ const updateSessionSchema = z.object({
 
 type UpdateSessionInput = z.infer<typeof updateSessionSchema>;
 
-export const updateSession: UpdateSession<UpdateSessionInput, SessionResponse> =
-  async (rawArgs, context) => {
-    const { sessionId, sessionDate, privateNotes, sharedSummary } =
-      ensureArgsSchemaOrThrowHttpError(updateSessionSchema, rawArgs);
+export const updateSession: UpdateSession<
+  UpdateSessionInput,
+  SessionResponse
+> = async (rawArgs, context) => {
+  const { sessionId, sessionDate, privateNotes, sharedSummary } =
+    ensureArgsSchemaOrThrowHttpError(updateSessionSchema, rawArgs);
 
-    if (!context.user) {
-      throw new HttpError(401, "You must be logged in to update sessions");
-    }
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in to update sessions");
+  }
 
-    // Ensure user is a COACH
-    if (context.user.role !== "COACH") {
-      throw new HttpError(403, "Only coaches can update sessions");
-    }
+  // Ensure user is a COACH
+  if (context.user.role !== "COACH") {
+    throw new HttpError(403, "Only coaches can update sessions");
+  }
 
-    // Get the coach profile
-    const coachProfile = await context.entities.CoachProfile.findUnique({
-      where: { userId: context.user.id },
-    });
+  // Get the coach profile
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id },
+  });
 
-    if (!coachProfile) {
-      throw new HttpError(404, "Coach profile not found");
-    }
+  if (!coachProfile) {
+    throw new HttpError(404, "Coach profile not found");
+  }
 
-    // Get the session and verify ownership
-    const session = await context.entities.CoachSession.findUnique({
-      where: { id: sessionId },
-    });
+  // Get the session and verify ownership
+  const session = await context.entities.CoachSession.findUnique({
+    where: { id: sessionId },
+  });
 
-    if (!session || session.coachId !== coachProfile.id) {
-      throw new HttpError(403, "You do not have access to this session");
-    }
+  if (!session || session.coachId !== coachProfile.id) {
+    throw new HttpError(403, "You do not have access to this session");
+  }
 
-    // Update the session
-    const updatedSession = await context.entities.CoachSession.update({
-      where: { id: sessionId },
-      data: {
-        ...(sessionDate && { sessionDate: new Date(sessionDate) }),
-        ...(privateNotes !== undefined && { privateNotes }),
-        ...(sharedSummary !== undefined && { sharedSummary }),
-      },
-    });
+  // Update the session
+  const updatedSession = await context.entities.CoachSession.update({
+    where: { id: sessionId },
+    data: {
+      ...(sessionDate && { sessionDate: new Date(sessionDate) }),
+      ...(privateNotes !== undefined && { privateNotes }),
+      ...(sharedSummary !== undefined && { sharedSummary }),
+    },
+  });
 
-    return {
-      id: updatedSession.id,
-      createdAt: updatedSession.createdAt,
-      sessionDate: updatedSession.sessionDate,
-      privateNotes: updatedSession.privateNotes,
-      sharedSummary: updatedSession.sharedSummary,
-    };
+  return {
+    id: updatedSession.id,
+    createdAt: updatedSession.createdAt,
+    sessionDate: updatedSession.sessionDate,
+    privateNotes: updatedSession.privateNotes,
+    sharedSummary: updatedSession.sharedSummary,
   };
+};
 
 // ============================================
 // DELETE SESSION
@@ -294,11 +305,11 @@ type DeleteSessionInput = z.infer<typeof deleteSessionSchema>;
 
 export const deleteSession: DeleteSession<DeleteSessionInput, void> = async (
   rawArgs,
-  context
+  context,
 ) => {
   const { sessionId } = ensureArgsSchemaOrThrowHttpError(
     deleteSessionSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -360,7 +371,7 @@ export const getSessionsForClient: GetSessionsForClient<
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     getSessionsForClientSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -383,7 +394,10 @@ export const getSessionsForClient: GetSessionsForClient<
 
     // Verify that the requested client matches the authenticated user
     if (args.clientId !== clientProfile.id) {
-      throw new HttpError(403, "You do not have access to this client's sessions");
+      throw new HttpError(
+        403,
+        "You do not have access to this client's sessions",
+      );
     }
 
     const [total, sessions] = await Promise.all([
@@ -442,7 +456,10 @@ export const getSessionsForClient: GetSessionsForClient<
 
     const client = coachProfile.clients[0];
     if (!client) {
-      throw new HttpError(403, "You do not have access to this client's sessions");
+      throw new HttpError(
+        403,
+        "You do not have access to this client's sessions",
+      );
     }
 
     const [total, sessions] = await Promise.all([
@@ -496,7 +513,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     getRecentSessionsForClientSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -515,7 +532,10 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
 
     // If a clientId is provided, verify it matches the authenticated user
     if (args.clientId && args.clientId !== clientProfile.id) {
-      throw new HttpError(403, "You do not have access to this client's sessions");
+      throw new HttpError(
+        403,
+        "You do not have access to this client's sessions",
+      );
     }
 
     const sessions = await context.entities.CoachSession.findMany({
@@ -563,7 +583,10 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     });
 
     if (!coachProfile || coachProfile.clients.length === 0) {
-      throw new HttpError(403, "You do not have access to this client's sessions");
+      throw new HttpError(
+        403,
+        "You do not have access to this client's sessions",
+      );
     }
 
     const sessions = await context.entities.CoachSession.findMany({
@@ -607,7 +630,20 @@ const logSessionSchema = z.object({
   topic: z.string().optional().nullable(),
   privateNotes: z.string().optional().nullable(),
   sharedSummary: z.string().optional().nullable(),
-  somaticAnchor: z.enum(["HEAD", "THROAT", "CHEST", "SOLAR_PLEXUS", "BELLY", "PELVIS", "ARMS", "LEGS", "FULL_BODY"]).optional().nullable(),
+  somaticAnchor: z
+    .enum([
+      "HEAD",
+      "THROAT",
+      "CHEST",
+      "SOLAR_PLEXUS",
+      "BELLY",
+      "PELVIS",
+      "ARMS",
+      "LEGS",
+      "FULL_BODY",
+    ])
+    .optional()
+    .nullable(),
   resourceIds: z.array(z.string()).optional().default([]),
 });
 
@@ -623,9 +659,20 @@ export type LogSessionResponse = {
   somaticAnchor: string | null;
 };
 
-export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async (rawArgs, context) => {
+export const logSession: LogSession<
+  LogSessionInput,
+  LogSessionResponse
+> = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
-  const { clientId, sessionDate, topic, privateNotes, sharedSummary, somaticAnchor, resourceIds } = args;
+  const {
+    clientId,
+    sessionDate,
+    topic,
+    privateNotes,
+    sharedSummary,
+    somaticAnchor,
+    resourceIds,
+  } = args;
 
   // ============================================
   // AUTHENTICATION & AUTHORIZATION
@@ -671,7 +718,10 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
     });
 
     if (resources.length !== resourceIds.length) {
-      throw new HttpError(403, "One or more selected resources are not available or do not belong to you");
+      throw new HttpError(
+        403,
+        "One or more selected resources are not available or do not belong to you",
+      );
     }
   }
 
@@ -699,11 +749,12 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
       coachId: coachProfile.id,
       clientId: clientId,
       // Attach resources
-      ...(resourceIds && resourceIds.length > 0 && {
-        resources: {
-          connect: resourceIds.map(id => ({ id })),
-        },
-      }),
+      ...(resourceIds &&
+        resourceIds.length > 0 && {
+          resources: {
+            connect: resourceIds.map((id) => ({ id })),
+          },
+        }),
     },
   });
 
@@ -720,12 +771,15 @@ export const logSession: LogSession<LogSessionInput, LogSessionResponse> = async
   // ============================================
   if (sharedSummary) {
     try {
-      await notificationEmitter.emit(NotificationEventType.SESSION_SUMMARY_POSTED, {
-        clientId: clientId,
-        sessionId: session.id,
-        topic: topic || undefined,
-        sharedSummary: sharedSummary,
-      });
+      await notificationEmitter.emit(
+        NotificationEventType.SESSION_SUMMARY_POSTED,
+        {
+          clientId: clientId,
+          sessionId: session.id,
+          topic: topic || undefined,
+          sharedSummary: sharedSummary,
+        },
+      );
     } catch (error) {
       console.error("Error emitting session summary notification:", error);
       // Don't fail the operation if notification fails

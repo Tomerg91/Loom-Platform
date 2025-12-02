@@ -50,7 +50,7 @@ export const getNotifications: GetNotifications<
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     getNotificationsSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -99,7 +99,7 @@ export const markNotificationRead: MarkNotificationRead<
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     markNotificationReadSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -195,7 +195,7 @@ export const updateNotificationPreferences: UpdateNotificationPreferences<
 > = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     updateNotificationPreferencesSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {

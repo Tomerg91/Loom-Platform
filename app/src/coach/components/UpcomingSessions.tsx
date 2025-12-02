@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Calendar, Clock, Users } from "lucide-react";
 import { format, isPast } from "date-fns";
@@ -9,7 +14,10 @@ export default function UpcomingSessions() {
   // Showing placeholder until recurring sessions feature is restored
   const isLoading = false;
   const error: Error | null = null;
-  const upcomingSessions: Array<{ client: { id: string; user: { username?: string } }; nextSessionDate: Date }> = [];
+  const upcomingSessions: Array<{
+    client: { id: string; user: { username?: string } };
+    nextSessionDate: Date;
+  }> = [];
 
   const handleStartSession = (clientId: string, sessionNumber: number) => {
     window.location.href = `/coach/client/${clientId}/log-session?sessionNumber=${sessionNumber}`;

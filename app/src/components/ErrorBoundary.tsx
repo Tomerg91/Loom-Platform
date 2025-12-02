@@ -31,7 +31,9 @@ const DefaultFallback = ({ error, resetErrorBoundary }: FallbackProps) => (
       <CardContent>
         <div className="space-y-4">
           <div className="rounded-md bg-destructive/10 p-3">
-            <p className="font-mono text-sm text-destructive">{error.message}</p>
+            <p className="font-mono text-sm text-destructive">
+              {error.message}
+            </p>
           </div>
           <Button onClick={resetErrorBoundary} className="w-full">
             Try again

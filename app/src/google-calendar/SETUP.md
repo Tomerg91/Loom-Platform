@@ -39,6 +39,7 @@
 ### 4. Share Calendar Access
 
 For each user who connects their calendar:
+
 1. User logs into their Google account
 2. App displays "Connect Google Calendar" button
 3. User clicks button

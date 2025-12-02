@@ -42,7 +42,11 @@ export default function PersonaCallouts() {
               </li>
             </ul>
 
-            <Button size="lg" className="w-full bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800" asChild>
+            <Button
+              size="lg"
+              className="w-full bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800"
+              asChild
+            >
               <WaspRouterLink to={routes.SignupRoute.to}>
                 {t("landing.personas.coach.cta")}
                 <span aria-hidden="true"> →</span>
@@ -84,7 +88,11 @@ export default function PersonaCallouts() {
               </li>
             </ul>
 
-            <Button size="lg" className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800" asChild>
+            <Button
+              size="lg"
+              className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
+              asChild
+            >
               <WaspRouterLink to={routes.SignupRoute.to}>
                 {t("landing.personas.client.cta")}
                 <span aria-hidden="true"> →</span>

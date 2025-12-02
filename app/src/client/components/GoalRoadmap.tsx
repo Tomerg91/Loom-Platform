@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Target,
   Calendar,
@@ -13,15 +13,39 @@ import {
   AlertCircle,
   TrendingUp,
   Zap,
-} from 'lucide-react';
-import { format, isPast, isToday, isTomorrow, isWithinInterval, addDays } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Progress } from '../../components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+} from "lucide-react";
+import {
+  format,
+  isPast,
+  isToday,
+  isTomorrow,
+  isWithinInterval,
+  addDays,
+} from "date-fns";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Progress } from "../../components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 // ============================================
 // TYPES
@@ -39,8 +63,8 @@ export interface Milestone {
 export interface Goal {
   id: string;
   title: string;
-  type: 'OKR' | 'SMART' | 'HABIT';
-  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  type: "OKR" | "SMART" | "HABIT";
+  status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
   progress: number;
   dueDate: Date | null;
   milestones: Milestone[];
@@ -56,7 +80,10 @@ interface GoalRoadmapProps {
   onCreateGoal?: (data: any) => Promise<void>;
   onUpdateGoal?: (data: any) => Promise<void>;
   onDeleteGoal?: (goalId: string) => Promise<void>;
-  onToggleMilestone?: (milestoneId: string, completed: boolean) => Promise<void>;
+  onToggleMilestone?: (
+    milestoneId: string,
+    completed: boolean,
+  ) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -75,12 +102,12 @@ const Celebration: React.FC<{ show: boolean }> = ({ show }) => {
           className="absolute animate-bounce"
           style={{
             left: `${Math.random() * 100}%`,
-            top: '-20px',
+            top: "-20px",
             animation: `celebration ${2 + Math.random()}s ease-in forwards`,
           }}
         >
           <span className="text-2xl">
-            {['🎉', '✨', '🌟', '⭐'][Math.floor(Math.random() * 4)]}
+            {["🎉", "✨", "🌟", "⭐"][Math.floor(Math.random() * 4)]}
           </span>
         </div>
       ))}
@@ -143,21 +170,23 @@ const CircularProgress: React.FC<{ progress: number; size?: number }> = ({
 // STATUS BADGE
 // ============================================
 
-const StatusBadge: React.FC<{ status: Goal['status'] }> = ({ status }) => {
-  const styles: Record<Goal['status'], string> = {
-    NOT_STARTED: 'bg-gray-100 text-gray-700',
-    IN_PROGRESS: 'bg-blue-100 text-blue-700',
-    COMPLETED: 'bg-green-100 text-green-700',
+const StatusBadge: React.FC<{ status: Goal["status"] }> = ({ status }) => {
+  const styles: Record<Goal["status"], string> = {
+    NOT_STARTED: "bg-gray-100 text-gray-700",
+    IN_PROGRESS: "bg-blue-100 text-blue-700",
+    COMPLETED: "bg-green-100 text-green-700",
   };
 
-  const labels: Record<Goal['status'], string> = {
-    NOT_STARTED: 'Not Started',
-    IN_PROGRESS: 'In Progress',
-    COMPLETED: 'Completed',
+  const labels: Record<Goal["status"], string> = {
+    NOT_STARTED: "Not Started",
+    IN_PROGRESS: "In Progress",
+    COMPLETED: "Completed",
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
+    <span
+      className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status]}`}
+    >
       {labels[status]}
     </span>
   );
@@ -168,17 +197,17 @@ const StatusBadge: React.FC<{ status: Goal['status'] }> = ({ status }) => {
 // ============================================
 
 const getGoalStatusColor = (goal: Goal): string => {
-  if (goal.status === 'COMPLETED') return 'border-l-4 border-l-green-500';
-  if (goal.progress >= 75) return 'border-l-4 border-l-green-500';
-  if (goal.progress >= 40) return 'border-l-4 border-l-yellow-500';
-  return 'border-l-4 border-l-gray-300';
+  if (goal.status === "COMPLETED") return "border-l-4 border-l-green-500";
+  if (goal.progress >= 75) return "border-l-4 border-l-green-500";
+  if (goal.progress >= 40) return "border-l-4 border-l-yellow-500";
+  return "border-l-4 border-l-gray-300";
 };
 
 const getGoalStatusLabel = (goal: Goal): string => {
-  if (goal.status === 'COMPLETED') return 'Completed';
-  if (goal.progress >= 75) return 'On Track';
-  if (goal.progress >= 40) return 'At Risk';
-  return 'Not Started';
+  if (goal.status === "COMPLETED") return "Completed";
+  if (goal.progress >= 75) return "On Track";
+  if (goal.progress >= 40) return "At Risk";
+  return "Not Started";
 };
 
 // ============================================
@@ -197,12 +226,14 @@ export default function GoalRoadmap({
 }: GoalRoadmapProps) {
   const [expandedGoalId, setExpandedGoalId] = useState<string | null>(null);
   const [isCreatingGoal, setIsCreatingGoal] = useState(false);
-  const [celebrationGoalId, setCelebrationGoalId] = useState<string | null>(null);
+  const [celebrationGoalId, setCelebrationGoalId] = useState<string | null>(
+    null,
+  );
   const [newGoalData, setNewGoalData] = useState({
-    title: '',
-    type: 'OKR' as const,
-    dueDate: '',
-    milestones: [{ text: '' }, { text: '' }],
+    title: "",
+    type: "OKR" as const,
+    dueDate: "",
+    milestones: [{ text: "" }, { text: "" }],
   });
 
   // Calculate overall progress
@@ -213,21 +244,18 @@ export default function GoalRoadmap({
   }, [goals]);
 
   // Handle milestone toggle with celebration
-  const handleMilestoneToggle = async (
-    milestone: Milestone,
-    goal: Goal
-  ) => {
+  const handleMilestoneToggle = async (milestone: Milestone, goal: Goal) => {
     if (!onToggleMilestone) return;
 
     try {
       await onToggleMilestone(milestone.id, !milestone.completed);
 
       // Trigger celebration if goal reaches 100%
-      const completedCount = goal.milestones.filter(
-        (m) => m.id === milestone.id ? !milestone.completed : m.completed
+      const completedCount = goal.milestones.filter((m) =>
+        m.id === milestone.id ? !milestone.completed : m.completed,
       ).length;
       const newProgress = Math.round(
-        (completedCount / goal.milestones.length) * 100
+        (completedCount / goal.milestones.length) * 100,
       );
 
       if (newProgress === 100 && goal.progress !== 100) {
@@ -235,7 +263,7 @@ export default function GoalRoadmap({
         setTimeout(() => setCelebrationGoalId(null), 2000);
       }
     } catch (error) {
-      console.error('Failed to toggle milestone:', error);
+      console.error("Failed to toggle milestone:", error);
     }
   };
 
@@ -254,13 +282,13 @@ export default function GoalRoadmap({
       });
 
       setNewGoalData({
-        title: '',
-        type: 'OKR',
-        dueDate: '',
-        milestones: [{ text: '' }, { text: '' }],
+        title: "",
+        type: "OKR",
+        dueDate: "",
+        milestones: [{ text: "" }, { text: "" }],
       });
     } catch (error) {
-      console.error('Failed to create goal:', error);
+      console.error("Failed to create goal:", error);
     } finally {
       setIsCreatingGoal(false);
     }
@@ -268,23 +296,23 @@ export default function GoalRoadmap({
 
   // Handle goal deletion
   const handleDeleteGoal = async (goalId: string) => {
-    if (!onDeleteGoal || !confirm('Are you sure you want to delete this goal?'))
+    if (!onDeleteGoal || !confirm("Are you sure you want to delete this goal?"))
       return;
 
     try {
       await onDeleteGoal(goalId);
     } catch (error) {
-      console.error('Failed to delete goal:', error);
+      console.error("Failed to delete goal:", error);
     }
   };
 
   const formatDueDate = (date: Date | string | null): string => {
-    if (!date) return 'No due date';
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    if (isToday(dateObj)) return 'Due today';
-    if (isTomorrow(dateObj)) return 'Due tomorrow';
-    if (isPast(dateObj)) return `Overdue: ${format(dateObj, 'MMM d')}`;
-    return format(dateObj, 'MMM d, yyyy');
+    if (!date) return "No due date";
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    if (isToday(dateObj)) return "Due today";
+    if (isTomorrow(dateObj)) return "Due tomorrow";
+    if (isPast(dateObj)) return `Overdue: ${format(dateObj, "MMM d")}`;
+    return format(dateObj, "MMM d, yyyy");
   };
 
   return (
@@ -293,8 +321,12 @@ export default function GoalRoadmap({
 
       {/* HEADER */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold text-gray-900">Goal & Milestone Roadmap</h1>
-        <p className="text-gray-600">Co-create and track your goals with clear milestones</p>
+        <h1 className="text-4xl font-bold text-gray-900">
+          Goal & Milestone Roadmap
+        </h1>
+        <p className="text-gray-600">
+          Co-create and track your goals with clear milestones
+        </p>
       </div>
 
       {/* DASHBOARD OVERVIEW */}
@@ -313,12 +345,14 @@ export default function GoalRoadmap({
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-gray-600 mb-2">Active Goals</div>
-                <div className="text-3xl font-bold text-gray-900">{goals.length}</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {goals.length}
+                </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 mb-2">Completed</div>
                 <div className="text-3xl font-bold text-green-600">
-                  {goals.filter((g) => g.status === 'COMPLETED').length}
+                  {goals.filter((g) => g.status === "COMPLETED").length}
                 </div>
               </div>
             </div>
@@ -326,13 +360,13 @@ export default function GoalRoadmap({
               <div>
                 <div className="text-sm text-gray-600 mb-2">In Progress</div>
                 <div className="text-3xl font-bold text-blue-600">
-                  {goals.filter((g) => g.status === 'IN_PROGRESS').length}
+                  {goals.filter((g) => g.status === "IN_PROGRESS").length}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 mb-2">Not Started</div>
                 <div className="text-3xl font-bold text-gray-400">
-                  {goals.filter((g) => g.status === 'NOT_STARTED').length}
+                  {goals.filter((g) => g.status === "NOT_STARTED").length}
                 </div>
               </div>
             </div>
@@ -356,7 +390,9 @@ export default function GoalRoadmap({
             <div className="space-y-6">
               {/* Goal Title */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Goal Title</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Goal Title
+                </label>
                 <Input
                   placeholder="e.g., Complete project X by end of quarter"
                   value={newGoalData.title}
@@ -369,7 +405,9 @@ export default function GoalRoadmap({
 
               {/* Goal Type */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Goal Type</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Goal Type
+                </label>
                 <Select
                   value={newGoalData.type}
                   onValueChange={(value: any) =>
@@ -380,7 +418,9 @@ export default function GoalRoadmap({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="OKR">OKR (Objectives & Key Results)</SelectItem>
+                    <SelectItem value="OKR">
+                      OKR (Objectives & Key Results)
+                    </SelectItem>
                     <SelectItem value="SMART">SMART Goal</SelectItem>
                     <SelectItem value="HABIT">Habit Building</SelectItem>
                   </SelectContent>
@@ -389,7 +429,9 @@ export default function GoalRoadmap({
 
               {/* Due Date */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Due Date</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Due Date
+                </label>
                 <Input
                   type="date"
                   value={newGoalData.dueDate}
@@ -423,7 +465,7 @@ export default function GoalRoadmap({
                   onClick={() =>
                     setNewGoalData({
                       ...newGoalData,
-                      milestones: [...newGoalData.milestones, { text: '' }],
+                      milestones: [...newGoalData.milestones, { text: "" }],
                     })
                   }
                 >
@@ -436,7 +478,7 @@ export default function GoalRoadmap({
                 disabled={isCreatingGoal || !newGoalData.title.trim()}
                 className="w-full"
               >
-                {isCreatingGoal ? 'Creating...' : 'Create Goal'}
+                {isCreatingGoal ? "Creating..." : "Create Goal"}
               </Button>
             </div>
           </DialogContent>
@@ -448,7 +490,9 @@ export default function GoalRoadmap({
         <Card className="text-center py-12">
           <CardContent>
             <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">No goals yet. Create one to get started!</p>
+            <p className="text-gray-500 mb-4">
+              No goals yet. Create one to get started!
+            </p>
             {onCreateGoal && (
               <Button variant="outline">Create Your First Goal</Button>
             )}
@@ -459,7 +503,9 @@ export default function GoalRoadmap({
           {goals.map((goal) => (
             <Card
               key={goal.id}
-              className={`transition-all duration-200 hover:shadow-md ${getGoalStatusColor(goal)}`}
+              className={`transition-all duration-200 hover:shadow-md ${getGoalStatusColor(
+                goal,
+              )}`}
             >
               <CardHeader
                 className="cursor-pointer"
@@ -487,10 +533,10 @@ export default function GoalRoadmap({
                       <span
                         className={`text-xs font-medium px-2 py-1 rounded ${
                           goal.progress >= 75
-                            ? 'bg-green-100 text-green-700'
+                            ? "bg-green-100 text-green-700"
                             : goal.progress >= 40
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         {getGoalStatusLabel(goal)}
@@ -524,16 +570,20 @@ export default function GoalRoadmap({
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
                     <div>
                       <div className="text-xs text-gray-600">Type</div>
-                      <div className="font-medium text-gray-900">{goal.type}</div>
+                      <div className="font-medium text-gray-900">
+                        {goal.type}
+                      </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-600">Status</div>
-                      <div className="font-medium text-gray-900">{goal.status}</div>
+                      <div className="font-medium text-gray-900">
+                        {goal.status}
+                      </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-600">Created</div>
                       <div className="font-medium text-gray-900">
-                        {format(new Date(goal.createdAt), 'MMM d, yyyy')}
+                        {format(new Date(goal.createdAt), "MMM d, yyyy")}
                       </div>
                     </div>
                   </div>
@@ -545,7 +595,9 @@ export default function GoalRoadmap({
                       Milestones ({goal.milestones.length})
                     </h4>
                     {goal.milestones.length === 0 ? (
-                      <p className="text-sm text-gray-500">No milestones added yet</p>
+                      <p className="text-sm text-gray-500">
+                        No milestones added yet
+                      </p>
                     ) : (
                       <div className="space-y-2">
                         {goal.milestones.map((milestone) => (
@@ -561,18 +613,16 @@ export default function GoalRoadmap({
                                 }
                                 className="cursor-pointer"
                               />
+                            ) : milestone.completed ? (
+                              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                             ) : (
-                              milestone.completed ? (
-                                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                              ) : (
-                                <Circle className="w-5 h-5 text-gray-300 flex-shrink-0" />
-                              )
+                              <Circle className="w-5 h-5 text-gray-300 flex-shrink-0" />
                             )}
                             <span
                               className={`flex-1 text-sm ${
                                 milestone.completed
-                                  ? 'text-gray-500 line-through'
-                                  : 'text-gray-700'
+                                  ? "text-gray-500 line-through"
+                                  : "text-gray-700"
                               }`}
                             >
                               {milestone.text}

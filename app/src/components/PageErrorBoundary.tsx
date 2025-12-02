@@ -1,6 +1,12 @@
 import React, { ReactNode } from "react";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 
 interface PageErrorBoundaryProps {
@@ -39,7 +45,8 @@ export function PageErrorBoundary({
                 Oops! Something went wrong
               </CardTitle>
               <CardDescription>
-                We encountered an error loading {pageName.toLowerCase()}. Please try again.
+                We encountered an error loading {pageName.toLowerCase()}. Please
+                try again.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -48,16 +55,17 @@ export function PageErrorBoundary({
                   <p className="text-sm font-mono text-destructive line-clamp-3">
                     {error.message}
                   </p>
-                  {typeof import.meta !== "undefined" && import.meta.env?.DEV && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-xs text-muted-foreground">
-                        Stack trace
-                      </summary>
-                      <pre className="mt-2 text-xs overflow-auto bg-background p-2 rounded border border-border">
-                        {error.stack}
-                      </pre>
-                    </details>
-                  )}
+                  {typeof import.meta !== "undefined" &&
+                    import.meta.env?.DEV && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-xs text-muted-foreground">
+                          Stack trace
+                        </summary>
+                        <pre className="mt-2 text-xs overflow-auto bg-background p-2 rounded border border-border">
+                          {error.stack}
+                        </pre>
+                      </details>
+                    )}
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={reset} variant="outline" className="flex-1">

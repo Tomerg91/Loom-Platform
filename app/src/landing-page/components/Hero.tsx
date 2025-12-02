@@ -20,20 +20,34 @@ export default function Hero() {
               {t("landing.hero.mainSubtitle")}
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Button size="lg" variant="outline" asChild className="hover-lift">
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="hover-lift"
+              >
                 <WaspRouterLink to={routes.PricingPageRoute.to}>
                   {t("landing.hero.seePricingBtn")}
                 </WaspRouterLink>
               </Button>
-              <Button size="lg" variant="default" asChild className="hover-lift">
+              <Button
+                size="lg"
+                variant="default"
+                asChild
+                className="hover-lift"
+              >
                 <WaspRouterLink to={routes.SignupRoute.to}>
-                  {t("landing.hero.startTrialBtn")} <span aria-hidden="true">→</span>
+                  {t("landing.hero.startTrialBtn")}{" "}
+                  <span aria-hidden="true">→</span>
                 </WaspRouterLink>
               </Button>
             </div>
           </div>
           <div className="mt-14 flow-root sm:mt-14">
-            <div className="m-2 hidden justify-center rounded-2xl md:flex lg:-m-4 lg:rounded-3xl lg:p-4 reveal" style={{ animationDelay: '0.4s' }}>
+            <div
+              className="m-2 hidden justify-center rounded-2xl md:flex lg:-m-4 lg:rounded-3xl lg:p-4 reveal"
+              style={{ animationDelay: "0.4s" }}
+            >
               <div className="w-full max-w-2xl p-8 bg-card rounded-2xl shadow-lg ring-1 ring-border hover-scale-subtle">
                 <BodyMapSelector
                   mode="readonly"

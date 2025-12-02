@@ -9,10 +9,22 @@ import {
   useQuery,
   useAction,
 } from "wasp/client/operations";
-import { Download, Trash, FileText, Music, Image as ImageIcon, Upload } from "lucide-react";
+import {
+  Download,
+  Trash,
+  FileText,
+  Music,
+  Image as ImageIcon,
+  Upload,
+} from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -168,7 +180,9 @@ export default function CoachResourcesPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">{t("resources.resourcesLibrary")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("resources.resourcesLibrary")}
+        </h1>
         <p className="text-muted-foreground mt-2">
           {t("resources.uploadForClients")}
         </p>
@@ -187,7 +201,9 @@ export default function CoachResourcesPage({ user }: { user: User }) {
             <CardContent>
               <form onSubmit={handleUpload} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="resource-name">{t("resources.resourceName")}</Label>
+                  <Label htmlFor="resource-name">
+                    {t("resources.resourceName")}
+                  </Label>
                   <Input
                     id="resource-name"
                     name="resource-name"
@@ -197,7 +213,9 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="file-upload">{t("resources.selectFile")}</Label>
+                  <Label htmlFor="file-upload">
+                    {t("resources.selectFile")}
+                  </Label>
                   <Input
                     id="file-upload"
                     name="file-upload"
@@ -211,7 +229,9 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">{t("resources.descriptionOptional")}</Label>
+                  <Label htmlFor="description">
+                    {t("resources.descriptionOptional")}
+                  </Label>
                   <Textarea
                     id="description"
                     placeholder={t("resources.descriptionPlaceholder")}
@@ -225,14 +245,18 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                 {uploadProgressPercent > 0 && (
                   <div className="space-y-2">
                     <div className="text-sm text-muted-foreground">
-                      {t("resources.uploading", { percent: uploadProgressPercent })}
+                      {t("resources.uploading", {
+                        percent: uploadProgressPercent,
+                      })}
                     </div>
                     <Progress value={uploadProgressPercent} />
                   </div>
                 )}
 
                 <Button type="submit" disabled={isUploading} className="w-full">
-                  {isUploading ? t("resources.uploading", { percent: "" }).trim() : t("resources.uploadResource")}
+                  {isUploading
+                    ? t("resources.uploading", { percent: "" }).trim()
+                    : t("resources.uploadResource")}
                 </Button>
               </form>
             </CardContent>
@@ -243,7 +267,11 @@ export default function CoachResourcesPage({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>{t("resources.yourResources", { count: resources?.length || 0 })}</CardTitle>
+              <CardTitle>
+                {t("resources.yourResources", {
+                  count: resources?.length || 0,
+                })}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {resources && resources.length > 0 ? (
@@ -276,7 +304,12 @@ export default function CoachResourcesPage({ user }: { user: User }) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setResourceToDelete({ id: resource.id, name: resource.name })}
+                          onClick={() =>
+                            setResourceToDelete({
+                              id: resource.id,
+                              name: resource.name,
+                            })
+                          }
                           className="flex-shrink-0"
                         >
                           <Trash className="h-4 w-4" />
@@ -299,12 +332,17 @@ export default function CoachResourcesPage({ user }: { user: User }) {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!resourceToDelete} onOpenChange={(open) => !open && setResourceToDelete(null)}>
+      <Dialog
+        open={!!resourceToDelete}
+        onOpenChange={(open) => !open && setResourceToDelete(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("resources.deleteResource")}</DialogTitle>
             <DialogDescription>
-              {t("resources.deleteConfirmation", { name: resourceToDelete?.name })}
+              {t("resources.deleteConfirmation", {
+                name: resourceToDelete?.name,
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

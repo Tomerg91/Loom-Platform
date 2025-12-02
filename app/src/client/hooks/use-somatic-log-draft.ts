@@ -1,6 +1,15 @@
 import { useEffect, useCallback, useState } from "react";
 
-type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
 
 export interface SomaticLogDraft {
   selectedZone?: BodyZone;
@@ -59,7 +68,10 @@ export function useSomaticLogDraft() {
         ...draft,
         savedAt: Date.now(),
       };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftWithTimestamp));
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify(draftWithTimestamp),
+      );
     } catch (error) {
       // Silently fail if localStorage is full or unavailable
       // This shouldn't block form submission

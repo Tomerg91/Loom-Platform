@@ -145,7 +145,7 @@ function formatSubscriptionStatusMessage(
     past_due: t("account.subscriptionPastDue", { plan: paymentPlanName }),
     cancel_at_period_end: t("account.subscriptionCanceled", {
       plan: paymentPlanName,
-      date: prettyPrintEndOfBillingPeriod(datePaid)
+      date: prettyPrintEndOfBillingPeriod(datePaid),
     }),
     deleted: t("account.subscriptionDeleted"),
   };

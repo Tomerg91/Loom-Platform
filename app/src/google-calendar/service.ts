@@ -1,5 +1,5 @@
-import { getGoogleCalendarClient } from './config';
-import { HttpError } from 'wasp/server';
+import { getGoogleCalendarClient } from "./config";
+import { HttpError } from "wasp/server";
 
 export class GoogleCalendarService {
   /**
@@ -13,20 +13,22 @@ export class GoogleCalendarService {
       const response = await calendar.calendars.insert({
         requestBody: {
           summary: `Loom Platform - ${userEmail}`,
-          description: 'Coaching sessions synced from Loom Platform',
-          timeZone: 'UTC',
+          description: "Coaching sessions synced from Loom Platform",
+          timeZone: "UTC",
         },
       });
 
       const calendarId = response.data.id;
       if (!calendarId) {
-        throw new Error('Calendar creation failed: no ID returned');
+        throw new Error("Calendar creation failed: no ID returned");
       }
 
       return calendarId;
     } catch (error) {
       throw new Error(
-        `Failed to create Google Calendar: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to create Google Calendar: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
   }
@@ -40,7 +42,7 @@ export class GoogleCalendarService {
     title: string,
     startTime: Date,
     endTime: Date,
-    description: string
+    description: string,
   ): Promise<string> {
     const calendar = getGoogleCalendarClient();
 
@@ -52,19 +54,21 @@ export class GoogleCalendarService {
           description,
           start: { dateTime: startTime.toISOString() },
           end: { dateTime: endTime.toISOString() },
-          transparency: 'opaque', // Mark as busy
+          transparency: "opaque", // Mark as busy
         },
       });
 
       const eventId = response.data.id;
       if (!eventId) {
-        throw new Error('Event creation failed: no ID returned');
+        throw new Error("Event creation failed: no ID returned");
       }
 
       return eventId;
     } catch (error) {
       throw new Error(
-        `Failed to add calendar event: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to add calendar event: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
   }
@@ -78,7 +82,7 @@ export class GoogleCalendarService {
     title: string,
     startTime: Date,
     endTime: Date,
-    description: string
+    description: string,
   ): Promise<void> {
     const calendar = getGoogleCalendarClient();
 
@@ -91,12 +95,14 @@ export class GoogleCalendarService {
           description,
           start: { dateTime: startTime.toISOString() },
           end: { dateTime: endTime.toISOString() },
-          transparency: 'opaque',
+          transparency: "opaque",
         },
       });
     } catch (error) {
       throw new Error(
-        `Failed to update calendar event: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to update calendar event: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
   }
@@ -114,7 +120,9 @@ export class GoogleCalendarService {
       });
     } catch (error) {
       throw new Error(
-        `Failed to delete calendar event: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to delete calendar event: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
   }

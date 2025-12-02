@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -27,19 +27,17 @@
   /* Grain texture overlay - Optimized for performance */
   .grain {
     position: relative;
-    background-image:
-      url('data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" /%3E%3CfeColorMatrix in="noise" type="saturate" values="0.3" /%3E%3C/filter%3E%3Crect width="400" height="400" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" /%3E%3CfeColorMatrix in="noise" type="saturate" values="0.3" /%3E%3C/filter%3E%3Crect width="400" height="400" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
     background-size: 400px 400px;
     isolation: isolate;
     contain: layout style paint;
   }
 
   .grain::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
-    background-image:
-      url('data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" /%3E%3CfeColorMatrix in="noise" type="saturate" values="0.3" /%3E%3C/filter%3E%3Crect width="400" height="400" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise" /%3E%3CfeColorMatrix in="noise" type="saturate" values="0.3" /%3E%3C/filter%3E%3Crect width="400" height="400" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
     background-size: 400px 400px;
     animation: grain-shift 8s linear infinite;
     will-change: opacity;
@@ -62,9 +60,11 @@
 
   /* Organic gradient backgrounds */
   .bg-warm-radial {
-    background: radial-gradient(ellipse at 50% 40%,
+    background: radial-gradient(
+      ellipse at 50% 40%,
       hsl(var(--primary)) 0%,
-      hsl(var(--background)) 100%);
+      hsl(var(--background)) 100%
+    );
     opacity: 0.1;
   }
 
@@ -129,26 +129,66 @@
     animation: reveal-up 0.6s var(--ease-organic) forwards;
   }
 
-  .reveal-stagger > *:nth-child(1) { animation-delay: 0.05s; }
-  .reveal-stagger > *:nth-child(2) { animation-delay: 0.1s; }
-  .reveal-stagger > *:nth-child(3) { animation-delay: 0.15s; }
-  .reveal-stagger > *:nth-child(4) { animation-delay: 0.2s; }
-  .reveal-stagger > *:nth-child(5) { animation-delay: 0.25s; }
-  .reveal-stagger > *:nth-child(6) { animation-delay: 0.3s; }
-  .reveal-stagger > *:nth-child(7) { animation-delay: 0.35s; }
-  .reveal-stagger > *:nth-child(8) { animation-delay: 0.4s; }
-  .reveal-stagger > *:nth-child(9) { animation-delay: 0.45s; }
-  .reveal-stagger > *:nth-child(10) { animation-delay: 0.5s; }
-  .reveal-stagger > *:nth-child(11) { animation-delay: 0.55s; }
-  .reveal-stagger > *:nth-child(12) { animation-delay: 0.6s; }
-  .reveal-stagger > *:nth-child(13) { animation-delay: 0.65s; }
-  .reveal-stagger > *:nth-child(14) { animation-delay: 0.7s; }
-  .reveal-stagger > *:nth-child(15) { animation-delay: 0.75s; }
-  .reveal-stagger > *:nth-child(16) { animation-delay: 0.8s; }
-  .reveal-stagger > *:nth-child(17) { animation-delay: 0.85s; }
-  .reveal-stagger > *:nth-child(18) { animation-delay: 0.9s; }
-  .reveal-stagger > *:nth-child(19) { animation-delay: 0.95s; }
-  .reveal-stagger > *:nth-child(20) { animation-delay: 1s; }
+  .reveal-stagger > *:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  .reveal-stagger > *:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .reveal-stagger > *:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+  .reveal-stagger > *:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .reveal-stagger > *:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+  .reveal-stagger > *:nth-child(6) {
+    animation-delay: 0.3s;
+  }
+  .reveal-stagger > *:nth-child(7) {
+    animation-delay: 0.35s;
+  }
+  .reveal-stagger > *:nth-child(8) {
+    animation-delay: 0.4s;
+  }
+  .reveal-stagger > *:nth-child(9) {
+    animation-delay: 0.45s;
+  }
+  .reveal-stagger > *:nth-child(10) {
+    animation-delay: 0.5s;
+  }
+  .reveal-stagger > *:nth-child(11) {
+    animation-delay: 0.55s;
+  }
+  .reveal-stagger > *:nth-child(12) {
+    animation-delay: 0.6s;
+  }
+  .reveal-stagger > *:nth-child(13) {
+    animation-delay: 0.65s;
+  }
+  .reveal-stagger > *:nth-child(14) {
+    animation-delay: 0.7s;
+  }
+  .reveal-stagger > *:nth-child(15) {
+    animation-delay: 0.75s;
+  }
+  .reveal-stagger > *:nth-child(16) {
+    animation-delay: 0.8s;
+  }
+  .reveal-stagger > *:nth-child(17) {
+    animation-delay: 0.85s;
+  }
+  .reveal-stagger > *:nth-child(18) {
+    animation-delay: 0.9s;
+  }
+  .reveal-stagger > *:nth-child(19) {
+    animation-delay: 0.95s;
+  }
+  .reveal-stagger > *:nth-child(20) {
+    animation-delay: 1s;
+  }
 
   /* Soft lift on hover */
   .hover-lift {
@@ -176,8 +216,9 @@
 
   .focus-organic:focus {
     outline: none;
-    box-shadow: 0 0 0 3px hsla(var(--primary), 0.1),
-                0 0 0 6px hsla(var(--primary), 0.05);
+    box-shadow:
+      0 0 0 3px hsla(var(--primary), 0.1),
+      0 0 0 6px hsla(var(--primary), 0.05);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -13,10 +13,10 @@ export interface SessionReminderData {
 }
 
 export function getSessionReminderEmailContent(data: SessionReminderData) {
-  const formattedDate = data.sessionDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
+  const formattedDate = data.sessionDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
   });
 
   const html = `
@@ -30,14 +30,22 @@ export function getSessionReminderEmailContent(data: SessionReminderData) {
       </p>
 
       <p style="color: #666; font-size: 16px; line-height: 1.6;">
-        You have a coaching session scheduled with <strong>${escapeHtml(data.coachName)}</strong> tomorrow:
+        You have a coaching session scheduled with <strong>${escapeHtml(
+          data.coachName,
+        )}</strong> tomorrow:
       </p>
 
       <div style="background-color: #e8f4f8; border-left: 4px solid #0891b2; padding: 16px; margin: 20px 0;">
         <p style="margin: 0; color: #333;">
           <strong style="font-size: 18px;">📅 ${formattedDate}</strong>
         </p>
-        ${data.time ? `<p style="margin: 8px 0 0 0; color: #666;">⏰ ${escapeHtml(data.time)}</p>` : ''}
+        ${
+          data.time
+            ? `<p style="margin: 8px 0 0 0; color: #666;">⏰ ${escapeHtml(
+                data.time,
+              )}</p>`
+            : ""
+        }
       </div>
 
       <p style="color: #666; font-size: 16px; line-height: 1.6;">
@@ -45,7 +53,9 @@ export function getSessionReminderEmailContent(data: SessionReminderData) {
       </p>
 
       <div style="margin: 30px 0;">
-        <a href="${escapeHtml(data.appUrl)}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        <a href="${escapeHtml(
+          data.appUrl,
+        )}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
           Open Loom
         </a>
       </div>
@@ -60,18 +70,20 @@ export function getSessionReminderEmailContent(data: SessionReminderData) {
 
   return {
     subject: `Reminder: Your session with ${data.coachName} is tomorrow`,
-    text: `Session Reminder: You have a coaching session scheduled with ${data.coachName} on ${formattedDate}${data.time ? ` at ${data.time}` : ''}.`,
+    text: `Session Reminder: You have a coaching session scheduled with ${
+      data.coachName
+    } on ${formattedDate}${data.time ? ` at ${data.time}` : ""}.`,
     html,
   };
 }
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   };
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }

@@ -132,10 +132,12 @@ const resources = {
         viewClientLogs: "View Client Logs",
         clientSomaticLogs: "Client Somatic Logs",
         addOfflineClientButton: "Add Offline Client",
-        addOfflineClientHelp: "Create a profile for a client without an account",
+        addOfflineClientHelp:
+          "Create a profile for a client without an account",
         offlineClientForm: {
           title: "Add New Client (No Account)",
-          description: "Create a client profile for someone who won't use the app themselves.",
+          description:
+            "Create a client profile for someone who won't use the app themselves.",
           displayName: "Client Name",
           displayNamePlaceholder: "Enter full name",
           contactEmail: "Contact Email (Optional)",
@@ -158,7 +160,8 @@ const resources = {
         },
         cancelInvitation: "Cancel Invitation",
         cancelInvitationConfirmTitle: "Cancel Invitation?",
-        cancelInvitationConfirmMessage: "Are you sure you want to cancel the invitation to {email}? They will no longer be able to use this link to join.",
+        cancelInvitationConfirmMessage:
+          "Are you sure you want to cancel the invitation to {email}? They will no longer be able to use this link to join.",
         confirmCancel: "Yes, Cancel Invitation",
       },
       client: {
@@ -169,27 +172,35 @@ const resources = {
         recentSensations: "Recent Sensations",
         recentSessions: "Recent Sessions",
         noLogsTitle: "No Sensations Logged Yet",
-        noLogsDescription: "Start tracking your somatic experience by logging your first body sensation.",
+        noLogsDescription:
+          "Start tracking your somatic experience by logging your first body sensation.",
         logFirstSensationBtn: "Log Your First Sensation",
         somaticLoggingHelp: "How to Log Your Sensations",
-        somaticLoggingExplanation: "Somatic logging helps you build awareness of your body's responses and patterns over time. Each log captures a moment of sensation in your body.",
+        somaticLoggingExplanation:
+          "Somatic logging helps you build awareness of your body's responses and patterns over time. Each log captures a moment of sensation in your body.",
         howToLog: "How to Log a Sensation:",
-        step1SelectZone: "Click on a body zone on the interactive map (head, chest, belly, etc.)",
-        step2ChooseSensation: "Select a sensation type like tight, hot, cold, vibrating, or numb",
+        step1SelectZone:
+          "Click on a body zone on the interactive map (head, chest, belly, etc.)",
+        step2ChooseSensation:
+          "Select a sensation type like tight, hot, cold, vibrating, or numb",
         step3SetIntensity: "Rate the intensity from 1 (mild) to 10 (intense)",
-        step4OptionalNotes: "Optionally add notes about context or what you were thinking",
+        step4OptionalNotes:
+          "Optionally add notes about context or what you were thinking",
         noSessionsTitle: "No Session Recaps Yet",
-        noSessionsDescription: "Once you have coaching sessions, your coach will share summaries and insights here.",
+        noSessionsDescription:
+          "Once you have coaching sessions, your coach will share summaries and insights here.",
         learnAboutSessionsBtn: "Learn About Sessions",
         sessionHistoryHelp: "Understanding Your Session History",
-        sessionHistoryExplanation: "Your session history is a record of your coaching journey with your coach. Each session recap contains insights, observations, and summaries from your work together.",
+        sessionHistoryExplanation:
+          "Your session history is a record of your coaching journey with your coach. Each session recap contains insights, observations, and summaries from your work together.",
         whatYouWillSee: "What You'll See:",
         sessionDate: "Session date and number in your coaching journey",
         sharedSummary: "Shared summary with key insights from the session",
         sessionNotes: "Any notes or reflections your coach wants to share",
         coachInsights: "Patterns and observations from your somatic journey",
         tip: "Tip",
-        sessionTip: "Review past sessions to spot patterns in your somatic responses and track your progress over time.",
+        sessionTip:
+          "Review past sessions to spot patterns in your somatic responses and track your progress over time.",
       },
       insights: {
         title: "Client Insights",
@@ -201,7 +212,8 @@ const resources = {
         },
         emptyState: {
           title: "Not enough data yet",
-          subtitle: "{{clientName}} needs at least {{minLogs}} somatic logs to see patterns. Currently has {{totalLogs}}.",
+          subtitle:
+            "{{clientName}} needs at least {{minLogs}} somatic logs to see patterns. Currently has {{totalLogs}}.",
           action: "View Client Details",
         },
         sensations: {
@@ -227,16 +239,19 @@ const resources = {
           title: "Welcome to Loom Platform",
           subtitle: "Somatic coaching platform for the Satya Method",
           cta: "Get Started",
-          description: "Transform your coaching practice with our somatic logging and body mapping system.",
+          description:
+            "Transform your coaching practice with our somatic logging and body mapping system.",
           mainTitle: "Stop Guessing How Your Clients Feel",
-          mainSubtitle: "The first platform built for Somatic Coaching. Track sensations on a visual Body Map, manage session history automatically, and deepen your container.",
+          mainSubtitle:
+            "The first platform built for Somatic Coaching. Track sensations on a visual Body Map, manage session history automatically, and deepen your container.",
           seePricingBtn: "See Pricing",
           startTrialBtn: "Start Free Trial",
         },
         personas: {
           coach: {
             title: "For Coaches",
-            description: "Manage clients, track sessions, and deepen your practice with integrated tools designed for the Satya Method.",
+            description:
+              "Manage clients, track sessions, and deepen your practice with integrated tools designed for the Satya Method.",
             feature1: "Manage unlimited clients",
             feature2: "Automatic session tracking",
             feature3: "Client portal & resources",
@@ -244,7 +259,8 @@ const resources = {
           },
           client: {
             title: "For Clients",
-            description: "Log your sensations, track your journey, and stay connected with your coach's insights.",
+            description:
+              "Log your sensations, track your journey, and stay connected with your coach's insights.",
             feature1: "Interactive body map logging",
             feature2: "Session history & notes",
             feature3: "Resource sharing from coach",
@@ -257,27 +273,33 @@ const resources = {
           sectionDescription: "These are some of the features of the product.",
           sensoryLayer: {
             title: "The Sensory Layer",
-            description: "Clients don't just tell you they are tight—they show you. Our interactive Body Map tracks heat, tension, and vibration over time.",
+            description:
+              "Clients don't just tell you they are tight—they show you. Our interactive Body Map tracks heat, tension, and vibration over time.",
           },
           infiniteSession: {
             title: "The Infinite Session",
-            description: "Never ask 'What session number is this?' again. Loom automatically tracks session counts and connects previous homework to current insights.",
+            description:
+              "Never ask 'What session number is this?' again. Loom automatically tracks session counts and connects previous homework to current insights.",
           },
           frictionlessBusiness: {
             title: "Frictionless Business",
-            description: "You pay, they heal. Invite unlimited clients for free. Integrated payments and simple scheduling rules keep the admin out of the therapy room.",
+            description:
+              "You pay, they heal. Invite unlimited clients for free. Integrated payments and simple scheduling rules keep the admin out of the therapy room.",
           },
           bodyMapping: {
             title: "Body Mapping",
-            description: "Intuitive body zone selection for precise somatic tracking",
+            description:
+              "Intuitive body zone selection for precise somatic tracking",
           },
           somaticLogging: {
             title: "Somatic Logging",
-            description: "Track sensations, intensities, and notes for detailed client insights",
+            description:
+              "Track sensations, intensities, and notes for detailed client insights",
           },
           clientManagement: {
             title: "Client Management",
-            description: "Manage multiple clients and track their progress over time",
+            description:
+              "Manage multiple clients and track their progress over time",
           },
           secure: {
             title: "Secure & Private",
@@ -295,12 +317,14 @@ const resources = {
           sarahCohen: {
             name: "Dr. Sarah Cohen",
             role: "Senior Satya Method Coach, Tel Aviv",
-            quote: "The Body Map changed everything. Clients can finally show me their 'red chest' instead of struggling to describe it. It's like having X-ray vision into their nervous system.",
+            quote:
+              "The Body Map changed everything. Clients can finally show me their 'red chest' instead of struggling to describe it. It's like having X-ray vision into their nervous system.",
           },
           michaelLevi: {
             name: "Michael Levi",
             role: "Satya Method Practitioner, 8 Years",
-            quote: "I was drowning in session notes. Loom's automatic tracking means I can stay present with my clients instead of frantically scribbling 'Session 7' in my notebook.",
+            quote:
+              "I was drowning in session notes. Loom's automatic tracking means I can stay present with my clients instead of frantically scribbling 'Session 7' in my notebook.",
           },
         },
         faqs: {
@@ -308,35 +332,42 @@ const resources = {
           learnMore: "Learn more",
           clientsPay: {
             question: "Do my clients have to pay?",
-            answer: "No! You subscribe to Loom, and your clients get free access. They can log their sensations and view their session history at no cost. You're paying for the container, not per-seat.",
+            answer:
+              "No! You subscribe to Loom, and your clients get free access. They can log their sensations and view their session history at no cost. You're paying for the container, not per-seat.",
           },
           hebrewAvailable: {
             question: "Is it available in Hebrew?",
-            answer: "Yes. Loom is fully localized in Hebrew and English. Your clients can switch languages instantly from their dashboard.",
+            answer:
+              "Yes. Loom is fully localized in Hebrew and English. Your clients can switch languages instantly from their dashboard.",
           },
           pricingWorks: {
             question: "How does pricing work?",
-            answer: "Hobby plan (₪99/mo) supports up to 5 clients. Pro plan (₪199/mo) includes unlimited clients plus the Resource Library for sharing materials. Both include all core features.",
+            answer:
+              "Hobby plan (₪99/mo) supports up to 5 clients. Pro plan (₪199/mo) includes unlimited clients plus the Resource Library for sharing materials. Both include all core features.",
           },
         },
         examples: {
           usedBy: "Used by:",
           rachel: {
             name: "Rachel T.",
-            description: "Went from scattered notes to organized insights. Now tracks 12 clients effortlessly with Loom's Session Tracker.",
+            description:
+              "Went from scattered notes to organized insights. Now tracks 12 clients effortlessly with Loom's Session Tracker.",
           },
           david: {
             name: "David K.",
-            description: "Body Map helped him identify a pattern across 3 clients - tension migrating from shoulders to chest after Session 4.",
+            description:
+              "Body Map helped him identify a pattern across 3 clients - tension migrating from shoulders to chest after Session 4.",
           },
           yael: {
             name: "Yael M.",
-            description: "Switched from paper logs to Loom. Her clients love seeing their progress visualized on the heat map.",
+            description:
+              "Switched from paper logs to Loom. Her clients love seeing their progress visualized on the heat map.",
           },
         },
         bodyMapShowcase: {
           title: "Feel It. Map It. Track It.",
-          description: "The interactive Body Map turns sensations into insights. Heat, tension, vibration — all tracked over time. Click a zone to explore what you're feeling, then save it to your journal.",
+          description:
+            "The interactive Body Map turns sensations into insights. Heat, tension, vibration — all tracked over time. Click a zone to explore what you're feeling, then save it to your journal.",
         },
         footer: {
           app: "App",
@@ -386,9 +417,11 @@ const resources = {
         noPreviousSessions: "No previous sessions yet",
         recentSomaticActivity: "Recent Somatic Activity (Last 14 Days)",
         loadingContext: "Loading client context...",
-        unableToLoadLogs: "Unable to load somatic logs. Proceeding with session log...",
+        unableToLoadLogs:
+          "Unable to load somatic logs. Proceeding with session log...",
         foundLogs: "Found {{count}} log(s) from the last 14 days",
-        reviewHeatmap: "Review the heatmap above to understand where your client has been experiencing sensations.",
+        reviewHeatmap:
+          "Review the heatmap above to understand where your client has been experiencing sensations.",
         noLogsRecent: "No somatic logs recorded in the last 14 days",
         sessionDetails: "Session Details",
         sessionDate: "Session Date & Time",
@@ -400,16 +433,20 @@ const resources = {
         noAnchor: "-- No anchor --",
         bodyZoneHelp: "Which body zone was the focus of this session?",
         sharedSummary: "Session Summary (Visible to Client)",
-        sharedSummaryPlaceholder: "What happened in this session? What key insights did we explore?",
+        sharedSummaryPlaceholder:
+          "What happened in this session? What key insights did we explore?",
         sharedSummaryHelp: "This will be visible to your client",
         privateNotes: "Private Notes (Coach Only)",
-        privateNotesPlaceholder: "Personal observations, next steps, follow-up items...",
+        privateNotesPlaceholder:
+          "Personal observations, next steps, follow-up items...",
         privateNotesHelp: "Private notes visible only to you",
         attachResources: "Attach Resources (Homework)",
         loadingResources: "Loading resources...",
         errorLoadingResources: "Error loading resources",
-        noResourcesAvailable: "No resources available. Upload resources in your library first.",
-        selectResourcesHelp: "Select resources to attach as homework for this session",
+        noResourcesAvailable:
+          "No resources available. Upload resources in your library first.",
+        selectResourcesHelp:
+          "Select resources to attach as homework for this session",
         sessionLoggedSuccess: "Session #{{number}} logged successfully!",
         saving: "Saving...",
         totalSessions: "{{total}} session(s) completed",
@@ -421,10 +458,13 @@ const resources = {
         downloadFailed: "Failed to download resource. Please try again.",
         failedLoadHistory: "Error loading session history",
         noSessionsYet: "No Sessions Yet",
-        noSessionsDescription: "Your session history will appear here as you complete sessions with your coach.",
-        notSetupAsClient: "You are not set up as a client. Please contact your coach.",
+        noSessionsDescription:
+          "Your session history will appear here as you complete sessions with your coach.",
+        notSetupAsClient:
+          "You are not set up as a client. Please contact your coach.",
         deleteSession: "Delete Session",
-        deleteConfirm: "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
+        deleteConfirm:
+          "Are you sure you want to delete this session from {{date}}? This action cannot be undone.",
         deleteSessionConfirm: "Delete Session",
         timezoneInfo: "Timezone Information",
         yourTimezone: "Your timezone",
@@ -451,13 +491,15 @@ const resources = {
         nameRequiredMessage: "Please enter a name for this resource.",
         invalidFile: "Invalid file",
         resourceUploaded: "Resource uploaded",
-        resourceUploadedSuccess: "Your resource has been successfully uploaded.",
+        resourceUploadedSuccess:
+          "Your resource has been successfully uploaded.",
         errorUploading: "Error uploading resource",
         resourceDeleted: "Resource deleted",
         deletedMessage: "{{name}} has been deleted.",
         errorDeleting: "Error deleting resource",
         deleteResource: "Delete Resource",
-        deleteConfirm: "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+        deleteConfirm:
+          'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
         availableResources: "Available Resources ({{count}})",
         resources: "Resources",
         accessResourcesSubtitle: "Access resources shared by your coach",
@@ -475,9 +517,12 @@ const resources = {
         credits: "Credits",
         about: "About",
         freePlan: "Free Plan",
-        pastDue: "Payment for your {{plan}} plan is past due! Please update your subscription payment information.",
-        subscriptionCanceled: "Your {{plan}} plan subscription has been canceled, but remains active until the end of the current billing period: {{date}}",
-        subscriptionCanceledNoLonger: "Your previous subscription has been canceled and is no longer active.",
+        pastDue:
+          "Payment for your {{plan}} plan is past due! Please update your subscription payment information.",
+        subscriptionCanceled:
+          "Your {{plan}} plan subscription has been canceled, but remains active until the end of the current billing period: {{date}}",
+        subscriptionCanceledNoLonger:
+          "Your previous subscription has been canceled and is no longer active.",
         managePaymentDetails: "Manage Payment Details",
         buyMoreCredits: "Buy More Credits",
       },
@@ -507,13 +552,15 @@ const resources = {
       errors: {
         errorBoundary: {
           title: "Oops! Something went wrong",
-          message: "We encountered an unexpected error. Please try going back to the dashboard.",
+          message:
+            "We encountered an unexpected error. Please try going back to the dashboard.",
           goHome: "Go to Dashboard",
           contact: "If the problem persists, please contact support.",
         },
         missingClientId: {
           title: "Invalid Client",
-          message: "The client ID is missing or invalid. Please select a client from your dashboard.",
+          message:
+            "The client ID is missing or invalid. Please select a client from your dashboard.",
         },
       },
     },
@@ -554,20 +601,20 @@ const resources = {
       auth: {
         login: "התחברות",
         signup: "הרשמה",
-        email: "דוא\"ל",
+        email: 'דוא"ל',
         password: "סיסמה",
         forgotPassword: "שכחת סיסמה?",
         resetPassword: "איפוס סיסמה",
-        emailVerification: "אימות דוא\"ל",
-        enterEmail: "הזן את דוא\"לך",
+        emailVerification: 'אימות דוא"ל',
+        enterEmail: 'הזן את דוא"לך',
         enterPassword: "הזן את הסיסמה שלך",
         confirmPassword: "אשר סיסמה",
         dontHaveAccount: "אין לך חשבון?",
         alreadyHaveAccount: "יש לך כבר חשבון?",
         signUpNow: "הירשם עכשיו",
         loginNow: "התחבר עכשיו",
-        verifyEmail: "אמת את דוא\"לך",
-        sendVerification: "שלח דוא\"ל אימות",
+        verifyEmail: 'אמת את דוא"לך',
+        sendVerification: 'שלח דוא"ל אימות',
         createAccount: "צור חשבון",
         logIn: "התחבר",
         accountCreatedSuccess: "החשבון נוצר בהצלחה! אנא התחבר.",
@@ -622,7 +669,7 @@ const resources = {
           loading: "טוען ניתוחים...",
           error: "שגיאה בטעינת הניתוחים. אנא נסה שוב.",
           noData: "אין נתונים זמינים לתקופה זו.",
-          totalLogs: "סה\"כ רישומים בתקופה: {{count}}",
+          totalLogs: 'סה"כ רישומים בתקופה: {{count}}',
           exportCsv: "ייצוא CSV",
           exportPdf: "ייצוא PDF",
           exportSuccess: "ייצוא הצליח",
@@ -641,7 +688,7 @@ const resources = {
         noClients: "אין לקוחות עדיין",
         inviteClient: "הזמן לקוח",
         inviteNewClient: "הזמן לקוח חדש",
-        clientEmail: "דוא\"ל הלקוח",
+        clientEmail: 'דוא"ל הלקוח',
         sendInvite: "שלח הזמנה",
         pendingInvites: "הזמנות ממתינות",
         acceptedClients: "לקוחות פעילים",
@@ -651,10 +698,11 @@ const resources = {
         addOfflineClientHelp: "צור פרופיל לקוח ללא חשבון",
         offlineClientForm: {
           title: "הוסף לקוח חדש (ללא חשבון)",
-          description: "צור פרופיל לקוח עבור מישהו שלא יהיה משתמש באפליקציה בעצמו.",
+          description:
+            "צור פרופיל לקוח עבור מישהו שלא יהיה משתמש באפליקציה בעצמו.",
           displayName: "שם הלקוח",
           displayNamePlaceholder: "הזן שם מלא",
-          contactEmail: "דוא\"ל יצירת קשר (אופציונלי)",
+          contactEmail: 'דוא"ל יצירת קשר (אופציונלי)',
           contactEmailPlaceholder: "client@example.com",
           emailHelp: "לשימוש שלך בלבד, לא משמש לאימות",
           avatar: "תמונת פרופיל (אופציונלי)",
@@ -667,14 +715,15 @@ const resources = {
             invalidFileType: "בחר קובץ תמונה",
             fileTooLarge: "הקובץ חייב להיות קטן מ-5MB",
             nameRequired: "שם הלקוח נדרש",
-            invalidEmail: "פורמט דוא\"ל לא תקין",
+            invalidEmail: 'פורמט דוא"ל לא תקין',
             uploadFailed: "הועלאת תמונה נכשלה. אנא נסה שוב.",
             createFailed: "יצירת לקוח נכשלה",
           },
         },
         cancelInvitation: "בטל הזמנה",
         cancelInvitationConfirmTitle: "בטל הזמנה?",
-        cancelInvitationConfirmMessage: "האם אתה בטוח שברצונך לבטל את ההזמנה ל-{email}? הם לא יוכלו עוד להשתמש בקישור זה כדי להצטרף.",
+        cancelInvitationConfirmMessage:
+          "האם אתה בטוח שברצונך לבטל את ההזמנה ל-{email}? הם לא יוכלו עוד להשתמש בקישור זה כדי להצטרף.",
         confirmCancel: "כן, בטל הזמנה",
       },
       client: {
@@ -685,27 +734,33 @@ const resources = {
         recentSensations: "תחושות אחרונות",
         recentSessions: "פגישות אחרונות",
         noLogsTitle: "עדיין לא רשמת תחושות",
-        noLogsDescription: "התחל לעקוב אחרי חוויתך הסומטית על ידי רישום תחושה ראשונה בגופך.",
+        noLogsDescription:
+          "התחל לעקוב אחרי חוויתך הסומטית על ידי רישום תחושה ראשונה בגופך.",
         logFirstSensationBtn: "רשום את התחושה הראשונה שלך",
         somaticLoggingHelp: "כיצד לרשום את התחושות שלך",
-        somaticLoggingExplanation: "רישום סומטי עוזר לך לבנות מודעות לתגובות ודפוסים של גופך לאורך זמן. כל רישום תופס רגע של תחושה בגופך.",
+        somaticLoggingExplanation:
+          "רישום סומטי עוזר לך לבנות מודעות לתגובות ודפוסים של גופך לאורך זמן. כל רישום תופס רגע של תחושה בגופך.",
         howToLog: "כיצד לרשום תחושה:",
-        step1SelectZone: "לחץ על אזור גוף במפה האינטראקטיבית (ראש, חזה, בטן וכו')",
+        step1SelectZone:
+          "לחץ על אזור גוף במפה האינטראקטיבית (ראש, חזה, בטן וכו')",
         step2ChooseSensation: "בחר סוג תחושה כמו הדוק, חם, קר, רועד או מנומן",
         step3SetIntensity: "דרג את העוצמה מ-1 (קלה) עד 10 (חזקה)",
         step4OptionalNotes: "הוסף הערות אופציונליות על הקשר או מה חשבת",
         noSessionsTitle: "עדיין אין סיכום פגישות",
-        noSessionsDescription: "כאשר יהיו לך פגישות אימון, המאמן שלך יחלוק סיכומים והבנות כאן.",
+        noSessionsDescription:
+          "כאשר יהיו לך פגישות אימון, המאמן שלך יחלוק סיכומים והבנות כאן.",
         learnAboutSessionsBtn: "למד על פגישות",
         sessionHistoryHelp: "הבנת ההיסטוריה של הפגישות שלך",
-        sessionHistoryExplanation: "היסטוריית הפגישות שלך היא רישום של מסע האימון שלך עם המאמן שלך. כל סיכום פגישה מכיל הבנות, תצפיות וסיכומים מהעבודה המשותפת שלכם.",
+        sessionHistoryExplanation:
+          "היסטוריית הפגישות שלך היא רישום של מסע האימון שלך עם המאמן שלך. כל סיכום פגישה מכיל הבנות, תצפיות וסיכומים מהעבודה המשותפת שלכם.",
         whatYouWillSee: "מה תראה:",
         sessionDate: "תאריך הפגישה ומספרה במסע האימון שלך",
         sharedSummary: "סיכום משותף עם תובנות חשובות מהפגישה",
         sessionNotes: "כל הערה או השתקפות שהמאמן שלך רוצה לשתף",
         coachInsights: "דפוסים ותצפיות ממסע הסומטי שלך",
         tip: "עצה",
-        sessionTip: "בדוק פגישות קודמות כדי לזהות דפוסים בתגובות הסומטיות שלך וללמוד על התקדמותך לאורך זמן.",
+        sessionTip:
+          "בדוק פגישות קודמות כדי לזהות דפוסים בתגובות הסומטיות שלך וללמוד על התקדמותך לאורך זמן.",
       },
       insights: {
         title: "תובנות הלקוח",
@@ -717,7 +772,8 @@ const resources = {
         },
         emptyState: {
           title: "אין מספיק נתונים עדיין",
-          subtitle: "{{clientName}} צריך לפחות {{minLogs}} רישומים סומטיים כדי לראות דפוסים. כרגע יש {{totalLogs}}.",
+          subtitle:
+            "{{clientName}} צריך לפחות {{minLogs}} רישומים סומטיים כדי לראות דפוסים. כרגע יש {{totalLogs}}.",
           action: "צפה בפרטי הלקוח",
         },
         sensations: {
@@ -732,7 +788,7 @@ const resources = {
           detail: "{{zone}}: {{count}} רישומים ({{percentage}}%)",
         },
         stats: {
-          totalLogs: "סה\"כ רישומים",
+          totalLogs: 'סה"כ רישומים',
           averageIntensity: "עוצמה ממוצעת",
           uniqueSensations: "תחושות ייחודיות",
         },
@@ -743,16 +799,19 @@ const resources = {
           title: "ברוכים הבאים ל-Loom Platform",
           subtitle: "פלטפורמת אימון סומטי עבור שיטת Satya",
           cta: "התחל",
-          description: "שנה את תרגול האימון שלך עם מערכת רישום סומטי ומיפוי גוף מתקדמת.",
+          description:
+            "שנה את תרגול האימון שלך עם מערכת רישום סומטי ומיפוי גוף מתקדמת.",
           mainTitle: "חדלו מהדיסות איך הלקוחות שלכם מרגישים",
-          mainSubtitle: "הפלטפורמה הראשונה שנבנתה עבור אימון סומטי. עקוב אחרי תחושות במפת גוף ויזואלית, נהל היסטוריית פגישות באופן אוטומטי, וחזק את המכל שלך.",
+          mainSubtitle:
+            "הפלטפורמה הראשונה שנבנתה עבור אימון סומטי. עקוב אחרי תחושות במפת גוף ויזואלית, נהל היסטוריית פגישות באופן אוטומטי, וחזק את המכל שלך.",
           seePricingBtn: "ראה תמחור",
           startTrialBtn: "התחל ניסיון חינם",
         },
         personas: {
           coach: {
             title: "עבור מאמנים",
-            description: "נהל לקוחות, עקוב אחרי הפגישות וההתקדמות שלהם בעזרת כלים מעצבים עבור שיטת Satya.",
+            description:
+              "נהל לקוחות, עקוב אחרי הפגישות וההתקדמות שלהם בעזרת כלים מעצבים עבור שיטת Satya.",
             feature1: "ניהול לקוחות ללא הגבלה",
             feature2: "עקוב אוטומטי של פגישות",
             feature3: "פורטל לקוח וספריית משאבים",
@@ -760,7 +819,8 @@ const resources = {
           },
           client: {
             title: "עבור לקוחות",
-            description: "רשום את תחושותיך, עקוב אחרי הדרך שלך והישאר מחובר להבנות של המאמן שלך.",
+            description:
+              "רשום את תחושותיך, עקוב אחרי הדרך שלך והישאר מחובר להבנות של המאמן שלך.",
             feature1: "רישום אינטראקטיבי במפת גוף",
             feature2: "היסטוריית פגישות והערות",
             feature3: "שיתוף משאבים מהמאמן",
@@ -773,15 +833,18 @@ const resources = {
           sectionDescription: "אלה חלק מהתכונות של המוצר.",
           sensoryLayer: {
             title: "שכבת החוש",
-            description: "הלקוחות לא רק אומרים לך שהם הדוקים — הם מראים לך. מפת הגוף האינטראקטיבית שלנו עוקבת אחרי חום, מתח וגלישה לאורך זמן.",
+            description:
+              "הלקוחות לא רק אומרים לך שהם הדוקים — הם מראים לך. מפת הגוף האינטראקטיבית שלנו עוקבת אחרי חום, מתח וגלישה לאורך זמן.",
           },
           infiniteSession: {
             title: "הפגישה האינסופית",
-            description: "אל תעזבו שוב בספק איזה מספר פגישה זו. Loom עוקב אוטומטית אחר ספירת הפגישות ומחבר שיעורי בית קודמים להבנות נוכחיות.",
+            description:
+              "אל תעזבו שוב בספק איזה מספר פגישה זו. Loom עוקב אוטומטית אחר ספירת הפגישות ומחבר שיעורי בית קודמים להבנות נוכחיות.",
           },
           frictionlessBusiness: {
             title: "עסקים ללא חיכוך",
-            description: "אתה משלם, הם מתרפאים. הזמן לקוחות ללא הגבלה בחינם. תשלומים משולבים וכללי תזמון פשוטים מעיקים את הניהול מחדר הטיפול.",
+            description:
+              "אתה משלם, הם מתרפאים. הזמן לקוחות ללא הגבלה בחינם. תשלומים משולבים וכללי תזמון פשוטים מעיקים את הניהול מחדר הטיפול.",
           },
           bodyMapping: {
             title: "מיפוי גוף",
@@ -809,14 +872,16 @@ const resources = {
           showLess: "הראה פחות",
           showMore: "הראה {{count}} נוסף",
           sarahCohen: {
-            name: "ד\"ר שרה כהן",
+            name: 'ד"ר שרה כהן',
             role: "מאמנת בכיר בשיטת Satya, תל אביב",
-            quote: "מפת הגוף שינתה את הכל. לקוחות יכולים סוף סוף להראות לי את ה'חזה אדום' שלהם במקום להאבק להסביר זאת. זה כמו לקבל חזון בעינת רנטגן לתוך מערכת העצבים שלהם.",
+            quote:
+              "מפת הגוף שינתה את הכל. לקוחות יכולים סוף סוף להראות לי את ה'חזה אדום' שלהם במקום להאבק להסביר זאת. זה כמו לקבל חזון בעינת רנטגן לתוך מערכת העצבים שלהם.",
           },
           michaelLevi: {
             name: "מיכאל לוי",
             role: "פרקטיקנט בשיטת Satya, 8 שנים",
-            quote: "טבעתי בהערות על הפגישות. המעקב האוטומטי של Loom פירושו שאני יכול להישאר נוכח עם הלקוחות שלי במקום לצרום בפיקניק 'פגישה 7' במחברת.",
+            quote:
+              "טבעתי בהערות על הפגישות. המעקב האוטומטי של Loom פירושו שאני יכול להישאר נוכח עם הלקוחות שלי במקום לצרום בפיקניק 'פגישה 7' במחברת.",
           },
         },
         faqs: {
@@ -824,35 +889,42 @@ const resources = {
           learnMore: "למד עוד",
           clientsPay: {
             question: "האם הלקוחות שלי חייבים לשלם?",
-            answer: "לא! אתה מנוי ל-Loom, והלקוחות שלך מקבלים גישה בחינם. הם יכולים לרשום את התחושות שלהם ולצפות בהיסטוריית הפגישות שלהם ללא עלות. אתה משלם עבור המכל, לא לכל מושב.",
+            answer:
+              "לא! אתה מנוי ל-Loom, והלקוחות שלך מקבלים גישה בחינם. הם יכולים לרשום את התחושות שלהם ולצפות בהיסטוריית הפגישות שלהם ללא עלות. אתה משלם עבור המכל, לא לכל מושב.",
           },
           hebrewAvailable: {
             question: "האם זה זמין בעברית?",
-            answer: "כן. Loom מתורגם במלואו לעברית ואנגלית. הלקוחות שלך יכולים לעבור בין שפות באופן מיידי מלוח הבקרה שלהם.",
+            answer:
+              "כן. Loom מתורגם במלואו לעברית ואנגלית. הלקוחות שלך יכולים לעבור בין שפות באופן מיידי מלוח הבקרה שלהם.",
           },
           pricingWorks: {
             question: "איך התמחור פועל?",
-            answer: "תוכנית חובי (₪99/חודש) תומכת עד 5 לקוחות. תוכנית Pro (₪199/חודש) כוללת לקוחות ללא הגבלה בתוספת ספריית המשאבים לשיתוף חומרים. שתיהן כוללות את כל התכונות הליבה.",
+            answer:
+              "תוכנית חובי (₪99/חודש) תומכת עד 5 לקוחות. תוכנית Pro (₪199/חודש) כוללת לקוחות ללא הגבלה בתוספת ספריית המשאבים לשיתוף חומרים. שתיהן כוללות את כל התכונות הליבה.",
           },
         },
         examples: {
           usedBy: "בשימוש על ידי:",
           rachel: {
             name: "Rachel T.",
-            description: "עברה מהערות פזורות להבנות מאורגנות. כעת עוקבת אחרי 12 לקוחות ללא מאמץ עם Loom's Session Tracker.",
+            description:
+              "עברה מהערות פזורות להבנות מאורגנות. כעת עוקבת אחרי 12 לקוחות ללא מאמץ עם Loom's Session Tracker.",
           },
           david: {
             name: "David K.",
-            description: "מפת הגוף עזרה לו לזהות דפוס על פני 3 לקוחות - מתח נעקר מהכתפיים לחזה לאחר פגישה 4.",
+            description:
+              "מפת הגוף עזרה לו לזהות דפוס על פני 3 לקוחות - מתח נעקר מהכתפיים לחזה לאחר פגישה 4.",
           },
           yael: {
             name: "Yael M.",
-            description: "עברה מרישומי נייר ל-Loom. הלקוחות שלה אוהבים לראות את ההתקדמות שלהם מוגדלת במפת החום.",
+            description:
+              "עברה מרישומי נייר ל-Loom. הלקוחות שלה אוהבים לראות את ההתקדמות שלהם מוגדלת במפת החום.",
           },
         },
         bodyMapShowcase: {
           title: "הרגש אותה. תעד אותה. עקוב אחריה.",
-          description: "מפת הגוף האינטראקטיבית הופכת תחושות להבנות. חום, מתח, גלישה — כל זה עוקב לאורך זמן. לחץ על אזור כדי לחקור מה אתה מרגיש, ואז שמור אותו ביומן שלך.",
+          description:
+            "מפת הגוף האינטראקטיבית הופכת תחושות להבנות. חום, מתח, גלישה — כל זה עוקב לאורך זמן. לחץ על אזור כדי לחקור מה אתה מרגיש, ואז שמור אותו ביומן שלך.",
         },
         footer: {
           app: "אפליקציה",
@@ -871,11 +943,7 @@ const resources = {
           description: "עבור מאמנים בודדים",
           price: "₪36",
           period: "לחודש",
-          features: [
-            "עד 5 לקוחות",
-            "רישומים סומטיים ללא הגבלה",
-            "ניתוח בסיסי",
-          ],
+          features: ["עד 5 לקוחות", "רישומים סומטיים ללא הגבלה", "ניתוח בסיסי"],
         },
         pro: {
           name: "פרו",
@@ -904,7 +972,8 @@ const resources = {
         loadingContext: "טוען הקשר לקוח...",
         unableToLoadLogs: "לא ניתן לטעון רישומים סומטיים. המשך ברישום הפעלה...",
         foundLogs: "נמצאו {{count}} רישום(ים) מ-14 הימים האחרונים",
-        reviewHeatmap: "בדוק את מפת החום למעלה כדי להבין היכן הלקוח שלך חווה תחושות.",
+        reviewHeatmap:
+          "בדוק את מפת החום למעלה כדי להבין היכן הלקוח שלך חווה תחושות.",
         noLogsRecent: "לא נרשמו רישומים סומטיים ב-14 הימים האחרונים",
         sessionDetails: "פרטי ההפעלה",
         sessionDate: "תאריך ושעת ההפעלה",
@@ -924,7 +993,8 @@ const resources = {
         attachResources: "צרף משאבים (שיעורי בית)",
         loadingResources: "טוען משאבים...",
         errorLoadingResources: "שגיאה בטעינת משאבים",
-        noResourcesAvailable: "אין משאבים זמינים. העלה משאבים בספריית שלך תחילה.",
+        noResourcesAvailable:
+          "אין משאבים זמינים. העלה משאבים בספריית שלך תחילה.",
         selectResourcesHelp: "בחר משאבים לצירוף כשיעורי בית להפעלה זו",
         sessionLoggedSuccess: "הפעלה #{{number}} נרשמה בהצלחה!",
         saving: "שמירה...",
@@ -937,10 +1007,12 @@ const resources = {
         downloadFailed: "הורדה נכשלה. אנא נסה שוב.",
         failedLoadHistory: "שגיאה בטעינת היסטוריית הפעלות",
         noSessionsYet: "אין הפעלות עדיין",
-        noSessionsDescription: "היסטוריית ההפעלות שלך תופיע כאן כאשר תשלים הפעלות עם המאמן שלך.",
+        noSessionsDescription:
+          "היסטוריית ההפעלות שלך תופיע כאן כאשר תשלים הפעלות עם המאמן שלך.",
         notSetupAsClient: "אתה לא הוגדרת כלקוח. אנא צור קשר עם המאמן שלך.",
         deleteSession: "מחק הפעלה",
-        deleteConfirm: "האם אתה בטוח שברצונך למחוק את ההפעלה מ-{{date}}? לא ניתן לבטל פעולה זו.",
+        deleteConfirm:
+          "האם אתה בטוח שברצונך למחוק את ההפעלה מ-{{date}}? לא ניתן לבטל פעולה זו.",
         deleteSessionConfirm: "מחק הפעלה",
         timezoneInfo: "מידע אזור הזמן",
         yourTimezone: "אזור הזמן שלך",
@@ -973,7 +1045,8 @@ const resources = {
         deletedMessage: "{{name}} נמחק.",
         errorDeleting: "שגיאה במחיקת משאב",
         deleteResource: "מחק משאב",
-        deleteConfirm: "האם אתה בטוח שברצונך למחוק \"{{name}}\"? לא ניתן לבטל פעולה זו.",
+        deleteConfirm:
+          'האם אתה בטוח שברצונך למחוק "{{name}}"? לא ניתן לבטל פעולה זו.',
         availableResources: "משאבים זמינים ({{count}})",
         resources: "משאבים",
         accessResourcesSubtitle: "גישה למשאבים שנשלחו על ידי המאמן שלך",
@@ -985,14 +1058,16 @@ const resources = {
       },
       account: {
         accountInformation: "מידע חשבון",
-        emailAddress: "כתובת דוא\"ל",
+        emailAddress: 'כתובת דוא"ל',
         username: "שם משתמש",
         yourPlan: "התוכנית שלך",
         credits: "קרדיטים",
         about: "על אודות",
         freePlan: "תוכנית חינם",
-        pastDue: "התשלום עבור תוכנית {{plan}} שלך עם איחור! עדכן את פרטי התשלום של המנוי שלך.",
-        subscriptionCanceled: "המנוי של תוכנית {{plan}} שלך בוטל, אך נשאר פעיל עד סוף תקופת החיוב הנוכחית: {{date}}",
+        pastDue:
+          "התשלום עבור תוכנית {{plan}} שלך עם איחור! עדכן את פרטי התשלום של המנוי שלך.",
+        subscriptionCanceled:
+          "המנוי של תוכנית {{plan}} שלך בוטל, אך נשאר פעיל עד סוף תקופת החיוב הנוכחית: {{date}}",
         subscriptionCanceledNoLonger: "המנוי הקודם שלך בוטל ואינו פעיל עוד.",
         managePaymentDetails: "נהל פרטי תשלום",
         buyMoreCredits: "קנה קרדיטים נוספים",

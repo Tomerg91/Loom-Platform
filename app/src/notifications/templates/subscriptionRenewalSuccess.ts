@@ -76,7 +76,11 @@ export function getSubscriptionRenewalSuccessEmailContent(
 
   return {
     subject: `✓ Your ${data.planName} subscription has been renewed`,
-    text: `Your ${data.planName} subscription has been successfully renewed for ₪${data.amountCharged.toFixed(2)} on ${formattedRenewalDate}. Next renewal is scheduled for ${formattedNextDate}.`,
+    text: `Your ${
+      data.planName
+    } subscription has been successfully renewed for ₪${data.amountCharged.toFixed(
+      2,
+    )} on ${formattedRenewalDate}. Next renewal is scheduled for ${formattedNextDate}.`,
     html,
   };
 }

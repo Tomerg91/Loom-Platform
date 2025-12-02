@@ -51,7 +51,12 @@ export function BodyZoneChart({ data }: BodyZoneChartProps) {
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis type="number" />
-        <YAxis dataKey="zone" type="category" width={140} tick={{ fontSize: 12 }} />
+        <YAxis
+          dataKey="zone"
+          type="category"
+          width={140}
+          tick={{ fontSize: 12 }}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: "#ffffff",

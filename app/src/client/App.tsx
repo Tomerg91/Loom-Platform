@@ -68,7 +68,9 @@ export default function App() {
         bodyZone: zone,
         sensation,
         intensity: 5, // Default intensity for landing page saves
-        note: `Saved from landing page on ${new Date(timestamp).toLocaleString()}`,
+        note: `Saved from landing page on ${new Date(
+          timestamp,
+        ).toLocaleString()}`,
         sharedWithCoach: true,
       })
         .then(() => {

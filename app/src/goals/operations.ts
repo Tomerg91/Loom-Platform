@@ -24,7 +24,7 @@ const CreateGoalSchema = z.object({
       z.object({
         text: z.string().min(1, "Milestone text is required"),
         order: z.number().default(0),
-      })
+      }),
     )
     .default([]),
   clientId: z.string().min(1, "Client ID is required"),
@@ -62,7 +62,9 @@ type GetGoalsInput = z.infer<typeof GetGoalsSchema>;
 type ToggleMilestoneInput = z.infer<typeof ToggleMilestoneSchema>;
 type UpdateGoalProgressInput = z.infer<typeof UpdateGoalProgressSchema>;
 
-type GoalWithMilestones = Prisma.GoalGetPayload<{ include: { milestones: true } }>;
+type GoalWithMilestones = Prisma.GoalGetPayload<{
+  include: { milestones: true };
+}>;
 
 type MilestoneQueryContext = {
   Milestone: {
@@ -98,10 +100,7 @@ export const createGoal: CreateGoal<
   CreateGoalInput,
   GoalWithMilestones
 > = async (args, context) => {
-  const data = await ensureArgsSchemaOrThrowHttpError(
-    CreateGoalSchema,
-    args
-  );
+  const data = await ensureArgsSchemaOrThrowHttpError(CreateGoalSchema, args);
 
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
@@ -127,7 +126,10 @@ export const createGoal: CreateGoal<
     context.user.role === "COACH";
 
   if (!isClient && !isCoach) {
-    throw new HttpError(403, "You don't have permission to create goals for this client");
+    throw new HttpError(
+      403,
+      "You don't have permission to create goals for this client",
+    );
   }
 
   // Create goal with milestones
@@ -163,10 +165,7 @@ export const updateGoal: UpdateGoal<
   UpdateGoalInput,
   GoalWithMilestones
 > = async (args, context) => {
-  const data = await ensureArgsSchemaOrThrowHttpError(
-    UpdateGoalSchema,
-    args
-  );
+  const data = await ensureArgsSchemaOrThrowHttpError(UpdateGoalSchema, args);
 
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
@@ -210,14 +209,11 @@ export const updateGoal: UpdateGoal<
   return updatedGoal;
 };
 
-export const deleteGoal: DeleteGoal<DeleteGoalInput, { success: true }> = async (
-  args,
-  context
-) => {
-  const data = await ensureArgsSchemaOrThrowHttpError(
-    DeleteGoalSchema,
-    args
-  );
+export const deleteGoal: DeleteGoal<
+  DeleteGoalInput,
+  { success: true }
+> = async (args, context) => {
+  const data = await ensureArgsSchemaOrThrowHttpError(DeleteGoalSchema, args);
 
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
@@ -257,10 +253,10 @@ export const deleteGoal: DeleteGoal<DeleteGoalInput, { success: true }> = async 
   return { success: true };
 };
 
-export const getGoals: GetGoals<
-  GetGoalsInput,
-  GoalWithMilestones[]
-> = async (args, context) => {
+export const getGoals: GetGoals<GetGoalsInput, GoalWithMilestones[]> = async (
+  args,
+  context,
+) => {
   if (!context.user) {
     throw new HttpError(401, "User must be logged in");
   }
@@ -334,7 +330,7 @@ export const toggleMilestone: ToggleMilestone<
 > = async (args, context) => {
   const data = await ensureArgsSchemaOrThrowHttpError(
     ToggleMilestoneSchema,
-    args
+    args,
   );
 
   if (!context.user) {
@@ -366,7 +362,10 @@ export const toggleMilestone: ToggleMilestone<
     context.user.role === "COACH";
 
   if (!isClient && !isCoach) {
-    throw new HttpError(403, "You don't have permission to update this milestone");
+    throw new HttpError(
+      403,
+      "You don't have permission to update this milestone",
+    );
   }
 
   // Update milestone
@@ -380,7 +379,7 @@ export const toggleMilestone: ToggleMilestone<
   // Recalculate goal progress
   const progress = await calculateGoalProgress(
     milestone.goal.id,
-    context.entities
+    context.entities,
   );
 
   // Update goal progress
@@ -445,7 +444,9 @@ export const updateGoalProgress: UpdateGoalProgress<
   const updatedGoal = await context.entities.Goal.update({
     where: { id: goalId },
     data: { progress },
-    include: { milestones: { where: { deletedAt: null }, orderBy: { order: "asc" } } },
+    include: {
+      milestones: { where: { deletedAt: null }, orderBy: { order: "asc" } },
+    },
   });
 
   return updatedGoal;

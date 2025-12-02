@@ -2,7 +2,16 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // BodyZone type definition matching Prisma schema
-type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
 
 type ZoneHighlight = {
   zone: BodyZone;
@@ -102,7 +111,10 @@ export default function BodyMapSelector({
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<SVGPathElement>, zone: BodyZone) => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent<SVGPathElement>,
+    zone: BodyZone,
+  ) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleZoneActivate(zone);
@@ -205,7 +217,11 @@ export default function BodyMapSelector({
               role={mode === "interactive" ? "button" : "presentation"}
               tabIndex={mode === "interactive" ? 0 : -1}
               aria-label={getZoneAriaLabel(zoneData.zone)}
-              aria-pressed={mode === "interactive" ? selectedZone === zoneData.zone : undefined}
+              aria-pressed={
+                mode === "interactive"
+                  ? selectedZone === zoneData.zone
+                  : undefined
+              }
               onMouseEnter={
                 mode === "interactive"
                   ? () => setHoveredZone(zoneData.zone)
@@ -243,15 +259,24 @@ export default function BodyMapSelector({
         ) : (
           <div className="flex items-center justify-center gap-4 text-xs">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#10b981" }}></div>
+              <div
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#10b981" }}
+              ></div>
               <span>{t("somatic.intensityLow")}</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#f59e0b" }}></div>
+              <div
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#f59e0b" }}
+              ></div>
               <span>{t("somatic.intensityMedium")}</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: "#ef4444" }}></div>
+              <div
+                className="w-3 h-3 rounded"
+                style={{ backgroundColor: "#ef4444" }}
+              ></div>
               <span>{t("somatic.intensityHigh")}</span>
             </div>
           </div>

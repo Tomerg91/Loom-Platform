@@ -7,11 +7,23 @@ import type {
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
-import { computeClientAnalytics, type ClientAnalyticsResult } from "./analytics";
+import {
+  computeClientAnalytics,
+  type ClientAnalyticsResult,
+} from "./analytics";
 import { isAdmin, isCoach, requireAuth, requireRole } from "../server/rbac";
 
 // BodyZone type definition matching Prisma schema
-type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
 
 // ============================================
 // CREATE SOMATIC LOG
@@ -66,7 +78,7 @@ export const createSomaticLog: CreateSomaticLog<
     // This handles cases where a user is created but profile isn't auto-created
     if (!clientProfile) {
       console.warn(
-        `[SomaticLog] Creating missing client profile for user ${clientContext.user.id}`
+        `[SomaticLog] Creating missing client profile for user ${clientContext.user.id}`,
       );
 
       try {
@@ -78,12 +90,12 @@ export const createSomaticLog: CreateSomaticLog<
       } catch (profileCreateError) {
         console.error(
           `[SomaticLog] Failed to create client profile for user ${clientContext.user.id}:`,
-          profileCreateError
+          profileCreateError,
         );
 
         throw new HttpError(
           500,
-          "Failed to initialize client profile. Please contact support if this persists."
+          "Failed to initialize client profile. Please contact support if this persists.",
         );
       }
     }
@@ -105,13 +117,10 @@ export const createSomaticLog: CreateSomaticLog<
     } catch (logCreateError) {
       console.error(
         `[SomaticLog] Failed to create log for client ${clientProfile.id}:`,
-        logCreateError
+        logCreateError,
       );
 
-      throw new HttpError(
-        500,
-        "Failed to save sensation. Please try again."
-      );
+      throw new HttpError(500, "Failed to save sensation. Please try again.");
     }
 
     // ============================================
@@ -127,7 +136,7 @@ export const createSomaticLog: CreateSomaticLog<
       // Activity tracking is non-critical
       console.warn(
         `[SomaticLog] Failed to update activity date for client ${clientProfile.id}:`,
-        activityError
+        activityError,
       );
     }
   } catch (error) {
@@ -142,7 +151,7 @@ export const createSomaticLog: CreateSomaticLog<
     // Return generic error to client
     throw new HttpError(
       500,
-      "An unexpected error occurred while logging your sensation. Please try again."
+      "An unexpected error occurred while logging your sensation. Please try again.",
     );
   }
 };
@@ -176,7 +185,10 @@ export const getSomaticLogs: GetSomaticLogs<
   SomaticLogResponse[]
 > = async (rawArgs, context) => {
   try {
-    const args = ensureArgsSchemaOrThrowHttpError(getSomaticLogsSchema, rawArgs);
+    const args = ensureArgsSchemaOrThrowHttpError(
+      getSomaticLogsSchema,
+      rawArgs,
+    );
     const authenticatedContext = requireAuth(
       context,
       "You must be logged in to view somatic logs",
@@ -185,55 +197,69 @@ export const getSomaticLogs: GetSomaticLogs<
     // Build filter conditions with type safety
     const whereConditions: any = {};
     if (args.startDate) {
-      whereConditions.createdAt = { ...whereConditions.createdAt, gte: args.startDate };
+      whereConditions.createdAt = {
+        ...whereConditions.createdAt,
+        gte: args.startDate,
+      };
     }
     if (args.endDate) {
-      whereConditions.createdAt = { ...whereConditions.createdAt, lte: args.endDate };
+      whereConditions.createdAt = {
+        ...whereConditions.createdAt,
+        lte: args.endDate,
+      };
     }
     if (args.bodyZones && args.bodyZones.length > 0) {
       whereConditions.bodyZone = { in: args.bodyZones };
     }
     if (args.minIntensity !== undefined) {
-      whereConditions.intensity = { ...whereConditions.intensity, gte: args.minIntensity };
+      whereConditions.intensity = {
+        ...whereConditions.intensity,
+        gte: args.minIntensity,
+      };
     }
     if (args.maxIntensity !== undefined) {
-      whereConditions.intensity = { ...whereConditions.intensity, lte: args.maxIntensity };
+      whereConditions.intensity = {
+        ...whereConditions.intensity,
+        lte: args.maxIntensity,
+      };
     }
 
     // If user is CLIENT: return their own logs
     if (authenticatedContext.user.role === "CLIENT") {
-      let clientProfile = await authenticatedContext.entities.ClientProfile.findUnique({
-        where: { userId: authenticatedContext.user.id },
-        include: {
-          somaticLogs: {
-            where: whereConditions,
-            orderBy: { createdAt: "desc" },
+      let clientProfile =
+        await authenticatedContext.entities.ClientProfile.findUnique({
+          where: { userId: authenticatedContext.user.id },
+          include: {
+            somaticLogs: {
+              where: whereConditions,
+              orderBy: { createdAt: "desc" },
+            },
           },
-        },
-      });
+        });
 
       // If profile doesn't exist, create it gracefully
       if (!clientProfile) {
         console.warn(
-          `[GetSomaticLogs] Creating missing client profile for user ${authenticatedContext.user.id}`
+          `[GetSomaticLogs] Creating missing client profile for user ${authenticatedContext.user.id}`,
         );
 
         try {
-          clientProfile = await authenticatedContext.entities.ClientProfile.create({
-            data: {
-              userId: authenticatedContext.user.id,
-            },
-            include: {
-              somaticLogs: {
-                where: whereConditions,
-                orderBy: { createdAt: "desc" },
+          clientProfile =
+            await authenticatedContext.entities.ClientProfile.create({
+              data: {
+                userId: authenticatedContext.user.id,
               },
-            },
-          });
+              include: {
+                somaticLogs: {
+                  where: whereConditions,
+                  orderBy: { createdAt: "desc" },
+                },
+              },
+            });
         } catch (error) {
           console.error(
             `[GetSomaticLogs] Failed to create client profile:`,
-            error
+            error,
           );
           // Return empty array instead of failing
           return [];
@@ -254,43 +280,50 @@ export const getSomaticLogs: GetSomaticLogs<
     // If user is COACH: return only shared logs for their clients
     if (authenticatedContext.user.role === "COACH") {
       if (!args.clientId) {
-        throw new HttpError(400, "Client ID is required for coaches to view logs");
+        throw new HttpError(
+          400,
+          "Client ID is required for coaches to view logs",
+        );
       }
 
       try {
-        const coachProfile = await authenticatedContext.entities.CoachProfile.findUnique({
-          where: { userId: authenticatedContext.user.id },
-          include: {
-            clients: {
-              where: { id: args.clientId },
-              include: {
-                somaticLogs: {
-                  where: {
-                    ...whereConditions,
-                    sharedWithCoach: true, // Only show shared logs to coaches
+        const coachProfile =
+          await authenticatedContext.entities.CoachProfile.findUnique({
+            where: { userId: authenticatedContext.user.id },
+            include: {
+              clients: {
+                where: { id: args.clientId },
+                include: {
+                  somaticLogs: {
+                    where: {
+                      ...whereConditions,
+                      sharedWithCoach: true, // Only show shared logs to coaches
+                    },
+                    orderBy: { createdAt: "desc" },
                   },
-                  orderBy: { createdAt: "desc" },
                 },
               },
             },
-          },
-        });
+          });
 
         if (!coachProfile) {
           console.warn(
-            `[GetSomaticLogs] Coach profile not found for user ${authenticatedContext.user.id}`
+            `[GetSomaticLogs] Coach profile not found for user ${authenticatedContext.user.id}`,
           );
-          throw new HttpError(404, "Coach profile not found. Please contact support.");
+          throw new HttpError(
+            404,
+            "Coach profile not found. Please contact support.",
+          );
         }
 
         const client = coachProfile.clients[0];
         if (!client) {
           console.warn(
-            `[GetSomaticLogs] Coach ${authenticatedContext.user.id} attempted unauthorized access to client ${args.clientId}`
+            `[GetSomaticLogs] Coach ${authenticatedContext.user.id} attempted unauthorized access to client ${args.clientId}`,
           );
           throw new HttpError(
             403,
-            "You do not have access to this client's logs"
+            "You do not have access to this client's logs",
           );
         }
 
@@ -333,7 +366,9 @@ const updateSomaticLogVisibilitySchema = z.object({
   sharedWithCoach: z.boolean(),
 });
 
-type UpdateSomaticLogVisibilityInput = z.infer<typeof updateSomaticLogVisibilitySchema>;
+type UpdateSomaticLogVisibilityInput = z.infer<
+  typeof updateSomaticLogVisibilitySchema
+>;
 
 export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
   UpdateSomaticLogVisibilityInput,
@@ -342,11 +377,14 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
   try {
     const { logId, sharedWithCoach } = ensureArgsSchemaOrThrowHttpError(
       updateSomaticLogVisibilitySchema,
-      rawArgs
+      rawArgs,
     );
 
     if (!context.user) {
-      throw new HttpError(401, "You must be logged in to update log visibility");
+      throw new HttpError(
+        401,
+        "You must be logged in to update log visibility",
+      );
     }
 
     if (context.user.role !== "CLIENT") {
@@ -361,7 +399,7 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
     // If profile doesn't exist, create it
     if (!clientProfile) {
       console.warn(
-        `[UpdateLogVisibility] Creating missing client profile for user ${context.user.id}`
+        `[UpdateLogVisibility] Creating missing client profile for user ${context.user.id}`,
       );
 
       try {
@@ -373,11 +411,11 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
       } catch (error) {
         console.error(
           `[UpdateLogVisibility] Failed to create client profile:`,
-          error
+          error,
         );
         throw new HttpError(
           500,
-          "Failed to initialize client profile. Please contact support."
+          "Failed to initialize client profile. Please contact support.",
         );
       }
     }
@@ -393,7 +431,7 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
 
     if (log.clientId !== clientProfile.id) {
       console.warn(
-        `[UpdateLogVisibility] Client ${context.user.id} attempted unauthorized access to log ${logId}`
+        `[UpdateLogVisibility] Client ${context.user.id} attempted unauthorized access to log ${logId}`,
       );
       throw new HttpError(403, "You do not have permission to update this log");
     }
@@ -417,9 +455,12 @@ export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
     } catch (updateError) {
       console.error(
         `[UpdateLogVisibility] Failed to update log ${logId}:`,
-        updateError
+        updateError,
       );
-      throw new HttpError(500, "Failed to update log visibility. Please try again.");
+      throw new HttpError(
+        500,
+        "Failed to update log visibility. Please try again.",
+      );
     }
   } catch (error) {
     if (error instanceof HttpError) {
@@ -447,7 +488,7 @@ export const getClientAnalytics: GetClientAnalytics<
 > = async (rawArgs, context) => {
   const { clientId, period } = ensureArgsSchemaOrThrowHttpError(
     getClientAnalyticsSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -475,14 +516,11 @@ export const getClientAnalytics: GetClientAnalytics<
     if (!coach || coach.userId !== context.user.id) {
       throw new HttpError(
         403,
-        "You do not have permission to view this client's analytics"
+        "You do not have permission to view this client's analytics",
       );
     }
   } else if (context.user.role === "CLIENT") {
-    throw new HttpError(
-      403,
-      "Clients cannot view analytics data"
-    );
+    throw new HttpError(403, "Clients cannot view analytics data");
   } else if (context.user.role !== "ADMIN") {
     throw new HttpError(403, "Invalid user role");
   }
@@ -514,7 +552,7 @@ export const getClientAnalytics: GetClientAnalytics<
   const analytics = await computeClientAnalytics(
     context.entities,
     clientId,
-    period
+    period,
   );
 
   return analytics;

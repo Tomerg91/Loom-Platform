@@ -14,9 +14,9 @@
 // ============================================
 
 export enum NotificationEventType {
-  SESSION_REMINDER = 'SESSION_REMINDER',
-  SESSION_SUMMARY_POSTED = 'SESSION_SUMMARY_POSTED',
-  RESOURCE_SHARED = 'RESOURCE_SHARED',
+  SESSION_REMINDER = "SESSION_REMINDER",
+  SESSION_SUMMARY_POSTED = "SESSION_SUMMARY_POSTED",
+  RESOURCE_SHARED = "RESOURCE_SHARED",
 }
 
 export interface NotificationEventPayload {
@@ -44,7 +44,7 @@ export interface NotificationEventPayload {
 // ============================================
 
 export type EventHandler<T extends NotificationEventType> = (
-  payload: NotificationEventPayload[T]
+  payload: NotificationEventPayload[T],
 ) => Promise<void>;
 
 // ============================================
@@ -68,7 +68,7 @@ class NotificationEventEmitterClass {
    */
   subscribe<T extends NotificationEventType>(
     eventType: T,
-    handler: EventHandler<T>
+    handler: EventHandler<T>,
   ): void {
     const handlers = this.handlers.get(eventType) || [];
     handlers.push(handler);
@@ -82,7 +82,7 @@ class NotificationEventEmitterClass {
    */
   unsubscribe<T extends NotificationEventType>(
     eventType: T,
-    handler: EventHandler<T>
+    handler: EventHandler<T>,
   ): void {
     const handlers = this.handlers.get(eventType) || [];
     const index = handlers.indexOf(handler);
@@ -100,7 +100,7 @@ class NotificationEventEmitterClass {
    */
   async emit<T extends NotificationEventType>(
     eventType: T,
-    payload: NotificationEventPayload[T]
+    payload: NotificationEventPayload[T],
   ): Promise<void> {
     const handlers = this.handlers.get(eventType) || [];
 
@@ -111,11 +111,11 @@ class NotificationEventEmitterClass {
           handler(payload).catch((error) => {
             console.error(
               `Error in notification handler for ${eventType}:`,
-              error
+              error,
             );
             // Don't re-throw - let other handlers execute
-          })
-        )
+          }),
+        ),
       );
     } catch (error) {
       console.error(`Fatal error emitting ${eventType}:`, error);

@@ -2,7 +2,11 @@ import type { HttpError } from "wasp/server";
 import { HttpError as WaspHttpError } from "wasp/server";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
-import { generateAnalyticsPdf, generatePdfFilename, bufferToBase64 } from "@src/server/pdf/exportPdf";
+import {
+  generateAnalyticsPdf,
+  generatePdfFilename,
+  bufferToBase64,
+} from "@src/server/pdf/exportPdf";
 import { computeClientAnalytics } from "@src/somatic-logs/analytics";
 import { isAdmin, isCoach, isClient, requireAuth } from "@src/server/rbac";
 import type { GenerateClientExportPdf } from "wasp/server/operations";
@@ -16,7 +20,9 @@ const generateClientExportPdfSchema = z.object({
   period: z.enum(["30d", "90d", "365d"]),
 });
 
-export type GenerateClientExportPdfInput = z.infer<typeof generateClientExportPdfSchema>;
+export type GenerateClientExportPdfInput = z.infer<
+  typeof generateClientExportPdfSchema
+>;
 
 // ============================================
 // PDF EXPORT OPERATION
@@ -28,7 +34,7 @@ export const generateClientExportPdf: GenerateClientExportPdf<
 > = async (rawArgs, context) => {
   const { clientId, period } = ensureArgsSchemaOrThrowHttpError(
     generateClientExportPdfSchema,
-    rawArgs
+    rawArgs,
   );
 
   // ========== AUTHORIZATION ==========
@@ -67,7 +73,7 @@ export const generateClientExportPdf: GenerateClientExportPdf<
     if (!coach || coach.userId !== authenticatedContext.user.id) {
       throw new WaspHttpError(
         403,
-        "You do not have permission to export this client's data"
+        "You do not have permission to export this client's data",
       );
     }
   } else if (isClient(authenticatedContext.user)) {
@@ -106,7 +112,7 @@ export const generateClientExportPdf: GenerateClientExportPdf<
       { name: clientName, email: clientProfile.user?.email },
       analytics,
       sessions,
-      period
+      period,
     );
 
     // Convert to base64 for transmission

@@ -102,7 +102,9 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
           user.subscriptionNextRetryDate > new Date()
         ) {
           console.log(
-            `⏸️  Skipping user ${user.id}: next retry is ${user.subscriptionNextRetryDate.toLocaleDateString()}`,
+            `⏸️  Skipping user ${
+              user.id
+            }: next retry is ${user.subscriptionNextRetryDate.toLocaleDateString()}`,
           );
           result.details.push({
             userId: user.id,
@@ -157,7 +159,9 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
               amountCharged: planPrice,
               renewalDate: new Date(),
               nextRenewalDate,
-              appUrl: `${process.env.WASP_WEB_CLIENT_URL || "https://loom.local"}/dashboard`,
+              appUrl: `${
+                process.env.WASP_WEB_CLIENT_URL || "https://loom.local"
+              }/dashboard`,
             });
 
             await emailSender.send({
@@ -208,8 +212,12 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
                 userEmail: user.email || "",
                 planName: formatPlanName(user.subscriptionPlan),
                 cancelledDate: new Date(),
-                appUrl: `${process.env.WASP_WEB_CLIENT_URL || "https://loom.local"}/dashboard`,
-                supportContactUrl: `${process.env.WASP_WEB_CLIENT_URL || "https://loom.local"}/support`,
+                appUrl: `${
+                  process.env.WASP_WEB_CLIENT_URL || "https://loom.local"
+                }/dashboard`,
+                supportContactUrl: `${
+                  process.env.WASP_WEB_CLIENT_URL || "https://loom.local"
+                }/support`,
               });
 
               await emailSender.send({
@@ -250,7 +258,9 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
             });
 
             console.log(
-              `⚠️  Renewal failed for user ${user.id}: ${chargeResult.error}. Will retry ${5 - newRetryCount} more time(s).`,
+              `⚠️  Renewal failed for user ${user.id}: ${
+                chargeResult.error
+              }. Will retry ${5 - newRetryCount} more time(s).`,
             );
 
             // Send failure email
@@ -262,7 +272,9 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
                 failureReason: chargeResult.error || "Unknown error",
                 attemptNumber: newRetryCount,
                 retryDate: nextRetryDate,
-                appUrl: `${process.env.WASP_WEB_CLIENT_URL || "https://loom.local"}/dashboard`,
+                appUrl: `${
+                  process.env.WASP_WEB_CLIENT_URL || "https://loom.local"
+                }/dashboard`,
               });
 
               await emailSender.send({
@@ -295,8 +307,7 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
           userId: user.id,
           email: user.email,
           status: "failure",
-          reason:
-            error instanceof Error ? error.message : "Processing error",
+          reason: error instanceof Error ? error.message : "Processing error",
         });
         result.failureCount++;
       }

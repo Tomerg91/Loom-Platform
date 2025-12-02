@@ -28,6 +28,7 @@ This document verifies the implementation of a **robust persistence workflow** f
 **File**: `app/src/client/hooks/use-somatic-log-draft.ts`
 
 **Features**:
+
 - Auto-loads draft from localStorage on component mount
 - Automatically saves draft as user types (debounced 500ms)
 - 24-hour expiration window for drafts
@@ -35,14 +36,15 @@ This document verifies the implementation of a **robust persistence workflow** f
 - Clears draft after successful submission
 
 **API**:
+
 ```typescript
 const {
-  loadDraft,        // () => SomaticLogDraft | null
-  saveDraft,        // (draft) => void
-  clearDraft,       // () => void
-  getDraftAge,      // (draft) => number (seconds)
-  isDraftLoaded,    // boolean
-  setIsDraftLoaded  // (boolean) => void
+  loadDraft, // () => SomaticLogDraft | null
+  saveDraft, // (draft) => void
+  clearDraft, // () => void
+  getDraftAge, // (draft) => number (seconds)
+  isDraftLoaded, // boolean
+  setIsDraftLoaded, // (boolean) => void
 } = useSomaticLogDraft();
 ```
 
@@ -51,6 +53,7 @@ const {
 **Expiry Time**: 24 hours
 
 **Draft Structure**:
+
 ```typescript
 interface SomaticLogDraft {
   selectedZone?: BodyZone;
@@ -67,39 +70,48 @@ interface SomaticLogDraft {
 **File**: `app/src/client/hooks/use-retry-operation.ts`
 
 **Features**:
+
 - Exponential backoff retry strategy
 - Configurable retry count, delays, and backoff multiplier
 - Callback support for monitoring retry attempts
 - Separate retry state tracking
 
 **API**:
+
 ```typescript
 const {
-  executeWithRetry,  // <T>(operation, onRetry?) => Promise
-  retryState,        // { isRetrying, retryCount, lastError, nextRetryIn }
-  resetRetryState    // () => void
+  executeWithRetry, // <T>(operation, onRetry?) => Promise
+  retryState, // { isRetrying, retryCount, lastError, nextRetryIn }
+  resetRetryState, // () => void
 } = useRetryOperation({
   maxRetries: 3,
   initialDelayMs: 1000,
   maxDelayMs: 10000,
-  backoffMultiplier: 2
+  backoffMultiplier: 2,
 });
 
 // Usage
 const { success, result, error } = await executeWithRetry(
-  async () => createSomaticLogFn({ /* ... */ }),
+  async () =>
+    createSomaticLogFn({
+      /* ... */
+    }),
   (attemptNumber, error, nextRetryIn) => {
-    console.log(`Retry attempt ${attemptNumber}, next retry in ${nextRetryIn}ms`);
-  }
+    console.log(
+      `Retry attempt ${attemptNumber}, next retry in ${nextRetryIn}ms`,
+    );
+  },
 );
 ```
 
 **Backoff Formula**:
+
 ```
 delay = min(initialDelay × (multiplier ^ retryCount), maxDelay)
 ```
 
 **Default Behavior**:
+
 - Attempt 1: 1000ms
 - Attempt 2: 2000ms
 - Attempt 3: 4000ms
@@ -110,39 +122,41 @@ delay = min(initialDelay × (multiplier ^ retryCount), maxDelay)
 **File**: `app/src/client/hooks/use-somatic-log-error-handler.ts`
 
 **Features**:
+
 - Parses server errors and maps to user-friendly messages
 - Classifies errors (network, auth, validation, profile, server)
 - Determines if error is retryable
 - Provides recovery action suggestions
 
 **API**:
+
 ```typescript
 const {
-  parseError,              // (error) => ErrorDetail
-  getRecoveryAction,       // (error) => string
-  shouldShowRetryButton,   // (error) => boolean
-  shouldShowSupportLink    // (error) => boolean
+  parseError, // (error) => ErrorDetail
+  getRecoveryAction, // (error) => string
+  shouldShowRetryButton, // (error) => boolean
+  shouldShowSupportLink, // (error) => boolean
 } = useSomaticLogErrorHandler();
 
 // ErrorDetail structure
 interface ErrorDetail {
-  code: string;          // NETWORK_ERROR | AUTH_ERROR | VALIDATION_ERROR | PROFILE_ERROR | SERVER_ERROR | UNKNOWN_ERROR
-  message: string;       // Original error message
-  userMessage: string;   // User-friendly message
-  isDraft: boolean;      // Whether form was saved
-  isRetryable: boolean;  // Whether retry might succeed
+  code: string; // NETWORK_ERROR | AUTH_ERROR | VALIDATION_ERROR | PROFILE_ERROR | SERVER_ERROR | UNKNOWN_ERROR
+  message: string; // Original error message
+  userMessage: string; // User-friendly message
+  isDraft: boolean; // Whether form was saved
+  isRetryable: boolean; // Whether retry might succeed
 }
 ```
 
 **Error Classification**:
 
-| Error Type | HTTP Code | User Message | Retryable | Example |
-|-----------|-----------|--------------|-----------|---------|
-| **NETWORK_ERROR** | - | "Network connection failed. Please check your internet connection and try again." | ✅ Yes | Timeout, failed to fetch |
-| **AUTH_ERROR** | 401/403 | "Your session has expired or you don't have permission..." | ❌ No | Unauthorized, permission denied |
-| **VALIDATION_ERROR** | 400 | "Please check your input and try again." | ❌ No | Invalid intensity, missing field |
-| **PROFILE_ERROR** | 404 | "Your client profile could not be found..." | ❌ No | Profile not found (now auto-created) |
-| **SERVER_ERROR** | 500+ | "The server encountered an error. Please try again in a few moments." | ✅ Yes | Internal server error |
+| Error Type           | HTTP Code | User Message                                                                      | Retryable | Example                              |
+| -------------------- | --------- | --------------------------------------------------------------------------------- | --------- | ------------------------------------ |
+| **NETWORK_ERROR**    | -         | "Network connection failed. Please check your internet connection and try again." | ✅ Yes    | Timeout, failed to fetch             |
+| **AUTH_ERROR**       | 401/403   | "Your session has expired or you don't have permission..."                        | ❌ No     | Unauthorized, permission denied      |
+| **VALIDATION_ERROR** | 400       | "Please check your input and try again."                                          | ❌ No     | Invalid intensity, missing field     |
+| **PROFILE_ERROR**    | 404       | "Your client profile could not be found..."                                       | ❌ No     | Profile not found (now auto-created) |
+| **SERVER_ERROR**     | 500+      | "The server encountered an error. Please try again in a few moments."             | ✅ Yes    | Internal server error                |
 
 ### Server-Side Improvements
 
@@ -151,6 +165,7 @@ interface ErrorDetail {
 **File**: `app/src/somatic-logs/operations.ts:39-148`
 
 **Improvements**:
+
 - ✅ Input validation with detailed error messages
 - ✅ Authentication check with clear error messaging
 - ✅ **AUTO-CREATION of missing ClientProfile** (graceful fallback)
@@ -159,6 +174,7 @@ interface ErrorDetail {
 - ✅ Proper error handling for non-critical operations (activity tracking)
 
 **Step-by-Step Flow**:
+
 1. Validate input schema → throw 400 on failure
 2. Authenticate & authorize → throw 401/403 on failure
 3. Lookup/Create ClientProfile → auto-create if missing
@@ -166,6 +182,7 @@ interface ErrorDetail {
 5. Update activity timestamp (non-critical, fails gracefully)
 
 **Error Handling Strategy**:
+
 ```typescript
 try {
   // Step 1-5...
@@ -183,6 +200,7 @@ try {
 **File**: `app/src/somatic-logs/operations.ts:174-326`
 
 **Improvements**:
+
 - ✅ **AUTO-CREATION of missing ClientProfile** for CLIENT role
 - ✅ Graceful degradation (returns [] instead of 404)
 - ✅ Enhanced error messages for coaches without access
@@ -190,6 +208,7 @@ try {
 - ✅ Try-catch blocks around profile operations
 
 **Authorization Logic**:
+
 ```typescript
 // Client: Get own logs, create profile if needed
 if (user.role === "CLIENT") {
@@ -217,6 +236,7 @@ if (user.role === "COACH") {
 **File**: `app/src/somatic-logs/operations.ts:338-432`
 
 **Improvements**:
+
 - ✅ **AUTO-CREATION of missing ClientProfile**
 - ✅ Granular error handling for each operation
 - ✅ Ownership verification before updating
@@ -236,6 +256,7 @@ User fills form → Draft saved to localStorage → User submits
 ```
 
 **Test Steps**:
+
 1. Open SomaticLogForm
 2. Select body zone (should see draft in localStorage)
 3. Select sensation
@@ -258,6 +279,7 @@ User fills form (auto-saved) → Page crashes/refreshed
 ```
 
 **Test Steps**:
+
 1. Open SomaticLogForm
 2. Fill in form partially (select zone, sensation, add note)
 3. Open DevTools → check `localStorage.somatic_log_draft` contains data
@@ -282,6 +304,7 @@ User submits form → Network error (timeout)
 ```
 
 **Test Steps (Requires Network Throttling)**:
+
 1. Open DevTools → Network tab
 2. Set throttling to "Offline" mode
 3. Fill SomaticLogForm and click "Log Sensation"
@@ -305,6 +328,7 @@ User submits incomplete form
 ```
 
 **Test Steps**:
+
 1. Open SomaticLogForm
 2. Click "Log Sensation" without filling any fields
 3. Verify validation errors shown
@@ -330,6 +354,7 @@ User session expires → Form still open
 ```
 
 **Test Steps**:
+
 1. Login as client
 2. Open SomaticLogForm
 3. Delete auth cookies/sessionStorage to simulate expiration
@@ -354,6 +379,7 @@ User submits log → System detects missing ClientProfile
 ```
 
 **Test Steps** (Requires Database Manipulation):
+
 1. Create new user via signup
 2. Manually delete their ClientProfile from database
 3. User logs in and navigates to SomaticLogForm
@@ -376,6 +402,7 @@ User submits form → Server returns 503 Service Unavailable
 ```
 
 **Test Steps** (Requires Server Manipulation):
+
 1. Fill SomaticLogForm
 2. Temporarily shutdown database/server
 3. Click "Log Sensation"
@@ -400,6 +427,7 @@ User fills form → Draft saved at timestamp T
 ```
 
 **Test Steps** (Requires Time Manipulation):
+
 1. Fill form and check localStorage has `savedAt` timestamp
 2. Manually modify localStorage entry to change `savedAt` to 24 hours ago
 3. Refresh page
@@ -420,6 +448,7 @@ User in private/incognito mode → localStorage blocked
 ```
 
 **Test Steps**:
+
 1. Open app in incognito/private window
 2. Open DevTools console
 3. Try `localStorage.setItem('test', 'value')` → should throw or be unavailable
@@ -442,6 +471,7 @@ Coach retrieves client logs → System verifies coach-client relationship
 ```
 
 **Test Steps**:
+
 1. Login as coach with assigned client
 2. Navigate to ClientDetailsPage
 3. Verify logs are displayed
@@ -457,19 +487,19 @@ Coach retrieves client logs → System verifies coach-client relationship
 
 ## Error Handling Matrix
 
-| Scenario | Error Code | HTTP Status | User Message | Retry Button | Save Draft | Recovery |
-|----------|-----------|------------|--------------|--------------|-----------|----------|
-| Network timeout | NETWORK_ERROR | - | "Network connection failed..." | ✅ Yes | ✅ Yes | Manual retry |
-| Session expired | AUTH_ERROR | 401 | "Your session has expired..." | ❌ No | ✅ Yes | Re-login |
-| Permission denied | AUTH_ERROR | 403 | "...don't have permission..." | ❌ No | ✅ Yes | Contact admin |
-| Missing field | VALIDATION_ERROR | 400 | "Please check your input..." | ❌ No | ✅ Yes | Fix form |
-| Invalid intensity | VALIDATION_ERROR | 400 | "...between 1 and 10..." | ❌ No | ✅ Yes | Fix form |
-| Missing body zone | VALIDATION_ERROR | 400 | "Please select a body zone..." | ❌ No | ✅ Yes | Fix form |
-| Profile not found | PROFILE_ERROR | 404 | "Client profile not found..." | ❌ No | ✅ Yes | Contact support |
-| Log not found | VALIDATION_ERROR | 404 | "Sensation log not found..." | ❌ No | ✅ Yes | Refresh page |
-| Database error | SERVER_ERROR | 500 | "Failed to save sensation..." | ✅ Yes | ✅ Yes | Automatic retry |
-| Server unavailable | SERVER_ERROR | 503 | "The server encountered an error..." | ✅ Yes | ✅ Yes | Automatic retry |
-| Unknown error | UNKNOWN_ERROR | - | "An unexpected error occurred..." | ✅ Yes | ✅ Yes | Manual retry |
+| Scenario           | Error Code       | HTTP Status | User Message                         | Retry Button | Save Draft | Recovery        |
+| ------------------ | ---------------- | ----------- | ------------------------------------ | ------------ | ---------- | --------------- |
+| Network timeout    | NETWORK_ERROR    | -           | "Network connection failed..."       | ✅ Yes       | ✅ Yes     | Manual retry    |
+| Session expired    | AUTH_ERROR       | 401         | "Your session has expired..."        | ❌ No        | ✅ Yes     | Re-login        |
+| Permission denied  | AUTH_ERROR       | 403         | "...don't have permission..."        | ❌ No        | ✅ Yes     | Contact admin   |
+| Missing field      | VALIDATION_ERROR | 400         | "Please check your input..."         | ❌ No        | ✅ Yes     | Fix form        |
+| Invalid intensity  | VALIDATION_ERROR | 400         | "...between 1 and 10..."             | ❌ No        | ✅ Yes     | Fix form        |
+| Missing body zone  | VALIDATION_ERROR | 400         | "Please select a body zone..."       | ❌ No        | ✅ Yes     | Fix form        |
+| Profile not found  | PROFILE_ERROR    | 404         | "Client profile not found..."        | ❌ No        | ✅ Yes     | Contact support |
+| Log not found      | VALIDATION_ERROR | 404         | "Sensation log not found..."         | ❌ No        | ✅ Yes     | Refresh page    |
+| Database error     | SERVER_ERROR     | 500         | "Failed to save sensation..."        | ✅ Yes       | ✅ Yes     | Automatic retry |
+| Server unavailable | SERVER_ERROR     | 503         | "The server encountered an error..." | ✅ Yes       | ✅ Yes     | Automatic retry |
+| Unknown error      | UNKNOWN_ERROR    | -           | "An unexpected error occurred..."    | ✅ Yes       | ✅ Yes     | Manual retry    |
 
 ---
 
@@ -484,6 +514,7 @@ All operations log errors with structured prefixes for easy filtering:
 ```
 
 **Log Examples**:
+
 ```
 [SomaticLog] Creating missing client profile for user 12345
 [SomaticLog] Failed to create log for client abc123: [Error details]
@@ -520,13 +551,13 @@ All operations log errors with structured prefixes for easy filtering:
 
 ## Files Modified
 
-| File | Changes | Type |
-|------|---------|------|
-| `app/src/client/hooks/use-somatic-log-draft.ts` | Created | New Hook |
-| `app/src/client/hooks/use-retry-operation.ts` | Created | New Hook |
-| `app/src/client/hooks/use-somatic-log-error-handler.ts` | Created | New Hook |
-| `app/src/client/SomaticLogForm.tsx` | Enhanced | Component |
-| `app/src/somatic-logs/operations.ts` | Improved | Operations |
+| File                                                    | Changes  | Type       |
+| ------------------------------------------------------- | -------- | ---------- |
+| `app/src/client/hooks/use-somatic-log-draft.ts`         | Created  | New Hook   |
+| `app/src/client/hooks/use-retry-operation.ts`           | Created  | New Hook   |
+| `app/src/client/hooks/use-somatic-log-error-handler.ts` | Created  | New Hook   |
+| `app/src/client/SomaticLogForm.tsx`                     | Enhanced | Component  |
+| `app/src/somatic-logs/operations.ts`                    | Improved | Operations |
 
 ---
 
@@ -543,6 +574,7 @@ All operations log errors with structured prefixes for easy filtering:
 ## Backward Compatibility
 
 ✅ All changes are backward compatible:
+
 - Existing logs unaffected
 - Existing auth flows unchanged
 - localStorage is opt-in (app works without it)
@@ -554,6 +586,7 @@ All operations log errors with structured prefixes for easy filtering:
 ## Migration Notes
 
 No database migrations required. The system gracefully handles:
+
 - Existing users without profiles (auto-creates)
 - Existing logs with any visibility setting
 - Existing auth tokens and sessions
@@ -576,15 +609,18 @@ No database migrations required. The system gracefully handles:
 ### Enable Debug Logging
 
 Add to browser console:
+
 ```javascript
 // View draft in localStorage
-JSON.parse(localStorage.getItem('somatic_log_draft'))
+JSON.parse(localStorage.getItem("somatic_log_draft"));
 
 // Clear draft
-localStorage.removeItem('somatic_log_draft')
+localStorage.removeItem("somatic_log_draft");
 
 // View all app localStorage
-Object.keys(localStorage).forEach(k => console.log(k, localStorage.getItem(k)))
+Object.keys(localStorage).forEach((k) =>
+  console.log(k, localStorage.getItem(k)),
+);
 ```
 
 ### Check Server Logs
@@ -599,6 +635,7 @@ docker logs [container_name] | grep "\[UpdateLogVisibility\]"
 ### Monitor Retry Rates
 
 Add to monitoring dashboard:
+
 ```sql
 SELECT
   DATE_TRUNC('hour', "createdAt") as hour,
@@ -618,6 +655,7 @@ ORDER BY hour DESC;
 **Documentation Status**: ✅ Complete
 
 **Reviewer Checklist**:
+
 - [ ] Code review completed
 - [ ] Manual testing verified
 - [ ] Performance testing passed

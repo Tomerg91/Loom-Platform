@@ -63,7 +63,7 @@ export const getClientsForCoach: GetClientsForCoach<
     : [];
 
   const lastLogMap = Object.fromEntries(
-    lastLogs.map((log) => [log.clientId, log._max.createdAt ?? null])
+    lastLogs.map((log) => [log.clientId, log._max.createdAt ?? null]),
   );
 
   // Transform the data to our return type
@@ -195,7 +195,7 @@ export const deleteOfflineClient: DeleteOfflineClient<
 > = async (rawArgs, context) => {
   const { clientId } = ensureArgsSchemaOrThrowHttpError(
     deleteOfflineClientSchema,
-    rawArgs
+    rawArgs,
   );
 
   const coachContext = requireRole(context, ["COACH"], {
@@ -260,7 +260,7 @@ export const getClientProfile: GetClientProfile<
 > = async (rawArgs, context) => {
   const { clientId } = ensureArgsSchemaOrThrowHttpError(
     getClientProfileSchema,
-    rawArgs
+    rawArgs,
   );
 
   const coachContext = requireRole(context, ["COACH"], {
