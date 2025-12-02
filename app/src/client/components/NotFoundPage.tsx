@@ -9,7 +9,7 @@ export function NotFoundPage() {
       <div className="text-center">
         <h1 className="mb-4 text-6xl font-bold">404</h1>
         <p className="text-bodydark mb-8 text-lg">
-          Oops! The page you're looking for doesn't exist.
+          Oops! The page you&apos;re looking for doesn&apos;t exist.
         </p>
         <WaspRouterLink
           to={user ? routes.CoachDashboardRoute.to : routes.LandingPageRoute.to}

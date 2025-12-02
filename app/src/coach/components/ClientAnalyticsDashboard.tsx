@@ -4,8 +4,9 @@ import { getClientAnalytics, generateClientExportPdf } from "wasp/client/operati
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
+import { Skeleton } from "../../components/ui/skeleton";
 import { AlertTriangle, Download, FileText } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
 import { BodyZoneChart } from "./charts/BodyZoneChart";
@@ -13,9 +14,7 @@ import { SensationChart } from "./charts/SensationChart";
 import { IntensityTrendChart } from "./charts/IntensityTrendChart";
 import {
   exportAnalyticsAsCSV,
-  exportSessionsAsCSV,
   type ClientAnalyticsResult,
-  type SessionData,
 } from "@src/utils/csv/exportAnalytics";
 
 interface ClientAnalyticsDashboardProps {

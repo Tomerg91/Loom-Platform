@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import type { SubscriptionStatus } from "../plans";
-import { PaymentPlanId } from "../plans";
+import type { PaymentPlanId } from "../plans";
 
 export const updateUserLemonSqueezyPaymentDetails = async (
   {

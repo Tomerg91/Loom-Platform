@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
-import { Feature } from "./Features";
+import type { Feature } from "./Features";
 import SectionTitle from "./SectionTitle";
 import { useTranslation } from "react-i18next";
 

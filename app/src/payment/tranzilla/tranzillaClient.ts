@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { config } from "wasp/server";
 import { requireNodeEnvVar } from "../../server/utils";
 import type { PaymentPlanId } from "../plans";
@@ -82,8 +81,7 @@ export function validateTranzillaSignature(
   // TODO: Implement actual signature validation based on Tranzilla docs
   // This is a placeholder that checks for required fields
 
-  const apiPassword = getTranzillaApiPassword();
-  const { Response, sum, u71, TranzilaTK, index } = body;
+  const { Response, sum, u71, index } = body;
 
   // Basic validation: ensure critical fields are present
   if (!Response || !sum || !u71 || !index) {

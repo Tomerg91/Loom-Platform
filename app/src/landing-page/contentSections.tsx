@@ -1,11 +1,4 @@
 import type { GridFeature } from "./components/FeaturesGrid";
-import {
-  TestimonialAvatar1,
-  TestimonialAvatar2,
-  ExampleAvatar1,
-  ExampleAvatar2,
-  ExampleAvatar3,
-} from "./components/AvatarIllustrations";
 import { LEGAL_LINKS } from "../shared/legalLinks";
 
 export const features: GridFeature[] = [

@@ -208,9 +208,17 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                   return (
                     <div
                       key={client.id}
+                      role="button"
+                      tabIndex={0}
                       className="p-3 border border-border rounded-xl hover-scale-subtle cursor-pointer bg-card-subtle transition-colors"
                       onClick={() => {
                         navigate(`/coach/client/${client.id}`);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          navigate(`/coach/client/${client.id}`);
+                        }
                       }}
                     >
                       <div className="flex items-center justify-between gap-2 mb-1">

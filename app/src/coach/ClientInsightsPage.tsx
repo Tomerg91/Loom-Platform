@@ -89,7 +89,7 @@ function ClientInsightsView({
   clientId: string;
 }) {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
 
   // Fetch insights data
@@ -314,6 +314,11 @@ function ClientInsightsView({
             <p className="text-sm text-gray-500 mt-1">
               {timeRangeLabels[timeRange]} • {insightsData.totalLogs} logs
             </p>
+            {(user.username || (user as any).email) && (
+              <p className="text-xs text-gray-500">
+                Coach: {user.username || (user as any).email}
+              </p>
+            )}
           </div>
         </div>
 

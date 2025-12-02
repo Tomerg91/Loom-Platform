@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-import Stripe from "stripe";
-import { User } from "wasp/entities";
+import type { PrismaClient } from "@prisma/client";
+import type Stripe from "stripe";
+import type { User } from "wasp/entities";
 import type { SubscriptionStatus } from "../plans";
-import { PaymentPlanId } from "../plans";
+import type { PaymentPlanId } from "../plans";
 
 export async function fetchUserPaymentProcessorUserId(
   userId: User["id"],

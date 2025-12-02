@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import type { FormEvent} from "react";
+import { useEffect, useState } from "react";
 import {
   addFileToDb,
   createFileUploadUrl,
@@ -178,7 +179,7 @@ export default function FileUploadPage() {
           </div>
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-center text-lg leading-8">
             This is an example file upload page using AWS S3. Maybe your app
-            needs this. Maybe it doesn't. But a lot of people asked for this
+            needs this. Maybe it doesn&apos;t. But a lot of people asked for this
             feature, so here you go 🤝
           </p>
           <Card className="my-8">

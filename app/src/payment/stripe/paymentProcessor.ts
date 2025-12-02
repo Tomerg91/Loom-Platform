@@ -1,4 +1,4 @@
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { config } from "wasp/server";
 import { assertUnreachable } from "../../shared/utils";
 import type {

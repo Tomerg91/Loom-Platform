@@ -262,7 +262,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                     </div>
                     {log.note && (
                       <p className="text-sm text-muted-foreground mt-2 italic">
-                        "{log.note}"
+                        &ldquo;{log.note}&rdquo;
                       </p>
                     )}
                   </div>
@@ -399,7 +399,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                   </div>
                   {session.sharedSummary && (
                     <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                      "{session.sharedSummary}"
+                      &ldquo;{session.sharedSummary}&rdquo;
                     </p>
                   )}
                   {!session.sharedSummary && (

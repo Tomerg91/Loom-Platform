@@ -1,5 +1,6 @@
 import { FileText, Mail, Upload, User } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { type AuthUser } from "wasp/auth";
 import {
   getAdminAvatarUploadUrl,
@@ -36,7 +37,7 @@ const getSafeImageUrl = (url: string | null) => {
   try {
     const parsed = new URL(url, window.location.origin);
     return ["http:", "https:", "blob:"].includes(parsed.protocol) ? parsed.toString() : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -238,6 +239,17 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
     );
   }
 
+  const triggerAvatarDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      triggerAvatarDialog();
+    }
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className="max-w-270 mx-auto">
@@ -265,7 +277,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                           className="pl-11.5"
                           type="text"
                           id="full-name"
-                          placeholder="Full name"
                           value={formState.fullName}
                           onChange={(e) => handleInputChange("fullName", e.target.value)}
                         />
@@ -282,7 +293,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       <Input
                         type="tel"
                         id="phone-number"
-                        placeholder="+1 555 123 4567"
                         value={formState.phoneNumber}
                         onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
                       />
@@ -302,7 +312,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         className="pl-11.5"
                         type="email"
                         id="email-address"
-                        placeholder="admin@loom-platform.com"
                         value={formState.emailAddress}
                         onChange={(e) => handleInputChange("emailAddress", e.target.value)}
                       />
@@ -319,7 +328,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                     <Input
                       type="text"
                       id="username"
-                      placeholder="loom-admin"
                       value={formState.username}
                       onChange={(e) => handleInputChange("username", e.target.value)}
                     />
@@ -338,7 +346,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         className="border-border bg-background pl-11.5 pr-4.5 text-foreground focus:border-primary w-full rounded border py-3 focus-visible:outline-none"
                         id="bio"
                         rows={6}
-                        placeholder="Share a short introduction for the admin team."
                         value={formState.bio}
                         onChange={(e) => handleInputChange("bio", e.target.value)}
                       ></Textarea>
@@ -356,7 +363,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       <Input
                         type="url"
                         id="privacy-policy-url"
-                        placeholder="https://loom-platform.com/privacy-policy"
                         value={formState.privacyPolicyUrl}
                         onChange={(e) => handleInputChange("privacyPolicyUrl", e.target.value)}
                       />
@@ -371,7 +377,6 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       <Input
                         type="url"
                         id="terms-url"
-                        placeholder="https://loom-platform.com/terms-of-service"
                         value={formState.termsOfServiceUrl}
                         onChange={(e) => handleInputChange("termsOfServiceUrl", e.target.value)}
                       />
@@ -424,13 +429,13 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         >
                           Reset
                         </button>
-                        <button
-                          type="button"
-                          className="hover:text-primary text-sm"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Update
-                        </button>
+            <button
+              type="button"
+              className="hover:text-primary text-sm"
+              onClick={triggerAvatarDialog}
+            >
+              Update
+            </button>
                         <button
                           type="button"
                           className="hover:text-primary text-sm"
@@ -448,8 +453,11 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
 
                   <div
                     id="FileUpload"
+                    role="button"
+                    tabIndex={0}
                     className="mb-5.5 border-primary bg-background sm:py-7.5 relative block w-full cursor-pointer appearance-none rounded border-2 border-dashed px-4 py-4"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={triggerAvatarDialog}
+                    onKeyDown={handleUploadKeyDown}
                   >
                     <input
                       ref={fileInputRef}

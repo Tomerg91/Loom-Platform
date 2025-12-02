@@ -8,7 +8,7 @@ export default function Login() {
       <LoginForm />
       <br />
       <span className="text-sm font-medium text-gray-900 dark:text-gray-900">
-        Don't have an account yet?{" "}
+        Don&apos;t have an account yet?{" "}
         <WaspRouterLink to={routes.SignupRoute.to} className="underline">
           go to signup
         </WaspRouterLink>
