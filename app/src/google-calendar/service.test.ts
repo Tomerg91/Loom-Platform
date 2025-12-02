@@ -120,6 +120,26 @@ describe('GoogleCalendarService', () => {
         )
       ).rejects.toThrow('Failed to add calendar event');
     });
+
+    it('should throw error if no event ID returned', async () => {
+      const mockInsert = jest.fn().mockResolvedValue({ data: {} });
+
+      const mockCalendarClient = {
+        events: { insert: mockInsert },
+      };
+
+      (getGoogleCalendarClient as jest.Mock).mockReturnValue(mockCalendarClient);
+
+      await expect(
+        service.addSessionEvent(
+          'cal-123',
+          'Coaching Session',
+          new Date('2025-12-10T14:00:00Z'),
+          new Date('2025-12-10T15:00:00Z'),
+          'Session notes'
+        )
+      ).rejects.toThrow('Event creation failed');
+    });
   });
 
   describe('updateSessionEvent', () => {
@@ -158,6 +178,27 @@ describe('GoogleCalendarService', () => {
         },
       });
     });
+
+    it('should handle API errors gracefully', async () => {
+      const mockUpdate = jest.fn().mockRejectedValue(new Error('Event not found'));
+
+      const mockCalendarClient = {
+        events: { update: mockUpdate },
+      };
+
+      (getGoogleCalendarClient as jest.Mock).mockReturnValue(mockCalendarClient);
+
+      await expect(
+        service.updateSessionEvent(
+          'cal-123',
+          'event-123',
+          'Updated Session',
+          new Date(),
+          new Date(),
+          'Notes'
+        )
+      ).rejects.toThrow('Failed to update calendar event');
+    });
   });
 
   describe('deleteSessionEvent', () => {
@@ -176,6 +217,20 @@ describe('GoogleCalendarService', () => {
         calendarId: 'cal-123',
         eventId: 'event-123',
       });
+    });
+
+    it('should handle API errors gracefully', async () => {
+      const mockDelete = jest.fn().mockRejectedValue(new Error('Event not found'));
+
+      const mockCalendarClient = {
+        events: { delete: mockDelete },
+      };
+
+      (getGoogleCalendarClient as jest.Mock).mockReturnValue(mockCalendarClient);
+
+      await expect(service.deleteSessionEvent('cal-123', 'event-123')).rejects.toThrow(
+        'Failed to delete calendar event'
+      );
     });
   });
 });
