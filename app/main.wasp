@@ -531,6 +531,21 @@ action updateNotificationPreferences {
   entities: [User, NotificationPreferences]
 }
 
+action connectGoogleCalendar {
+  fn: import { connectGoogleCalendar } from "@src/google-calendar/operations",
+  entities: [User, UserCalendarConnection]
+}
+
+action disconnectGoogleCalendar {
+  fn: import { disconnectGoogleCalendar } from "@src/google-calendar/operations",
+  entities: [User, UserCalendarConnection]
+}
+
+query getCalendarConnection {
+  fn: import { getCalendarConnection } from "@src/google-calendar/operations",
+  entities: [User, UserCalendarConnection]
+}
+
 job sessionRemindersJob {
   executor: PgBoss,
   perform: {
