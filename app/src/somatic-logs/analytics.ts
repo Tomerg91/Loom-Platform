@@ -1,4 +1,3 @@
-import type { PrismaClient } from "@prisma/client";
 import type { Job } from "wasp/server/jobs";
 
 // ============================================

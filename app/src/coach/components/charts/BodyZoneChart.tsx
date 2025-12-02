@@ -20,14 +20,6 @@ interface BodyZoneChartProps {
   data: BodyZoneStats[];
 }
 
-const COLORS = [
-  "#3b82f6", // blue
-  "#6366f1", // indigo
-  "#8b5cf6", // violet
-  "#d946ef", // fuchsia
-  "#ec4899", // pink
-];
-
 export function BodyZoneChart({ data }: BodyZoneChartProps) {
   const getColor = (intensity: number): string => {
     // Color based on average intensity (1-10 scale)

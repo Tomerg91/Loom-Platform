@@ -402,6 +402,11 @@ function ClientDetailsPageView({
                 No activity yet
               </p>
             )}
+            {user?.username && (
+              <p className="text-muted-foreground text-xs mt-2">
+                Coach: {user.username}
+              </p>
+            )}
           </div>
           <div className="flex gap-3">
             <Button
@@ -663,7 +668,7 @@ function ClientDetailsPageView({
         <CardContent>
           {!sessionsResponse || sessionsResponse.sessions.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No sessions logged yet. Click "Log Session" to create one.
+              No sessions logged yet. Click &ldquo;Log Session&rdquo; to create one.
             </p>
           ) : (
             <>
@@ -1071,7 +1076,7 @@ function ClientDetailsPageView({
                 <option value="Asia/Kolkata">Asia/Kolkata</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Client's timezone for scheduling
+                Client&rsquo;s timezone for scheduling
               </p>
             </div>
 

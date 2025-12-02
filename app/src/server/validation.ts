@@ -1,5 +1,5 @@
 import { HttpError } from "wasp/server";
-import * as z from "zod";
+import type * as z from "zod";
 
 export function ensureArgsSchemaOrThrowHttpError<Schema extends z.ZodType>(
   schema: Schema,

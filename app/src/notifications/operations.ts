@@ -228,6 +228,9 @@ export const updateNotificationPreferences: UpdateNotificationPreferences<
 export const getUnreadNotificationCount = async (userId: string) => {
   // This is a helper function for the Prisma client
   // Can be used in other operations to get unread count
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Unread notification count requested for", userId);
+  }
   return {
     count: 0,
   };

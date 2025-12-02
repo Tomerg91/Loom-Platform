@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
 import type { User } from 'wasp/entities';
 import {
   createGoal,
@@ -43,7 +42,7 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
         <Alert className="bg-red-50 border-red-200">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            Client not found or you don't have access to this client.
+            Client not found or you don&apos;t have access to this client.
           </AlertDescription>
         </Alert>
       </div>
@@ -116,6 +115,12 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Client
         </Button>
+
+        {(user.username || (user as any).email) && (
+          <p className="text-xs text-muted-foreground mb-4">
+            Coach: {user.username || (user as any).email}
+          </p>
+        )}
 
         {client && (
           <div className="mb-6">

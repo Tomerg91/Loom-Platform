@@ -7,8 +7,8 @@ import type {
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
-import { computeClientAnalytics, type ClientAnalyticsResult } from "./analytics";
-import { isAdmin, isCoach, requireAuth, requireRole } from "../server/rbac";
+import { computeClientAnalytics } from "./analytics";
+import { requireAuth, requireRole } from "../server/rbac";
 
 // BodyZone type definition matching Prisma schema
 type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";

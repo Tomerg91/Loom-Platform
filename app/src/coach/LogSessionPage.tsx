@@ -20,7 +20,6 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
-import BodyMapSelector from "../client/components/BodyMapSelector";
 
 function LogSessionPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
@@ -308,6 +307,11 @@ function LogSessionForm({
             Session #{sessionNumber}
           </p>
         )}
+        {(user.username || (user as any).email) && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Coach: {user.username || (user as any).email}
+          </p>
+        )}
       </div>
 
       {/* Two-Column Layout: Desktop 2 cols, Mobile 1 col */}
@@ -321,7 +325,11 @@ function LogSessionForm({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isContextLoading ? (
+              {contextError ? (
+                <p className="text-sm text-destructive">
+                  Failed to load previous sessions.
+                </p>
+              ) : isContextLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
                   <p className="text-sm text-muted-foreground">

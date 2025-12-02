@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import BodyPart from './BodyPart';
 import SensationPanel from './SensationPanel';
 

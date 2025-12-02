@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import type { FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { User, Resource } from "wasp/entities";
 import {
@@ -9,8 +10,7 @@ import {
   useQuery,
   useAction,
 } from "wasp/client/operations";
-import { Download, Trash, FileText, Music, Image as ImageIcon, Upload } from "lucide-react";
-import { Alert, AlertDescription } from "../components/ui/alert";
+import { Trash, FileText, Music, Image as ImageIcon, Upload } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import {
@@ -26,7 +26,6 @@ import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Textarea } from "../components/ui/textarea";
 import { toast } from "../hooks/use-toast";
-import { cn } from "../lib/utils";
 import { uploadFileWithProgress } from "../file-upload/fileUploading";
 import { validateResourceFile } from "../resources/validation";
 import { formatRelativeTime } from "@src/shared/date";
@@ -172,6 +171,11 @@ export default function CoachResourcesPage({ user }: { user: User }) {
         <p className="text-muted-foreground mt-2">
           {t("resources.uploadForClients")}
         </p>
+        {(user.username || user.email) && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Coach: {user.username || user.email}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

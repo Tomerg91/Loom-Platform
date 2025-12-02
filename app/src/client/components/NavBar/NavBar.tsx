@@ -1,5 +1,6 @@
 import { LogIn, Menu } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction} from "react";
+import { useEffect, useState } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "wasp/client/auth";

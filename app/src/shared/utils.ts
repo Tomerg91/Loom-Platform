@@ -2,8 +2,8 @@
  * Used purely to help compiler check for exhaustiveness in switch statements,
  * will never execute. See https://stackoverflow.com/a/39419171.
  */
-export function assertUnreachable(_: never): never {
-  throw Error("This code should be unreachable");
+export function assertUnreachable(value: never): never {
+  throw Error(`This code should be unreachable: ${String(value)}`);
 }
 
 /**

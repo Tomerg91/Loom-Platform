@@ -1,5 +1,6 @@
 import { FileText, Mail, Upload, User } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { type AuthUser } from "wasp/auth";
 import {
   getAdminAvatarUploadUrl,
@@ -36,7 +37,7 @@ const getSafeImageUrl = (url: string | null) => {
   try {
     const parsed = new URL(url, window.location.origin);
     return ["http:", "https:", "blob:"].includes(parsed.protocol) ? parsed.toString() : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -238,6 +239,17 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
     );
   }
 
+  const triggerAvatarDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      triggerAvatarDialog();
+    }
+  };
+
   return (
     <DefaultLayout user={user}>
       <div className="max-w-270 mx-auto">
@@ -417,13 +429,13 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         >
                           Reset
                         </button>
-                        <button
-                          type="button"
-                          className="hover:text-primary text-sm"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Update
-                        </button>
+            <button
+              type="button"
+              className="hover:text-primary text-sm"
+              onClick={triggerAvatarDialog}
+            >
+              Update
+            </button>
                         <button
                           type="button"
                           className="hover:text-primary text-sm"
@@ -441,8 +453,11 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
 
                   <div
                     id="FileUpload"
+                    role="button"
+                    tabIndex={0}
                     className="mb-5.5 border-primary bg-background sm:py-7.5 relative block w-full cursor-pointer appearance-none rounded border-2 border-dashed px-4 py-4"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={triggerAvatarDialog}
+                    onKeyDown={handleUploadKeyDown}
                   >
                     <input
                       ref={fileInputRef}

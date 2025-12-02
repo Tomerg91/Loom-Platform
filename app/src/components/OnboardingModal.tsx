@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { CheckCircle2, Circle } from 'lucide-react';
-import type { User } from 'wasp/entities';
 
 export interface OnboardingStep {
   id: string;

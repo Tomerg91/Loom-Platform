@@ -16,13 +16,6 @@ type BodyMapSelectorProps = {
   highlightedZones?: ZoneHighlight[];
 };
 
-type ZoneDefinition = {
-  zone: BodyZone;
-  path: string;
-  label: string;
-  labelPosition: { x: number; y: number };
-};
-
 type ZoneDefinitionBase = {
   zone: BodyZone;
   path: string;
