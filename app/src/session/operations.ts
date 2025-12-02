@@ -12,6 +12,85 @@ import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 import { addDays, setHours, setMinutes, format } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { notificationEmitter, NotificationEventType } from "../notifications/eventEmitter";
+import { GoogleCalendarService } from "@src/google-calendar/service";
+
+// ============================================
+// GOOGLE CALENDAR SYNC HELPER
+// ============================================
+/**
+ * Helper: Add session to user's Google Calendar if connected
+ * Catches errors and logs them but doesn't fail session creation
+ */
+async function syncSessionToGoogleCalendar(
+  session: any, // CoachSession type
+  user: any, // User type
+  context: any // Wasp context
+): Promise<void> {
+  try {
+    const connection = await context.entities.UserCalendarConnection.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!connection?.isConnected) {
+      return; // Not connected, skip sync
+    }
+
+    const service = new GoogleCalendarService();
+
+    // Format event details
+    const title = session.topic || 'Coaching Session';
+    const description = `Session with client\nTopic: ${session.topic || 'General'}\nNotes: ${session.sharedSummary || 'None'}`;
+
+    // Add 1-hour duration default
+    const startTime = new Date(session.sessionDate);
+    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+
+    const googleEventId = await service.addSessionEvent(
+      connection.calendarId,
+      title,
+      startTime,
+      endTime,
+      description
+    );
+
+    // Store the Google Calendar event reference
+    await context.entities.GoogleCalendarEvent.create({
+      data: {
+        sessionId: session.id,
+        googleEventId,
+      },
+    });
+
+    // Update last sync time
+    await context.entities.UserCalendarConnection.update({
+      where: { userId: user.id },
+      data: {
+        lastSyncAt: new Date(),
+      },
+    });
+  } catch (error) {
+    // Log error but don't fail session creation
+    console.error('Google Calendar sync failed:', {
+      userId: user.id,
+      sessionId: session.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    // Update error tracking in database
+    try {
+      await context.entities.UserCalendarConnection.update({
+        where: { userId: user.id },
+        data: {
+          lastError: error instanceof Error ? error.message : String(error),
+          lastErrorAt: new Date(),
+          syncErrorCount: { increment: 1 },
+        },
+      });
+    } catch (updateError) {
+      console.error('Failed to update calendar error', updateError);
+    }
+  }
+}
 
 // ============================================
 // SESSION RESPONSE TYPE
@@ -122,6 +201,9 @@ export const createSession: CreateSession<CreateSessionInput, SessionResponse> =
         clientId: clientId,
       },
     });
+
+    // Sync to Google Calendar (fire-and-forget, doesn't fail session creation)
+    await syncSessionToGoogleCalendar(session, context.user, context);
 
     // Update client's lastActivityDate
     await context.entities.ClientProfile.update({
