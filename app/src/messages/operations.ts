@@ -1,4 +1,5 @@
 import { type Prisma } from "@prisma/client";
+import sanitizeHtml from "sanitize-html";
 import { type ContactFormMessage, type User } from "wasp/entities";
 import { HttpError } from "wasp/server";
 import {
@@ -18,6 +19,16 @@ const contactMessageFilterSchema = z.object({
 export type ContactMessageWithUser = ContactFormMessage & {
   user: Pick<User, "id" | "email" | "username">;
 };
+
+const contactMessageWithUserInclude = {
+  user: {
+    select: {
+      id: true,
+      email: true,
+      username: true,
+    },
+  },
+} satisfies Prisma.ContactFormMessageInclude;
 
 export const getContactMessages: GetContactMessages<
   z.infer<typeof contactMessageFilterSchema>,
@@ -47,15 +58,7 @@ export const getContactMessages: GetContactMessages<
   return adminContext.entities.ContactFormMessage.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          username: true,
-        },
-      },
-    },
+    include: contactMessageWithUserInclude,
   });
 };
 
@@ -80,15 +83,7 @@ export const getContactMessageById: GetContactMessageById<
 
   const message = await adminContext.entities.ContactFormMessage.findUnique({
     where: { id },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          username: true,
-        },
-      },
-    },
+    include: contactMessageWithUserInclude,
   });
 
   if (!message) {
@@ -116,9 +111,21 @@ export const submitContactFormMessage: SubmitContactFormMessage<
     rawArgs,
   );
 
+  const sanitizedContent = sanitizeHtml(content.trim(), {
+    allowedTags: [],
+    allowedAttributes: {},
+  }).trim();
+
+  if (sanitizedContent.length < 5) {
+    throw new HttpError(
+      400,
+      "Message is too short after removing unsafe content",
+    );
+  }
+
   return authenticatedContext.entities.ContactFormMessage.create({
     data: {
-      content,
+      content: sanitizedContent,
       user: {
         connect: { id: authenticatedContext.user.id },
       },
