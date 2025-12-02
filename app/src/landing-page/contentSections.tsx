@@ -6,6 +6,7 @@ import {
   ExampleAvatar2,
   ExampleAvatar3,
 } from "./components/AvatarIllustrations";
+import { LEGAL_LINKS } from "../shared/legalLinks";
 
 export const features: GridFeature[] = [
   {
@@ -81,8 +82,8 @@ export const footerNavigation = {
   ],
   company: [
     { nameKey: "landing.footer.aboutSatyaMethod", href: "#" },
-    { nameKey: "landing.footer.privacy", href: "#" },
-    { nameKey: "landing.footer.termsOfService", href: "#" },
+    { nameKey: "landing.footer.privacy", href: LEGAL_LINKS.privacyPolicyUrl },
+    { nameKey: "landing.footer.termsOfService", href: LEGAL_LINKS.termsOfServiceUrl },
   ],
 };
 

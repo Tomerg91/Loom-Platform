@@ -18,12 +18,14 @@ export const coachNavigationItems: NavigationItem[] = [
   { name: "Coach Dashboard", to: routes.CoachDashboardRoute.to },
   { name: "Resources", to: routes.CoachResourcesRoute.to },
   { name: "File Upload", to: routes.FileUploadRoute.to },
+  { name: "Contact Admin", to: routes.ContactAdminRoute.to },
   ...staticNavigationItems,
 ] as const;
 
 export const clientNavigationItems: NavigationItem[] = [
   { name: "Client Dashboard", to: routes.ClientDashboardRoute.to },
   { name: "Resources", to: routes.ClientResourcesRoute.to },
+  { name: "Contact Admin", to: routes.ContactAdminRoute.to },
   ...staticNavigationItems,
 ] as const;
 
