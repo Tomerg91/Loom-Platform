@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { Job } from "wasp/server/jobs";
+import type { ComputeSomaticAnalyticsJob } from "wasp/server/jobs";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -173,7 +173,7 @@ export async function computeClientAnalytics(
 // ============================================
 // CRON JOB: Compute analytics for all active clients
 // ============================================
-export const computeAllClientAnalytics: Job<
+export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
   never,
   { success: boolean; message: string }
 > = async (_args, context) => {
@@ -184,7 +184,7 @@ export const computeAllClientAnalytics: Job<
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const activeClients = await entities.clientProfile.findMany({
+    const activeClients = await prisma.ClientProfile.findMany({
       where: {
         lastActivityDate: {
           gte: sevenDaysAgo,
@@ -215,7 +215,7 @@ export const computeAllClientAnalytics: Job<
           const { startDate, endDate } = getDateRange(period);
 
           // Upsert the analytics record
-          await entities.somaticLogAnalytics.upsert({
+          await prisma.SomaticLogAnalytics.upsert({
             where: {
               clientId_period: {
                 clientId: client.id,

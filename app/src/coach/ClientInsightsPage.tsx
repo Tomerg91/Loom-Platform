@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import { getClientInsights, useQuery } from "wasp/client/operations";
@@ -25,7 +25,8 @@ type BodyZone =
 
 type TimeRange = "30days" | "3months" | "allTime";
 
-function ClientInsightsPageContent({ user }: { user: User }) {
+function ClientInsightsPageContent({ user: _user }: { user: User }) {
+  void _user;
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam?.trim();
 
@@ -33,7 +34,7 @@ function ClientInsightsPageContent({ user }: { user: User }) {
     return <MissingClientInsightsNotice />;
   }
 
-  return <ClientInsightsView user={user} clientId={clientId} />;
+  return <ClientInsightsView clientId={clientId} />;
 }
 
 function MissingClientInsightsNotice() {
@@ -69,15 +70,9 @@ function MissingClientInsightsNotice() {
   );
 }
 
-function ClientInsightsView({
-  user,
-  clientId,
-}: {
-  user: User;
-  clientId: string;
-}) {
+function ClientInsightsView({ clientId }: { clientId: string }) {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
 
   // Fetch insights data
@@ -87,10 +82,13 @@ function ClientInsightsView({
   });
 
   // Get body zone labels
-  const getBodyZoneLabel = (zone: BodyZone): string => {
-    const zoneKey = `somatic.bodyZones.${zone}`;
-    return t(zoneKey, zone);
-  };
+  const getBodyZoneLabel = useCallback(
+    (zone: BodyZone): string => {
+      const zoneKey = `somatic.bodyZones.${zone}`;
+      return t(zoneKey, zone);
+    },
+    [t],
+  );
 
   // Prepare data for charts
   const sensationChartData = useMemo(() => {
@@ -114,7 +112,7 @@ function ClientInsightsView({
       percentage: item.percentage,
       bodyZone: item.bodyZone,
     }));
-  }, [insightsData, t]);
+  }, [getBodyZoneLabel, insightsData]);
 
   // Time range label mapping
   const timeRangeLabels: Record<TimeRange, string> = {

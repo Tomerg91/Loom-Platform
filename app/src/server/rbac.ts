@@ -4,6 +4,7 @@ import type { UserRole } from "@prisma/client";
 
 export type OperationContext = {
   user: User | null | undefined;
+  entities: Record<string, any>;
 };
 
 type AuthenticatedContext<TContext extends OperationContext> = TContext & {

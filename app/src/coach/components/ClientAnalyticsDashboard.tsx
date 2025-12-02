@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
+import { Skeleton } from "../../components/ui/skeleton";
 import { AlertTriangle, Download, FileText } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
 import { BodyZoneChart } from "./charts/BodyZoneChart";

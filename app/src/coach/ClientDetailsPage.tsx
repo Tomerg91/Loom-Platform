@@ -34,7 +34,8 @@ type ZoneHighlight = {
   intensity: number;
 };
 
-function ClientDetailsPageContent({ user }: { user: User }) {
+function ClientDetailsPageContent({ user: _user }: { user: User }) {
+  void _user;
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam?.trim();
 
@@ -42,7 +43,7 @@ function ClientDetailsPageContent({ user }: { user: User }) {
     return <MissingClientNotice />;
   }
 
-  return <ClientDetailsPageView user={user} clientId={clientId} />;
+  return <ClientDetailsPageView clientId={clientId} />;
 }
 
 function MissingClientNotice() {
@@ -78,13 +79,7 @@ function MissingClientNotice() {
   );
 }
 
-function ClientDetailsPageView({
-  user,
-  clientId,
-}: {
-  user: User;
-  clientId: string;
-}) {
+function ClientDetailsPageView({ clientId }: { clientId: string }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -133,6 +128,7 @@ function ClientDetailsPageView({
     page: currentPage,
     limit: itemsPerPage,
   });
+  const coachSessions = sessionsResponse?.sessions as SessionResponse[] | undefined;
 
   const createSessionFn = useAction(createSession);
   const updateSessionFn = useAction(updateSession);
@@ -237,8 +233,10 @@ function ClientDetailsPageView({
         handleCloseSessionDialog();
         refetchSessions();
       }, 1000);
-    } catch (error: any) {
-      setSessionError(error.message || "Failed to save session");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save session";
+      setSessionError(message);
     } finally {
       setIsSubmittingSession(false);
     }
@@ -253,8 +251,10 @@ function ClientDetailsPageView({
       setTimeout(() => {
         refetchSessions();
       }, 500);
-    } catch (error: any) {
-      setSessionError(error.message || "Failed to delete session");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to delete session";
+      setSessionError(message);
     }
   };
 
@@ -661,9 +661,9 @@ function ClientDetailsPageView({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!sessionsResponse || sessionsResponse.sessions.length === 0 ? (
+          {!coachSessions || coachSessions.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No sessions logged yet. Click "Log Session" to create one.
+              No sessions logged yet. Click &quot;Log Session&quot; to create one.
             </p>
           ) : (
             <>
@@ -679,7 +679,7 @@ function ClientDetailsPageView({
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {sessionsResponse.sessions.map((session: any) => (
+                    {coachSessions.map((session) => (
                       <tr key={session.id} className="text-sm">
                         <td className="py-3">
                           <div>
@@ -740,7 +740,7 @@ function ClientDetailsPageView({
 
               {/* Mobile Card Layout */}
               <div className="block md:hidden space-y-3">
-                {sessionsResponse.sessions.map((session: any) => (
+                {coachSessions.map((session) => (
                   <div
                     key={session.id}
                     className="border rounded-lg p-4 space-y-3 bg-card"
@@ -1081,7 +1081,7 @@ function ClientDetailsPageView({
                 <option value="Asia/Kolkata">Asia/Kolkata</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Client's timezone for scheduling
+                Client&apos;s timezone for scheduling
               </p>
             </div>
 

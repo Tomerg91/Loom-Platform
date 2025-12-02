@@ -20,7 +20,15 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
-import BodyMapSelector from "../client/components/BodyMapSelector";
+
+type LogSessionFormState = {
+  sessionDate: string;
+  topic: string;
+  privateNotes: string;
+  sharedSummary: string;
+  somaticAnchor: BodyZone | "";
+  resourceIds: string[];
+};
 
 function LogSessionPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
@@ -67,18 +75,19 @@ function MissingLogSessionClient() {
 }
 
 function LogSessionForm({
-  user,
+  user: _user,
   clientId,
 }: {
   user: User;
   clientId: string;
 }) {
+  void _user;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LogSessionFormState>({
     sessionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     topic: "",
     privateNotes: "",
@@ -179,10 +188,11 @@ function LogSessionForm({
   const {
     data: previousSessions,
     isLoading: isContextLoading,
-    error: contextError,
   } = useQuery(getRecentSessionsForClient, {
     clientId: clientId || "",
   });
+
+  const previousSession = previousSessions?.[0] ?? null;
 
   // Get the logSession action
   const logSessionFn = useAction(logSession);
@@ -267,7 +277,7 @@ function LogSessionForm({
         topic: formData.topic || null,
         privateNotes: formData.privateNotes || null,
         sharedSummary: formData.sharedSummary || null,
-        somaticAnchor: (formData.somaticAnchor || null) as any,
+        somaticAnchor: formData.somaticAnchor || null,
         resourceIds: formData.resourceIds,
       });
 
@@ -292,8 +302,10 @@ function LogSessionForm({
       setTimeout(() => {
         navigate(`/coach/client/${clientId}`);
       }, 2000);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to log session");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to log session";
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -341,13 +353,13 @@ function LogSessionForm({
                   </div>
 
                   {/* Somatic Anchor */}
-                  {(previousSession as any).somaticAnchor && (
+                  {previousSession?.somaticAnchor && (
                     <div>
                       <p className="text-xs text-muted-foreground font-semibold">
                         {t("session.bodyZoneDiscussed")}
                       </p>
                       <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mt-1">
-                        {t(`somatic.bodyZones.${(previousSession as any).somaticAnchor}`)}
+                        {t(`somatic.bodyZones.${previousSession.somaticAnchor}`)}
                       </span>
                     </div>
                   )}
