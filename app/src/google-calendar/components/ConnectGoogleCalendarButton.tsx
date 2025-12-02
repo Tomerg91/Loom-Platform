@@ -4,8 +4,10 @@ import { connectGoogleCalendar } from 'wasp/client/operations';
 import { Button } from '@src/components/ui/button';
 import { useToast } from '@src/hooks/use-toast';
 import { Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function ConnectGoogleCalendarButton() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const connectFn = useAction(connectGoogleCalendar);
   const { toast } = useToast();
@@ -15,17 +17,17 @@ export function ConnectGoogleCalendarButton() {
     try {
       const result = await connectFn();
       toast({
-        title: 'Success',
-        description: `Connected to ${result.calendarName}`,
+        title: t('common.success'),
+        description: t('googleCalendar.connectedTo', { calendarName: result.calendarName }),
         variant: 'default',
       });
     } catch (error) {
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description:
           error instanceof Error
             ? error.message
-            : 'Failed to connect Google Calendar',
+            : t('googleCalendar.connectError'),
         variant: 'destructive',
       });
     } finally {
@@ -40,7 +42,7 @@ export function ConnectGoogleCalendarButton() {
       variant="outline"
     >
       {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-      Connect Google Calendar
+      {t('googleCalendar.connectButton')}
     </Button>
   );
 }

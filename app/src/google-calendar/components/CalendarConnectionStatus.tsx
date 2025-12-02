@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@src/components/ui/car
 import { AlertCircle, CheckCircle2, Loader } from 'lucide-react';
 import { ConnectGoogleCalendarButton } from './ConnectGoogleCalendarButton';
 import { DisconnectGoogleCalendarButton } from './DisconnectGoogleCalendarButton';
+import { useTranslation } from 'react-i18next';
 
 export function CalendarConnectionStatus() {
+  const { t } = useTranslation();
   const { data: connection, isLoading } = useQuery(getCalendarConnection);
 
   if (isLoading) {
@@ -22,11 +24,11 @@ export function CalendarConnectionStatus() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Google Calendar Integration</CardTitle>
+          <CardTitle>{t('googleCalendar.integrationTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-4">
-            Connect your Google Calendar to automatically sync your coaching sessions.
+            {t('googleCalendar.connectPrompt')}
           </p>
           <ConnectGoogleCalendarButton />
         </CardContent>
@@ -39,19 +41,19 @@ export function CalendarConnectionStatus() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-green-600" />
-          Google Calendar Connected
+          {t('googleCalendar.connectedTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-gray-700">Calendar</p>
+            <p className="text-sm font-medium text-gray-700">{t('googleCalendar.calendarLabel')}</p>
             <p className="text-sm text-gray-600">{connection.calendarName}</p>
           </div>
 
           {connection.lastSyncAt && (
             <div>
-              <p className="text-sm font-medium text-gray-700">Last Synced</p>
+              <p className="text-sm font-medium text-gray-700">{t('googleCalendar.lastSyncedLabel')}</p>
               <p className="text-sm text-gray-600">
                 {new Date(connection.lastSyncAt).toLocaleString()}
               </p>
@@ -62,7 +64,7 @@ export function CalendarConnectionStatus() {
             <div className="flex gap-2 p-3 bg-yellow-50 rounded-md">
               <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-yellow-800">Sync Errors</p>
+                <p className="text-sm font-medium text-yellow-800">{t('googleCalendar.syncErrorsLabel')}</p>
                 <p className="text-xs text-yellow-700">{connection.lastError}</p>
               </div>
             </div>
