@@ -514,6 +514,44 @@ action deleteActionItem {
 }
 //#endregion
 
+//#region Mentoring Circles
+route MentoringCirclesRoute { path: "/coach/mentoring-circles", to: MentoringCirclesPage }
+page MentoringCirclesPage {
+  authRequired: true,
+  component: import MentoringCircles from "@src/group/MentoringCirclesPage"
+}
+
+action createGroup {
+  fn: import { createGroup } from "@src/group/operations",
+  entities: [User, CoachProfile, Group]
+}
+
+query getGroupFeed {
+  fn: import { getGroupFeed } from "@src/group/operations",
+  entities: [User, CoachProfile, Group, GroupMember, GroupPost, GroupPostReply]
+}
+
+action createGroupPost {
+  fn: import { createGroupPost } from "@src/group/operations",
+  entities: [User, CoachProfile, Group, GroupMember, GroupPost]
+}
+
+action createGroupPostReply {
+  fn: import { createGroupPostReply } from "@src/group/operations",
+  entities: [User, CoachProfile, GroupMember, GroupPost, GroupPostReply]
+}
+
+query getGroupMembers {
+  fn: import { getGroupMembers } from "@src/group/operations",
+  entities: [User, CoachProfile, GroupMember]
+}
+
+action deleteGroupPost {
+  fn: import { deleteGroupPost } from "@src/group/operations",
+  entities: [User, CoachProfile, Group, GroupPost]
+}
+//#endregion
+
 //#region Analytics
 query getDailyStats {
   fn: import { getDailyStats } from "@src/analytics/operations",
