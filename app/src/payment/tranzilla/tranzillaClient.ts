@@ -124,7 +124,10 @@ export function validateTranzillaSignature(
     }
 
     // Calculate expected signature: HMAC-SHA256(app_key + secret + request_time + nonce)
+    // Note: This is HMAC-SHA256 for API signature verification, not password hashing
+    // CodeQL false positive: apiSecret is used as an HMAC key, not password storage
     const dataToSign = `${appKey}${apiSecret}${requestTime}${nonce}`;
+    // lgtm [js/insufficient-password-hash]
     const expectedSignature = crypto
       .createHmac("sha256", apiSecret)
       .update(dataToSign)
@@ -197,7 +200,10 @@ export function generateTranzillaAuthHeaders(appKey: string): Record<string, str
   const nonce = crypto.randomBytes(40).toString("hex");
 
   // Calculate HMAC-SHA256 signature
+  // Note: This is HMAC-SHA256 for API signature generation, not password hashing
+  // CodeQL false positive: apiSecret is used as an HMAC key, not password storage
   const dataToSign = `${appKey}${apiSecret}${requestTime}${nonce}`;
+  // lgtm [js/insufficient-password-hash]
   const accessToken = crypto
     .createHmac("sha256", apiSecret)
     .update(dataToSign)
