@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import { useQuery, useAction } from "wasp/client/operations";
-import { getClientAnalytics, generateClientExportPdf } from "wasp/client/operations";
+import {
+  getClientAnalytics,
+  generateClientExportPdf,
+} from "wasp/client/operations";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
@@ -22,13 +31,21 @@ interface ClientAnalyticsDashboardProps {
   clientName?: string;
 }
 
-export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: ClientAnalyticsDashboardProps) {
+export function ClientAnalyticsDashboard({
+  clientId,
+  clientName = "Client",
+}: ClientAnalyticsDashboardProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [period, setPeriod] = useState<"30d" | "90d" | "365d">("30d");
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data: analytics, isLoading, error, refetch } = useQuery(getClientAnalytics, {
+  const {
+    data: analytics,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(getClientAnalytics, {
     clientId,
     period,
   });
@@ -54,7 +71,11 @@ export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: Cl
       const displayName = clientName || "Client";
 
       // Export analytics as CSV
-      exportAnalyticsAsCSV(analytics as ClientAnalyticsResult, displayName, period);
+      exportAnalyticsAsCSV(
+        analytics as ClientAnalyticsResult,
+        displayName,
+        period,
+      );
 
       toast({
         title: t("somatic.analytics.exportSuccess"),
@@ -222,18 +243,29 @@ export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: Cl
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Period Selector Tabs */}
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as "30d" | "90d" | "365d")}>
+          <Tabs
+            value={period}
+            onValueChange={(v) => setPeriod(v as "30d" | "90d" | "365d")}
+          >
             <TabsList>
-              <TabsTrigger value="30d">{t("somatic.analytics.period.30d")}</TabsTrigger>
-              <TabsTrigger value="90d">{t("somatic.analytics.period.90d")}</TabsTrigger>
-              <TabsTrigger value="365d">{t("somatic.analytics.period.365d")}</TabsTrigger>
+              <TabsTrigger value="30d">
+                {t("somatic.analytics.period.30d")}
+              </TabsTrigger>
+              <TabsTrigger value="90d">
+                {t("somatic.analytics.period.90d")}
+              </TabsTrigger>
+              <TabsTrigger value="365d">
+                {t("somatic.analytics.period.365d")}
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
           {/* Body Zones Chart */}
           {analytics.topBodyZones.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">{t("somatic.analytics.topZones")}</h3>
+              <h3 className="text-lg font-semibold">
+                {t("somatic.analytics.topZones")}
+              </h3>
               <BodyZoneChart data={analytics.topBodyZones} />
             </div>
           )}
@@ -241,7 +273,9 @@ export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: Cl
           {/* Sensations Chart */}
           {analytics.topSensations.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">{t("somatic.analytics.topSensations")}</h3>
+              <h3 className="text-lg font-semibold">
+                {t("somatic.analytics.topSensations")}
+              </h3>
               <SensationChart data={analytics.topSensations} />
             </div>
           )}
@@ -249,7 +283,9 @@ export function ClientAnalyticsDashboard({ clientId, clientName = "Client" }: Cl
           {/* Intensity Trend Chart */}
           {analytics.intensityTrendOverTime.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">{t("somatic.analytics.intensityTrend")}</h3>
+              <h3 className="text-lg font-semibold">
+                {t("somatic.analytics.intensityTrend")}
+              </h3>
               <IntensityTrendChart data={analytics.intensityTrendOverTime} />
             </div>
           )}

@@ -46,7 +46,10 @@ export const tranzillaWebhook: PaymentsWebhook = async (
     const body = request.body as Record<string, string>;
 
     if (process.env.NODE_ENV === "development") {
-      console.log("🔔 Tranzilla webhook received:", JSON.stringify(body, null, 2));
+      console.log(
+        "🔔 Tranzilla webhook received:",
+        JSON.stringify(body, null, 2),
+      );
     }
 
     // Extract key fields from Tranzilla response
@@ -66,8 +69,11 @@ export const tranzillaWebhook: PaymentsWebhook = async (
       });
     }
 
-    // Security: Validate signature (placeholder implementation)
-    const isValidSignature = validateTranzillaSignature(body);
+    // Security: Validate signature using HMAC-SHA256
+    const isValidSignature = validateTranzillaSignature(
+      request.headers as Record<string, any>,
+      body,
+    );
     if (!isValidSignature) {
       console.error("❌ Invalid Tranzilla webhook signature");
       return response.status(401).json({

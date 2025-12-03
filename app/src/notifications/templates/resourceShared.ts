@@ -24,7 +24,9 @@ export function getResourceSharedEmailContent(data: ResourceSharedData) {
       </p>
 
       <p style="color: #666; font-size: 16px; line-height: 1.6;">
-        <strong>${escapeHtml(data.coachName)}</strong> has shared a new resource with you.
+        <strong>${escapeHtml(
+          data.coachName,
+        )}</strong> has shared a new resource with you.
       </p>
 
       <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0;">
@@ -33,8 +35,10 @@ export function getResourceSharedEmailContent(data: ResourceSharedData) {
         </p>
         ${
           data.resourceDescription
-            ? `<p style="margin: 0; color: #666; line-height: 1.5;">${escapeHtml(data.resourceDescription)}</p>`
-            : ''
+            ? `<p style="margin: 0; color: #666; line-height: 1.5;">${escapeHtml(
+                data.resourceDescription,
+              )}</p>`
+            : ""
         }
       </div>
 
@@ -43,7 +47,9 @@ export function getResourceSharedEmailContent(data: ResourceSharedData) {
       </p>
 
       <div style="margin: 30px 0;">
-        <a href="${escapeHtml(data.appUrl)}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        <a href="${escapeHtml(
+          data.appUrl,
+        )}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
           View Resources
         </a>
       </div>
@@ -65,11 +71,11 @@ export function getResourceSharedEmailContent(data: ResourceSharedData) {
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   };
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }

@@ -1,4 +1,4 @@
-import type { FC, ReactNode} from "react";
+import type { FC, ReactNode } from "react";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { type AuthUser } from "wasp/auth";

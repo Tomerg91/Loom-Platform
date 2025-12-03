@@ -3,11 +3,7 @@ export function formatCurrency(
   options?: Intl.NumberFormatOptions & { currency?: string; locale?: string },
 ): string {
   const resolvedValue = value ?? 0;
-  const {
-    currency = "USD",
-    locale = "en-US",
-    ...intlOptions
-  } = options || {};
+  const { currency = "USD", locale = "en-US", ...intlOptions } = options || {};
 
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -21,10 +17,7 @@ export function formatNumber(
   value: number | null | undefined,
   options?: Intl.NumberFormatOptions & { locale?: string },
 ): string {
-  const {
-    locale = "en-US",
-    ...intlOptions
-  } = options || {};
+  const { locale = "en-US", ...intlOptions } = options || {};
 
   return new Intl.NumberFormat(locale, {
     maximumFractionDigits: 1,
@@ -47,10 +40,7 @@ export function formatCompactNumber(
   value: number | null | undefined,
   options?: Intl.NumberFormatOptions & { locale?: string },
 ): string {
-  const {
-    locale = "en-US",
-    ...intlOptions
-  } = options || {};
+  const { locale = "en-US", ...intlOptions } = options || {};
 
   return new Intl.NumberFormat(locale, {
     notation: "compact",

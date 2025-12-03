@@ -33,7 +33,9 @@ export default function LanguageSwitcher() {
       size="sm"
       onClick={handleLanguageToggle}
       className="px-2 py-1 text-base"
-      title={currentLanguage === "en" ? "Switch to Hebrew" : "Switch to English"}
+      title={
+        currentLanguage === "en" ? "Switch to Hebrew" : "Switch to English"
+      }
     >
       {currentLanguage === "en" ? "🇬🇧" : "🇮🇱"}
     </Button>

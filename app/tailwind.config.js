@@ -14,8 +14,20 @@ export default {
     extend: {
       fontFamily: {
         display: ["Crimson Pro", "Georgia", "Cambria", "serif"],
-        body: ["Source Sans 3", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        sans: ["Source Sans 3", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        body: [
+          "Source Sans 3",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
+        sans: [
+          "Source Sans 3",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
       },
       colors: {
         current: "currentColor",

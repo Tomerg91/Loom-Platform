@@ -76,7 +76,10 @@ export const footerNavigation = {
   company: [
     { nameKey: "landing.footer.aboutSatyaMethod", href: "#" },
     { nameKey: "landing.footer.privacy", href: LEGAL_LINKS.privacyPolicyUrl },
-    { nameKey: "landing.footer.termsOfService", href: LEGAL_LINKS.termsOfServiceUrl },
+    {
+      nameKey: "landing.footer.termsOfService",
+      href: LEGAL_LINKS.termsOfServiceUrl,
+    },
   ],
 };
 

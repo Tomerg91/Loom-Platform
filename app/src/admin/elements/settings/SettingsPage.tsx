@@ -36,7 +36,9 @@ const getSafeImageUrl = (url: string | null) => {
 
   try {
     const parsed = new URL(url, window.location.origin);
-    return ["http:", "https:", "blob:"].includes(parsed.protocol) ? parsed.toString() : null;
+    return ["http:", "https:", "blob:"].includes(parsed.protocol)
+      ? parsed.toString()
+      : null;
   } catch {
     return null;
   }
@@ -61,7 +63,10 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const safeAvatarSrc = useMemo(() => getSafeImageUrl(avatarPreview), [avatarPreview]);
+  const safeAvatarSrc = useMemo(
+    () => getSafeImageUrl(avatarPreview),
+    [avatarPreview],
+  );
 
   const currentSettings = useMemo(() => data, [data]);
 
@@ -82,10 +87,7 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
     setAvatarFile(null);
   }, [currentSettings]);
 
-  const handleInputChange = (
-    field: keyof typeof formState,
-    value: string,
-  ) => {
+  const handleInputChange = (field: keyof typeof formState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -94,7 +96,10 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
-        if (img.width > MAX_AVATAR_DIMENSION || img.height > MAX_AVATAR_DIMENSION) {
+        if (
+          img.width > MAX_AVATAR_DIMENSION ||
+          img.height > MAX_AVATAR_DIMENSION
+        ) {
           URL.revokeObjectURL(objectUrl);
           reject(
             new Error(
@@ -114,7 +119,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
     });
   };
 
-  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -122,8 +129,14 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
     setErrorMessage(null);
 
     try {
-      if (!ACCEPTED_AVATAR_TYPES.includes(file.type as (typeof ACCEPTED_AVATAR_TYPES)[number])) {
-        throw new Error("Unsupported file type. Please upload PNG, JPEG, WEBP or GIF.");
+      if (
+        !ACCEPTED_AVATAR_TYPES.includes(
+          file.type as (typeof ACCEPTED_AVATAR_TYPES)[number],
+        )
+      ) {
+        throw new Error(
+          "Unsupported file type. Please upload PNG, JPEG, WEBP or GIF.",
+        );
       }
 
       if (file.size > MAX_AVATAR_FILE_SIZE) {
@@ -144,7 +157,10 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
   };
 
   const uploadAvatar = async () => {
-    if (!avatarFile) return { s3Key: removeAvatar ? null : currentSettings?.avatarS3Key ?? null };
+    if (!avatarFile)
+      return {
+        s3Key: removeAvatar ? null : currentSettings?.avatarS3Key ?? null,
+      };
 
     const uploadDetails = await getAdminAvatarUploadUrl({
       fileName: avatarFile.name,
@@ -185,7 +201,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
         emailAddress: formState.emailAddress.trim(),
         username: formState.username.trim(),
         bio: formState.bio.trim() || undefined,
-        avatarS3Key: removeAvatar ? null : s3Key ?? currentSettings?.avatarS3Key ?? null,
+        avatarS3Key: removeAvatar
+          ? null
+          : s3Key ?? currentSettings?.avatarS3Key ?? null,
         privacyPolicyUrl: formState.privacyPolicyUrl.trim(),
         termsOfServiceUrl: formState.termsOfServiceUrl.trim(),
       };
@@ -278,7 +296,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                           type="text"
                           id="full-name"
                           value={formState.fullName}
-                          onChange={(e) => handleInputChange("fullName", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("fullName", e.target.value)
+                          }
                         />
                       </div>
                     </div>
@@ -294,7 +314,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="tel"
                         id="phone-number"
                         value={formState.phoneNumber}
-                        onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phoneNumber", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -313,7 +335,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="email"
                         id="email-address"
                         value={formState.emailAddress}
-                        onChange={(e) => handleInputChange("emailAddress", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("emailAddress", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -329,7 +353,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       type="text"
                       id="username"
                       value={formState.username}
-                      onChange={(e) => handleInputChange("username", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("username", e.target.value)
+                      }
                     />
                   </div>
 
@@ -347,7 +373,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         id="bio"
                         rows={6}
                         value={formState.bio}
-                        onChange={(e) => handleInputChange("bio", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("bio", e.target.value)
+                        }
                       ></Textarea>
                     </div>
                   </div>
@@ -364,7 +392,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="url"
                         id="privacy-policy-url"
                         value={formState.privacyPolicyUrl}
-                        onChange={(e) => handleInputChange("privacyPolicyUrl", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("privacyPolicyUrl", e.target.value)
+                        }
                       />
                     </div>
                     <div className="w-full sm:w-1/2">
@@ -378,20 +408,31 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         type="url"
                         id="terms-url"
                         value={formState.termsOfServiceUrl}
-                        onChange={(e) => handleInputChange("termsOfServiceUrl", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("termsOfServiceUrl", e.target.value)
+                        }
                       />
                     </div>
                   </div>
 
                   {statusMessage && (
-                    <div className="text-green-600 mb-4 text-sm">{statusMessage}</div>
+                    <div className="text-green-600 mb-4 text-sm">
+                      {statusMessage}
+                    </div>
                   )}
                   {errorMessage && (
-                    <div className="text-destructive mb-4 text-sm">{errorMessage}</div>
+                    <div className="text-destructive mb-4 text-sm">
+                      {errorMessage}
+                    </div>
                   )}
 
                   <div className="gap-4.5 flex justify-end">
-                    <Button variant="outline" type="button" onClick={handleCancel} disabled={isSaving}>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                    >
                       Cancel
                     </Button>
                     <Button type="submit" disabled={isSaving}>
@@ -412,7 +453,11 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                   <div className="mb-4 flex items-center gap-3">
                     <div className="h-14 w-14 overflow-hidden rounded-full">
                       {safeAvatarSrc ? (
-                        <img src={safeAvatarSrc} alt="Admin avatar" className="h-full w-full object-cover" />
+                        <img
+                          src={safeAvatarSrc}
+                          alt="Admin avatar"
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
                         <div className="bg-muted flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                           No photo
@@ -420,7 +465,9 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                       )}
                     </div>
                     <div>
-                      <span className="text-foreground mb-1.5">Edit your photo</span>
+                      <span className="text-foreground mb-1.5">
+                        Edit your photo
+                      </span>
                       <span className="flex gap-2.5">
                         <button
                           type="button"
@@ -429,13 +476,13 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         >
                           Reset
                         </button>
-            <button
-              type="button"
-              className="hover:text-primary text-sm"
-              onClick={triggerAvatarDialog}
-            >
-              Update
-            </button>
+                        <button
+                          type="button"
+                          className="hover:text-primary text-sm"
+                          onClick={triggerAvatarDialog}
+                        >
+                          Update
+                        </button>
                         <button
                           type="button"
                           className="hover:text-primary text-sm"
@@ -475,12 +522,20 @@ const SettingsPage = ({ user }: { user: AuthUser }) => {
                         drag and drop
                       </p>
                       <p className="mt-1.5">PNG, JPG, WebP or GIF</p>
-                      <p>(max {MAX_AVATAR_DIMENSION} x {MAX_AVATAR_DIMENSION}px, 2MB)</p>
+                      <p>
+                        (max {MAX_AVATAR_DIMENSION} x {MAX_AVATAR_DIMENSION}px,
+                        2MB)
+                      </p>
                     </div>
                   </div>
 
                   <div className="gap-4.5 flex justify-end">
-                    <Button variant="outline" type="button" onClick={handleCancel} disabled={isSaving}>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                    >
                       Cancel
                     </Button>
                     <Button type="submit" disabled={isSaving}>

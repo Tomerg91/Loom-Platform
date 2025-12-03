@@ -3,11 +3,22 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import { getClientInsights, useQuery } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
-import { ArrowLeft, BarChart3, AlertCircle, Loader2, TrendingUp } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  AlertCircle,
+  Loader2,
+  TrendingUp,
+} from "lucide-react";
 import { cn } from "../lib/utils";
 import {
   Bar,
@@ -35,7 +46,14 @@ type BodyZone =
 
 type TimeRange = "30days" | "3months" | "allTime";
 
-const chartColors = ["#2563eb", "#22c55e", "#a855f7", "#f59e0b", "#f97316", "#0ea5e9"];
+const chartColors = [
+  "#2563eb",
+  "#22c55e",
+  "#a855f7",
+  "#f59e0b",
+  "#f97316",
+  "#0ea5e9",
+];
 
 function ClientInsightsPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
@@ -64,7 +82,7 @@ function MissingClientInsightsNotice() {
             <p className="text-sm mb-4">
               {t(
                 "errors.missingClientId.message",
-                "The client ID is missing or invalid."
+                "The client ID is missing or invalid.",
               )}
             </p>
           </AlertDescription>
@@ -93,7 +111,11 @@ function ClientInsightsView({
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
 
   // Fetch insights data
-  const { data: insightsData, isLoading, error } = useQuery(getClientInsights, {
+  const {
+    data: insightsData,
+    isLoading,
+    error,
+  } = useQuery(getClientInsights, {
     clientId,
     timeRange,
   });
@@ -260,10 +282,7 @@ function ClientInsightsView({
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  {t(
-                    "insights.emptyState.title",
-                    "Not enough data yet"
-                  )}
+                  {t("insights.emptyState.title", "Not enough data yet")}
                 </h2>
                 <p className="text-gray-600 mb-6">
                   {t(
@@ -273,17 +292,14 @@ function ClientInsightsView({
                       clientName: "Client",
                       minLogs: insightsData.minLogsRequired,
                       totalLogs: insightsData.totalLogs,
-                    }
+                    },
                   )}
                 </p>
                 <Button
                   onClick={() => navigate(`/coach/client/${clientId}`)}
                   className="flex items-center gap-2 mx-auto"
                 >
-                  {t(
-                    "insights.emptyState.action",
-                    "View Client Details"
-                  )}
+                  {t("insights.emptyState.action", "View Client Details")}
                 </Button>
               </div>
             </CardContent>
@@ -334,7 +350,7 @@ function ClientInsightsView({
                 "px-4 py-2",
                 timeRange === range
                   ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
+                  : "text-gray-700 hover:bg-gray-100",
               )}
             >
               {timeRangeLabels[range]}
@@ -398,7 +414,10 @@ function ClientInsightsView({
                 data={sensationChartData}
                 isLoading={isLoading}
                 logsLabel={t("insights.sensations.logs", "logs")}
-                noDataMessage={t("insights.noData", "No sensation data available")}
+                noDataMessage={t(
+                  "insights.noData",
+                  "No sensation data available",
+                )}
               />
             </CardContent>
           </Card>
@@ -415,7 +434,10 @@ function ClientInsightsView({
                 data={bodyZoneChartData}
                 isLoading={isLoading}
                 logsLabel={t("insights.sensations.logs", "logs")}
-                noDataMessage={t("insights.noData", "No body zone data available")}
+                noDataMessage={t(
+                  "insights.noData",
+                  "No body zone data available",
+                )}
               />
             </CardContent>
           </Card>
@@ -499,11 +521,18 @@ function TopSensationsChart({
             tick={{ fontSize: 12 }}
           />
           <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-          <Tooltip content={(props) => <InsightsTooltip {...props} logsLabel={logsLabel} />} />
+          <Tooltip
+            content={(props) => (
+              <InsightsTooltip {...props} logsLabel={logsLabel} />
+            )}
+          />
           <Legend />
           <Bar dataKey="count" name={logsLabel} radius={[6, 6, 0, 0]}>
             {data.map((entry, index) => (
-              <Cell key={entry.sensation} fill={chartColors[index % chartColors.length]} />
+              <Cell
+                key={entry.sensation}
+                fill={chartColors[index % chartColors.length]}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -518,7 +547,12 @@ function BodyZoneActivityChart({
   logsLabel,
   noDataMessage,
 }: {
-  data: { zone: string; count: number; percentage: number; bodyZone: BodyZone }[];
+  data: {
+    zone: string;
+    count: number;
+    percentage: number;
+    bodyZone: BodyZone;
+  }[];
   isLoading: boolean;
   logsLabel: string;
   noDataMessage: string;
@@ -551,11 +585,18 @@ function BodyZoneActivityChart({
             tick={{ fontSize: 12 }}
           />
           <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-          <Tooltip content={(props) => <InsightsTooltip {...props} logsLabel={logsLabel} />} />
+          <Tooltip
+            content={(props) => (
+              <InsightsTooltip {...props} logsLabel={logsLabel} />
+            )}
+          />
           <Legend />
           <Bar dataKey="count" name={logsLabel} radius={[6, 6, 0, 0]}>
             {chartData.map((entry, index) => (
-              <Cell key={`${entry.bodyZone}-${index}`} fill={chartColors[index % chartColors.length]} />
+              <Cell
+                key={`${entry.bodyZone}-${index}`}
+                fill={chartColors[index % chartColors.length]}
+              />
             ))}
           </Bar>
         </BarChart>

@@ -68,7 +68,10 @@ function FeaturesGridItem({
 
   // Translate name and description if they're translation keys
   const translatedName = name && name.startsWith("landing.") ? t(name) : name;
-  const translatedDescription = description && description.startsWith("landing.") ? t(description) : description;
+  const translatedDescription =
+    description && description.startsWith("landing.")
+      ? t(description)
+      : description;
   const gridFeatureSizeToClasses: Record<GridFeature["size"], string> = {
     small: "col-span-1",
     medium: "col-span-2 md:col-span-2 lg:col-span-2",

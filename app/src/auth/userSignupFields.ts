@@ -86,11 +86,11 @@ const githubDataSchema = z.object({
         z.object({
           email: z.string(),
           verified: z.boolean(),
-        })
+        }),
       )
       .min(
         1,
-        "You need to have an email address associated with your GitHub account to sign up."
+        "You need to have an email address associated with your GitHub account to sign up.",
       ),
     login: z.string(),
   }),
@@ -151,7 +151,7 @@ export const getDiscordUserFields = defineUserSignupFields({
     // Users need to have an email for payment processing.
     if (!discordData.profile.email) {
       throw new Error(
-        "You need to have an email address associated with your Discord account to sign up."
+        "You need to have an email address associated with your Discord account to sign up.",
       );
     }
     return discordData.profile.email;

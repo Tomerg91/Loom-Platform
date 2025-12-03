@@ -236,16 +236,19 @@ const updateOnboardingStatusInputSchema = z.object({
   onboardingSteps: z.record(z.boolean()).optional(),
 });
 
-type UpdateOnboardingStatusInput = z.infer<typeof updateOnboardingStatusInputSchema>;
+type UpdateOnboardingStatusInput = z.infer<
+  typeof updateOnboardingStatusInputSchema
+>;
 
 export const updateOnboardingStatus: UpdateOnboardingStatus<
   UpdateOnboardingStatusInput,
   OnboardingStatusResponse
 > = async (rawArgs, context) => {
-  const { onboardingCompleted, onboardingSteps } = ensureArgsSchemaOrThrowHttpError(
-    updateOnboardingStatusInputSchema,
-    rawArgs,
-  );
+  const { onboardingCompleted, onboardingSteps } =
+    ensureArgsSchemaOrThrowHttpError(
+      updateOnboardingStatusInputSchema,
+      rawArgs,
+    );
 
   if (!context.user) {
     throw new HttpError(

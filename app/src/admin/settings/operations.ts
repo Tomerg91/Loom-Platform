@@ -8,7 +8,10 @@ import {
   type UpdateAdminSettings,
 } from "wasp/server/operations";
 import * as z from "zod";
-import { getDownloadFileSignedURLFromS3, getUploadFileSignedURLFromS3 } from "../../file-upload/s3Utils";
+import {
+  getDownloadFileSignedURLFromS3,
+  getUploadFileSignedURLFromS3,
+} from "../../file-upload/s3Utils";
 import { ensureArgsSchemaOrThrowHttpError } from "../../server/validation";
 import { LEGAL_LINKS } from "../../shared/legalLinks";
 
@@ -50,11 +53,17 @@ const ensureAdmin = <TContext extends AdminOperationContext>(
   messages?: { unauthenticated?: string; unauthorized?: string },
 ): TContext & { user: User } => {
   if (!context.user) {
-    throw new HttpError(401, messages?.unauthenticated || "You must be logged in.");
+    throw new HttpError(
+      401,
+      messages?.unauthenticated || "You must be logged in.",
+    );
   }
 
   if (!context.user.isAdmin && context.user.role !== "ADMIN") {
-    throw new HttpError(403, messages?.unauthorized || "Only admins can access this area.");
+    throw new HttpError(
+      403,
+      messages?.unauthorized || "Only admins can access this area.",
+    );
   }
 
   return context as TContext & { user: User };
@@ -90,7 +99,9 @@ const withAvatarUrl = async (
   }
 
   try {
-    const url = await getDownloadFileSignedURLFromS3({ s3Key: settings.avatarS3Key });
+    const url = await getDownloadFileSignedURLFromS3({
+      s3Key: settings.avatarS3Key,
+    });
     return { ...settings, avatarUrl: url };
   } catch (error) {
     console.error("Failed to build admin avatar URL", error);
@@ -98,10 +109,10 @@ const withAvatarUrl = async (
   }
 };
 
-export const getAdminSettings: GetAdminSettings<void, SettingsWithAvatarUrl> = async (
-  _args,
-  rawContext,
-) => {
+export const getAdminSettings: GetAdminSettings<
+  void,
+  SettingsWithAvatarUrl
+> = async (_args, rawContext) => {
   const context = ensureAdmin(rawContext, {
     unauthenticated: "You must be logged in to view admin settings.",
     unauthorized: "Only admins can view admin settings.",
@@ -163,7 +174,9 @@ export const getPublicLegalSettings: GetPublicLegalSettings<
   void,
   { privacyPolicyUrl: string; termsOfServiceUrl: string }
 > = async (_args, rawContext) => {
-  const context = rawContext as AdminOperationContext & { user: User | null | undefined };
+  const context = rawContext as AdminOperationContext & {
+    user: User | null | undefined;
+  };
   const settings = await context.entities.AdminSettings.upsert({
     where: { id: SETTINGS_ID },
     update: {},

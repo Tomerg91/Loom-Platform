@@ -33,7 +33,9 @@ interface PaymentPlanCard {
   features: string[];
 }
 
-const getPricingPageCards = (t: (key: string) => string): Record<PaymentPlanId, PaymentPlanCard> => ({
+const getPricingPageCards = (
+  t: (key: string) => string,
+): Record<PaymentPlanId, PaymentPlanCard> => ({
   [PaymentPlanId.Hobby]: {
     name: prettyPaymentPlanName(PaymentPlanId.Hobby),
     price: "$9.99",
@@ -47,10 +49,7 @@ const getPricingPageCards = (t: (key: string) => string): Record<PaymentPlanId, 
     name: prettyPaymentPlanName(PaymentPlanId.Pro),
     price: "$19.99",
     description: t("pricing.pro.description"),
-    features: [
-      t("pricing.pro.features.0"),
-      t("pricing.pro.features.1"),
-    ],
+    features: [t("pricing.pro.features.0"), t("pricing.pro.features.1")],
   },
   [PaymentPlanId.Credits10]: {
     name: prettyPaymentPlanName(PaymentPlanId.Credits10),

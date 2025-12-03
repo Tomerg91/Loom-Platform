@@ -14,18 +14,18 @@ export interface SessionSummaryPostedData {
 }
 
 export function getSessionSummaryPostedEmailContent(
-  data: SessionSummaryPostedData
+  data: SessionSummaryPostedData,
 ) {
-  const formattedDate = data.sessionDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  const formattedDate = data.sessionDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 
   const truncatedSummary =
     data.summary.length > 300
-      ? data.summary.substring(0, 300) + '...'
+      ? data.summary.substring(0, 300) + "..."
       : data.summary;
 
   const html = `
@@ -39,18 +39,28 @@ export function getSessionSummaryPostedEmailContent(
       </p>
 
       <p style="color: #666; font-size: 16px; line-height: 1.6;">
-        <strong>${escapeHtml(data.coachName)}</strong> has posted a summary of your session from ${formattedDate}.
+        <strong>${escapeHtml(
+          data.coachName,
+        )}</strong> has posted a summary of your session from ${formattedDate}.
       </p>
 
       <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 20px 0;">
-        ${data.topic ? `<p style="margin: 0 0 12px 0; color: #333;"><strong>Topic:</strong> ${escapeHtml(data.topic)}</p>` : ''}
+        ${
+          data.topic
+            ? `<p style="margin: 0 0 12px 0; color: #333;"><strong>Topic:</strong> ${escapeHtml(
+                data.topic,
+              )}</p>`
+            : ""
+        }
         <p style="margin: 0; color: #555; line-height: 1.6;">
           ${escapeHtml(truncatedSummary)}
         </p>
       </div>
 
       <div style="margin: 30px 0;">
-        <a href="${escapeHtml(data.appUrl)}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        <a href="${escapeHtml(
+          data.appUrl,
+        )}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
           View Full Summary
         </a>
       </div>
@@ -76,11 +86,11 @@ export function getSessionSummaryPostedEmailContent(
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   };
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }

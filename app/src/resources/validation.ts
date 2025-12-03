@@ -9,22 +9,25 @@ export const ALLOWED_RESOURCE_TYPES = [
   "image/jpeg",
   "image/png",
   // Audio
-  "audio/mpeg",    // MP3
-  "audio/mp4",     // M4A
-  "audio/x-m4a",   // M4A alternative
+  "audio/mpeg", // MP3
+  "audio/mp4", // M4A
+  "audio/x-m4a", // M4A alternative
 ] as const;
 
 /**
  * Validates if a file can be uploaded as a resource
  */
-export function validateResourceFile(
-  file: File,
-): { valid: boolean; error?: string } {
+export function validateResourceFile(file: File): {
+  valid: boolean;
+  error?: string;
+} {
   // Check file size
   if (file.size > MAX_RESOURCE_FILE_SIZE) {
     return {
       valid: false,
-      error: `File size exceeds ${MAX_RESOURCE_FILE_SIZE / (1024 * 1024)}MB limit`,
+      error: `File size exceeds ${
+        MAX_RESOURCE_FILE_SIZE / (1024 * 1024)
+      }MB limit`,
     };
   }
 

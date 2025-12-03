@@ -4,6 +4,7 @@ import type { UserRole } from "@prisma/client";
 
 export type OperationContext = {
   user: User | null | undefined;
+  entities: Record<string, any>;
 };
 
 type AuthenticatedContext<TContext extends OperationContext> = TContext & {
@@ -68,9 +69,8 @@ type Entities = {
   };
 };
 
-type CoachClientContext<TContext extends OperationContext> = AuthenticatedContext<
-  TContext & { entities: Entities }
->;
+type CoachClientContext<TContext extends OperationContext> =
+  AuthenticatedContext<TContext & { entities: Entities }>;
 
 export async function requireCoachOwnsClient<TContext extends OperationContext>(
   context: TContext & { entities: Entities },

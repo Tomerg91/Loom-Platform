@@ -41,7 +41,14 @@ export function IntensityTrendChart({ data }: IntensityTrendChartProps) {
           textAnchor="end"
           height={60}
         />
-        <YAxis domain={[0, 10]} label={{ value: "Intensity (1-10)", angle: -90, position: "insideLeft" }} />
+        <YAxis
+          domain={[0, 10]}
+          label={{
+            value: "Intensity (1-10)",
+            angle: -90,
+            position: "insideLeft",
+          }}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: "#ffffff",

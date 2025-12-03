@@ -1,13 +1,16 @@
 # Resource Library - Quick Reference Guide
 
 ## Feature Overview
+
 Coaches upload educational resources (PDF, images, audio) that clients can securely download with presigned URLs.
 
 ## Routes
+
 - **Coach:** `http://localhost:3000/coach/resources`
 - **Client:** `http://localhost:3000/client/resources`
 
 ## Navigation
+
 Both appear in the sidebar under "Resources" link (auto-hidden based on user role)
 
 ---
@@ -15,11 +18,12 @@ Both appear in the sidebar under "Resources" link (auto-hidden based on user rol
 ## Backend Operations
 
 ### Upload Resources
+
 ```typescript
 // Get presigned S3 URL
 const { uploadUrl, s3Key, uploadFields } = await getUploadUrl({
   fileName: "document.pdf",
-  fileType: "application/pdf"
+  fileType: "application/pdf",
 });
 
 // Upload to S3 via browser
@@ -27,7 +31,7 @@ await uploadFileWithProgress({
   file: fileObject,
   s3UploadUrl: uploadUrl,
   s3UploadFields: uploadFields,
-  setUploadProgressPercent: setProgress
+  setUploadProgressPercent: setProgress,
 });
 
 // Save to database
@@ -35,29 +39,32 @@ const resource = await createResource({
   name: "Important Document",
   type: "application/pdf",
   s3Key: s3Key,
-  description: "Optional description"
+  description: "Optional description",
 });
 ```
 
 ### Fetch Resources
+
 ```typescript
 // Works for both coaches (own) and clients (coach's)
 const resources = await getCoachResources();
 ```
 
 ### Download Resources
+
 ```typescript
 const presignedUrl = await getResourceDownloadUrl({
-  resourceId: "resource-uuid"
+  resourceId: "resource-uuid",
 });
 window.open(presignedUrl, "_blank"); // Triggers download
 ```
 
 ### Delete Resources
+
 ```typescript
 // Coaches only
 const deleted = await deleteResource({
-  resourceId: "resource-uuid"
+  resourceId: "resource-uuid",
 });
 ```
 
@@ -65,14 +72,14 @@ const deleted = await deleteResource({
 
 ## Allowed File Types
 
-| Type | MIME Type | Extension |
-|------|-----------|-----------|
-| PDF | `application/pdf` | .pdf |
-| JPEG | `image/jpeg` | .jpg, .jpeg |
-| PNG | `image/png` | .png |
-| MP3 | `audio/mpeg` | .mp3 |
-| M4A | `audio/mp4` | .m4a |
-| M4A (alt) | `audio/x-m4a` | .m4a |
+| Type      | MIME Type         | Extension   |
+| --------- | ----------------- | ----------- |
+| PDF       | `application/pdf` | .pdf        |
+| JPEG      | `image/jpeg`      | .jpg, .jpeg |
+| PNG       | `image/png`       | .png        |
+| MP3       | `audio/mpeg`      | .mp3        |
+| M4A       | `audio/mp4`       | .m4a        |
+| M4A (alt) | `audio/x-m4a`     | .m4a        |
 
 **Max Size:** 20MB per file
 
@@ -81,16 +88,20 @@ const deleted = await deleteResource({
 ## Component Props
 
 ### CoachResourcesPage
+
 ```typescript
-export default function CoachResourcesPage({ user }: { user: User })
+export default function CoachResourcesPage({ user }: { user: User });
 ```
+
 - Requires authenticated coach user
 - Auto-hides delete/upload for non-coaches
 
 ### ClientResourcesPage
+
 ```typescript
-export default function ClientResourcesPage({ user }: { user: User })
+export default function ClientResourcesPage({ user }: { user: User });
 ```
+
 - Requires authenticated client user
 - Read-only resource viewing with download button
 
@@ -98,18 +109,19 @@ export default function ClientResourcesPage({ user }: { user: User })
 
 ## Error Codes
 
-| Code | Meaning | Fix |
-|------|---------|-----|
-| 401 | Not authenticated | Log in first |
-| 403 | Not authorized (wrong role) | Coach/Client role required |
-| 404 | Resource not found | Resource may be deleted |
-| 500 | Server error | Check S3 bucket credentials |
+| Code | Meaning                     | Fix                         |
+| ---- | --------------------------- | --------------------------- |
+| 401  | Not authenticated           | Log in first                |
+| 403  | Not authorized (wrong role) | Coach/Client role required  |
+| 404  | Resource not found          | Resource may be deleted     |
+| 500  | Server error                | Check S3 bucket credentials |
 
 ---
 
 ## Common Tasks
 
 ### As a Coach: Upload a Resource
+
 1. Navigate to `/coach/resources`
 2. Enter resource name
 3. (Optional) Add description
@@ -119,12 +131,14 @@ export default function ClientResourcesPage({ user }: { user: User })
 7. Resource appears in list
 
 ### As a Coach: Delete a Resource
+
 1. Find resource in list
 2. Click trash icon
 3. Confirm in dialog
 4. Resource deleted from S3 and database
 
 ### As a Client: Download a Resource
+
 1. Navigate to `/client/resources`
 2. See resources from assigned coach
 3. Click "Download" on resource
@@ -135,6 +149,7 @@ export default function ClientResourcesPage({ user }: { user: User })
 ## AWS S3 Setup (Required)
 
 ### 1. Create IAM User
+
 ```bash
 # In AWS Console:
 1. Go to IAM → Users → Create User
@@ -144,6 +159,7 @@ export default function ClientResourcesPage({ user }: { user: User })
 ```
 
 ### 2. Create S3 Bucket
+
 ```bash
 # In AWS Console:
 1. S3 → Create Bucket
@@ -154,6 +170,7 @@ export default function ClientResourcesPage({ user }: { user: User })
 ```
 
 ### 3. Attach S3 Policy to IAM User
+
 ```json
 {
   "Version": "2012-10-17",
@@ -173,13 +190,11 @@ export default function ClientResourcesPage({ user }: { user: User })
 ```
 
 ### 4. Configure CORS on Bucket
+
 ```json
 [
   {
-    "AllowedOrigins": [
-      "http://localhost:3000",
-      "https://yourdomain.com"
-    ],
+    "AllowedOrigins": ["http://localhost:3000", "https://yourdomain.com"],
     "AllowedMethods": ["GET", "POST", "PUT"],
     "AllowedHeaders": ["*"],
     "MaxAgeSeconds": 3000
@@ -188,6 +203,7 @@ export default function ClientResourcesPage({ user }: { user: User })
 ```
 
 ### 5. Update Environment Variables
+
 ```bash
 # In .env.server:
 AWS_S3_IAM_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
@@ -197,6 +213,7 @@ AWS_S3_REGION=us-east-1
 ```
 
 ### 6. Restart Application
+
 ```bash
 pkill -f "wasp start"
 wasp start
@@ -207,21 +224,25 @@ wasp start
 ## Troubleshooting
 
 ### "File not found in S3"
+
 - Verify bucket name in `.env.server`
 - Check IAM user has S3 access
 - Ensure file uploaded successfully (check progress to 100%)
 
 ### "CORS error" on upload
+
 - Configure CORS on S3 bucket
 - Restart application after CORS update
 - Check your domain is in CORS allowed origins
 
 ### Upload stuck at 0%
+
 - Check browser console for errors
 - Verify S3 bucket CORS is configured
 - Try with smaller file first
 
 ### Download URL expired
+
 - Presigned URLs valid for 1 hour
 - User must click download within 1 hour
 - Re-click download button to get fresh URL
@@ -274,6 +295,7 @@ schema.prisma                   # Resource model
 ## Monitoring & Logging
 
 Check server logs for:
+
 ```
 POST /operations/get-coach-resources [200] ← Success
 POST /operations/createResource [200]      ← Resource created
@@ -291,6 +313,7 @@ Error: "File not found in S3"              ← Upload failed
 - **Presigned URLs:** No cost (generates on-demand)
 
 For 10,000 users downloading 10MB resources monthly:
+
 - Storage: ~$2.30/month
 - Requests: ~$0.04/month
 - Transfer: ~$10/month

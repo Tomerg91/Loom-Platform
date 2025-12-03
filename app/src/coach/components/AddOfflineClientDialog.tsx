@@ -48,13 +48,23 @@ export default function AddOfflineClientDialog({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError(t("coach.offlineClientForm.errors.invalidFileType", "Please select an image file"));
+      setError(
+        t(
+          "coach.offlineClientForm.errors.invalidFileType",
+          "Please select an image file",
+        ),
+      );
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError(t("coach.offlineClientForm.errors.fileTooLarge", "File must be less than 5MB"));
+      setError(
+        t(
+          "coach.offlineClientForm.errors.fileTooLarge",
+          "File must be less than 5MB",
+        ),
+      );
       return;
     }
 
@@ -81,12 +91,22 @@ export default function AddOfflineClientDialog({
 
     // Validation
     if (!displayName.trim()) {
-      setError(t("coach.offlineClientForm.errors.nameRequired", "Client name is required"));
+      setError(
+        t(
+          "coach.offlineClientForm.errors.nameRequired",
+          "Client name is required",
+        ),
+      );
       return;
     }
 
     if (contactEmail && !contactEmail.includes("@")) {
-      setError(t("coach.offlineClientForm.errors.invalidEmail", "Invalid email format"));
+      setError(
+        t(
+          "coach.offlineClientForm.errors.invalidEmail",
+          "Invalid email format",
+        ),
+      );
       return;
     }
 
@@ -123,8 +143,8 @@ export default function AddOfflineClientDialog({
             throw new Error(
               t(
                 "coach.offlineClientForm.errors.uploadFailed",
-                "Failed to upload avatar"
-              )
+                "Failed to upload avatar",
+              ),
             );
           }
 
@@ -134,8 +154,8 @@ export default function AddOfflineClientDialog({
           setError(
             t(
               "coach.offlineClientForm.errors.uploadFailed",
-              "Failed to upload avatar. Please try again."
-            )
+              "Failed to upload avatar. Please try again.",
+            ),
           );
           setIsSubmitting(false);
           return;
@@ -149,13 +169,21 @@ export default function AddOfflineClientDialog({
         avatarS3Key,
       });
 
-      setSuccess(t("coach.offlineClientForm.success", "Client added successfully!"));
+      setSuccess(
+        t("coach.offlineClientForm.success", "Client added successfully!"),
+      );
       setTimeout(() => {
         handleClose();
         onSuccess();
       }, 1500);
     } catch (err: any) {
-      setError(err.message || t("coach.offlineClientForm.errors.createFailed", "Failed to create client"));
+      setError(
+        err.message ||
+          t(
+            "coach.offlineClientForm.errors.createFailed",
+            "Failed to create client",
+          ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -176,15 +204,12 @@ export default function AddOfflineClientDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {t(
-              "coach.offlineClientForm.title",
-              "Add New Client (No Account)"
-            )}
+            {t("coach.offlineClientForm.title", "Add New Client (No Account)")}
           </DialogTitle>
           <DialogDescription>
             {t(
               "coach.offlineClientForm.description",
-              "Create a client profile for someone who won't use the app themselves."
+              "Create a client profile for someone who won't use the app themselves.",
             )}
           </DialogDescription>
         </DialogHeader>
@@ -199,7 +224,7 @@ export default function AddOfflineClientDialog({
               id="display-name"
               placeholder={t(
                 "coach.offlineClientForm.displayNamePlaceholder",
-                "Enter full name"
+                "Enter full name",
               )}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -213,7 +238,7 @@ export default function AddOfflineClientDialog({
             <Label htmlFor="contact-email">
               {t(
                 "coach.offlineClientForm.contactEmail",
-                "Contact Email (Optional)"
+                "Contact Email (Optional)",
               )}
             </Label>
             <Input
@@ -221,7 +246,7 @@ export default function AddOfflineClientDialog({
               type="email"
               placeholder={t(
                 "coach.offlineClientForm.contactEmailPlaceholder",
-                "client@example.com"
+                "client@example.com",
               )}
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
@@ -230,7 +255,7 @@ export default function AddOfflineClientDialog({
             <p className="text-xs text-muted-foreground">
               {t(
                 "coach.offlineClientForm.emailHelp",
-                "For your reference only, not used for authentication"
+                "For your reference only, not used for authentication",
               )}
             </p>
           </div>
@@ -238,7 +263,10 @@ export default function AddOfflineClientDialog({
           {/* Avatar Upload */}
           <div className="space-y-2">
             <Label htmlFor="avatar">
-              {t("coach.offlineClientForm.avatar", "Profile Picture (Optional)")}
+              {t(
+                "coach.offlineClientForm.avatar",
+                "Profile Picture (Optional)",
+              )}
             </Label>
 
             {avatarPreview ? (
@@ -272,18 +300,13 @@ export default function AddOfflineClientDialog({
             ) : (
               <button
                 type="button"
-                onClick={() =>
-                  document.getElementById("avatar-input")?.click()
-                }
+                onClick={() => document.getElementById("avatar-input")?.click()}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 <Upload className="w-4 h-4" />
                 <span className="text-sm">
-                  {t(
-                    "coach.offlineClientForm.uploadAvatar",
-                    "Upload photo"
-                  )}
+                  {t("coach.offlineClientForm.uploadAvatar", "Upload photo")}
                 </span>
               </button>
             )}
@@ -299,7 +322,7 @@ export default function AddOfflineClientDialog({
             <p className="text-xs text-muted-foreground">
               {t(
                 "coach.offlineClientForm.avatarHelp",
-                "PNG, JPG, WebP or GIF up to 5MB"
+                "PNG, JPG, WebP or GIF up to 5MB",
               )}
             </p>
           </div>

@@ -21,9 +21,12 @@ export default function BodyMapPromoDemo() {
       <div className="max-w-2xl w-full">
         {/* Light Mode Card */}
         <div className="bg-white rounded-lg shadow-2xl p-12 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">See What Your Clients Feel</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            See What Your Clients Feel
+          </h2>
           <p className="text-gray-600 mb-8">
-            The interactive Body Map turns abstract sensations into concrete visuals. Heat, tension, vibration — all tracked over time.
+            The interactive Body Map turns abstract sensations into concrete
+            visuals. Heat, tension, vibration — all tracked over time.
           </p>
           <div className="flex justify-center">
             <BodyMapSelector
@@ -35,9 +38,12 @@ export default function BodyMapPromoDemo() {
 
         {/* Dark Mode Card */}
         <div className="bg-slate-900 rounded-lg shadow-2xl p-12 border border-slate-700">
-          <h2 className="text-2xl font-bold text-white mb-2">See What Your Clients Feel</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            See What Your Clients Feel
+          </h2>
           <p className="text-slate-300 mb-8">
-            The interactive Body Map turns abstract sensations into concrete visuals. Heat, tension, vibration — all tracked over time.
+            The interactive Body Map turns abstract sensations into concrete
+            visuals. Heat, tension, vibration — all tracked over time.
           </p>
           <div className="flex justify-center">
             <BodyMapSelector

@@ -48,7 +48,9 @@ export const setupServer = async (app: Application) => {
       "https://analytics.google.com",
       ...(plausibleSiteId ? [plausibleBaseUrl] : []),
       // Allow S3 bucket connections for file downloads
-      `https://${process.env.AWS_S3_FILES_BUCKET || "*"}.s3.${process.env.AWS_S3_REGION || "*"}.amazonaws.com`,
+      `https://${process.env.AWS_S3_FILES_BUCKET || "*"}.s3.${
+        process.env.AWS_S3_REGION || "*"
+      }.amazonaws.com`,
       // Allow Stripe if configured
       ...(process.env.STRIPE_API_KEY ? ["https://api.stripe.com"] : []),
       // Allow LemonSqueezy if configured
@@ -113,7 +115,9 @@ export const setupServer = async (app: Application) => {
   console.log("   - X-Frame-Options: SAMEORIGIN");
   console.log("   - X-XSS-Protection: enabled");
   console.log("   - Referrer-Policy: strict-origin-when-cross-origin");
-  console.log("   - Permissions-Policy: camera, microphone, geolocation blocked");
+  console.log(
+    "   - Permissions-Policy: camera, microphone, geolocation blocked",
+  );
 
   if (plausibleSiteId) {
     console.log(`   - Plausible Analytics allowed for: ${plausibleSiteId}`);

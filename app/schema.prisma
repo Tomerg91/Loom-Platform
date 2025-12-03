@@ -85,6 +85,11 @@ model User {
   // TRANZILLA TOKENIZATION
   tranzillaToken String? // TranzilaTK for auto-renewal
 
+  // SUBSCRIPTION RENEWAL RETRY TRACKING (Tranzilla)
+  subscriptionRetryCount    Int       @default(0) // Number of failed renewal attempts
+  lastRetryAttempt          DateTime? // Timestamp of last renewal attempt
+  subscriptionNextRetryDate DateTime? // When to attempt next renewal
+
   // BOILERPLATE FIELDS
   isEmailVerified        Boolean @default(false)
   emailVerificationToken String?
@@ -100,6 +105,9 @@ model User {
 
   contactFormMessages ContactFormMessage[]
   files               File[]
+
+  // Google Calendar integration
+  calendarConnection UserCalendarConnection?
 }
 
 // ============================================
@@ -257,6 +265,9 @@ model CoachSession {
   // HARMONY UPDATE: Somatic Anchor & Resource Attachments
   somaticAnchor BodyZone? // Body zone discussed in session
   resources     Resource[] // Resources attached as homework
+
+  // Google Calendar integration
+  googleCalendarEvent GoogleCalendarEvent?
 
   // Relations
   coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
@@ -488,4 +499,46 @@ model TranzillaTransaction {
   response      String
   tranzilaTK    String?
   processedAt   DateTime @default(now())
+}
+
+// ============================================
+// GOOGLE CALENDAR INTEGRATION
+// ============================================
+model UserCalendarConnection {
+  id String @id @default(uuid())
+
+  // Which user owns this connection
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  // Google Calendar info
+  calendarId   String // User's Google Calendar ID (from service account perspective)
+  calendarName String? // e.g., "Loom Platform" calendar we created
+  isConnected  Boolean @default(true)
+
+  // Metadata
+  connectedAt    DateTime  @default(now())
+  lastSyncAt     DateTime?
+  syncErrorCount Int       @default(0)
+  lastErrorAt    DateTime?
+  lastError      String?   @db.Text
+
+  // Tracking
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GoogleCalendarEvent {
+  id String @id @default(uuid())
+
+  // Link to session that created this
+  session   CoachSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String       @unique
+
+  // Google Calendar event ID (used to update/delete later if needed)
+  googleEventId String
+
+  // Track sync status
+  syncedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 }

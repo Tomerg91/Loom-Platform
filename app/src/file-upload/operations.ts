@@ -214,15 +214,12 @@ export const getClientAvatarUploadUrl: GetClientAvatarUploadUrl<
 
   // Verify user is a coach
   if (context.user.role !== "COACH") {
-    throw new HttpError(
-      403,
-      "Only coaches can upload client avatars"
-    );
+    throw new HttpError(403, "Only coaches can upload client avatars");
   }
 
   const { fileName, fileType } = ensureArgsSchemaOrThrowHttpError(
     getClientAvatarUploadUrlSchema,
-    rawArgs
+    rawArgs,
   );
 
   const result = await getUploadFileSignedURLFromS3({

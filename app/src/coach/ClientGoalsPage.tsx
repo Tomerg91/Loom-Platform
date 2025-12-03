@@ -1,5 +1,5 @@
-import { useParams } from 'react-router-dom';
-import type { User } from 'wasp/entities';
+import { useParams } from "react-router-dom";
+import type { User } from "wasp/entities";
 import {
   createGoal,
   updateGoal,
@@ -9,11 +9,11 @@ import {
   getClientsForCoach,
   useQuery,
   useAction,
-} from 'wasp/client/operations';
-import GoalRoadmap from '../client/components/GoalRoadmap';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Button } from '../components/ui/button';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+} from "wasp/client/operations";
+import GoalRoadmap from "../client/components/GoalRoadmap";
+import { Alert, AlertDescription } from "../components/ui/alert";
+import { Button } from "../components/ui/button";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function CoachClientGoalsPage({ user }: { user: User }) {
   const params = useParams();
@@ -23,8 +23,13 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
   const { data: allClients = [] } = useQuery(getClientsForCoach);
   const clientExists = allClients.some((c: any) => c.id === clientId);
 
-  const { data: goals = [], isLoading, error, refetch } = useQuery(getGoals, {
-    clientId: clientId || '',
+  const {
+    data: goals = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(getGoals, {
+    clientId: clientId || "",
   });
 
   const createGoalFn = useAction(createGoal);
@@ -35,7 +40,11 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
   if (!clientExists && allClients.length > 0) {
     return (
       <div className="mt-10 px-6">
-        <Button variant="ghost" className="mb-4" onClick={() => window.history.back()}>
+        <Button
+          variant="ghost"
+          className="mb-4"
+          onClick={() => window.history.back()}
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
@@ -52,7 +61,11 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
   if (error) {
     return (
       <div className="mt-10 px-6">
-        <Button variant="ghost" className="mb-4" onClick={() => window.history.back()}>
+        <Button
+          variant="ghost"
+          className="mb-4"
+          onClick={() => window.history.back()}
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
@@ -73,7 +86,7 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
       await createGoalFn({ ...data, clientId });
       await refetch();
     } catch (error) {
-      console.error('Failed to create goal:', error);
+      console.error("Failed to create goal:", error);
       throw error;
     }
   };
@@ -83,7 +96,7 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
       await updateGoalFn(data);
       await refetch();
     } catch (error) {
-      console.error('Failed to update goal:', error);
+      console.error("Failed to update goal:", error);
       throw error;
     }
   };
@@ -93,17 +106,20 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
       await deleteGoalFn({ goalId });
       await refetch();
     } catch (error) {
-      console.error('Failed to delete goal:', error);
+      console.error("Failed to delete goal:", error);
       throw error;
     }
   };
 
-  const handleToggleMilestone = async (milestoneId: string, completed: boolean) => {
+  const handleToggleMilestone = async (
+    milestoneId: string,
+    completed: boolean,
+  ) => {
     try {
       await toggleMilestoneFn({ milestoneId, completed });
       await refetch();
     } catch (error) {
-      console.error('Failed to toggle milestone:', error);
+      console.error("Failed to toggle milestone:", error);
       throw error;
     }
   };
@@ -111,7 +127,11 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
   return (
     <div className="min-h-screen bg-white">
       <div className="mt-10 px-6">
-        <Button variant="ghost" className="mb-6" onClick={() => window.history.back()}>
+        <Button
+          variant="ghost"
+          className="mb-6"
+          onClick={() => window.history.back()}
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Client
         </Button>
@@ -125,9 +145,14 @@ export default function CoachClientGoalsPage({ user }: { user: User }) {
         {client && (
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              Goals for {(client as any).user?.username || (client as any).user?.email || 'Client'}
+              Goals for{" "}
+              {(client as any).user?.username ||
+                (client as any).user?.email ||
+                "Client"}
             </h2>
-            <p className="text-gray-600">Co-create and track goals with your client</p>
+            <p className="text-gray-600">
+              Co-create and track goals with your client
+            </p>
           </div>
         )}
 

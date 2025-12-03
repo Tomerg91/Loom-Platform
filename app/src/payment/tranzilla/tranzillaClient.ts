@@ -46,7 +46,7 @@ export function buildTranzillaCheckoutUrl(params: {
   const terminalName = getTranzillaTerminalName();
   const baseUrl = `https://direct.tranzilla.com/${terminalName}/iframe.php`;
 
-  const apiUrl = `${config.frontendUrl.replace(/\/$/, '')}/api`;
+  const apiUrl = `${config.frontendUrl.replace(/\/$/, "")}/api`;
   const queryParams = new URLSearchParams({
     sum: params.amount.toString(),
     currency: "1", // ILS
@@ -75,9 +75,7 @@ export function buildTranzillaCheckoutUrl(params: {
  * For now, this function performs basic validation and can be enhanced
  * when the exact algorithm is known.
  */
-export function validateTranzillaSignature(
-  body: Record<string, any>,
-): boolean {
+export function validateTranzillaSignature(body: Record<string, any>): boolean {
   // TODO: Implement actual signature validation based on Tranzilla docs
   // This is a placeholder that checks for required fields
 
@@ -99,7 +97,9 @@ export function validateTranzillaSignature(
 
   // For development: log the signature validation attempt
   if (process.env.NODE_ENV === "development") {
-    console.log("⚠️  Tranzilla signature validation is using placeholder logic");
+    console.log(
+      "⚠️  Tranzilla signature validation is using placeholder logic",
+    );
     console.log("   Webhook body:", JSON.stringify(body, null, 2));
   }
 

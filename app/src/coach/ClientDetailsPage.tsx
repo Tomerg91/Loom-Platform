@@ -2,10 +2,31 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
-import { getSomaticLogs, useQuery, getSessionsForClient, useAction, createSession, updateSession, deleteSession, getClientProfile } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  getSomaticLogs,
+  useQuery,
+  getSessionsForClient,
+  useAction,
+  createSession,
+  updateSession,
+  deleteSession,
+  getClientProfile,
+} from "wasp/client/operations";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
@@ -13,9 +34,27 @@ import { Skeleton } from "../components/ui/skeleton";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ClientAnalyticsDashboard } from "./components/ClientAnalyticsDashboard";
-import { RichTextEditor, renderSanitizedHtml } from "./components/RichTextEditor";
-import { ArrowLeft, Calendar, Activity, Plus, Loader2, Trash2, Edit2, Clock, AlertCircle, TrendingUp } from "lucide-react";
-import { formatClockTime, formatDate, formatRelativeTime } from "@src/shared/date";
+import {
+  RichTextEditor,
+  renderSanitizedHtml,
+} from "./components/RichTextEditor";
+import {
+  ArrowLeft,
+  Calendar,
+  Activity,
+  Plus,
+  Loader2,
+  Trash2,
+  Edit2,
+  Clock,
+  AlertCircle,
+  TrendingUp,
+} from "lucide-react";
+import {
+  formatClockTime,
+  formatDate,
+  formatRelativeTime,
+} from "@src/shared/date";
 import type { SessionResponse } from "../session/operations";
 
 type BodyZone =
@@ -61,7 +100,7 @@ function MissingClientNotice() {
             <p className="text-sm mb-4">
               {t(
                 "errors.missingClientId.message",
-                "The client ID is missing or invalid. Please select a client from your dashboard."
+                "The client ID is missing or invalid. Please select a client from your dashboard.",
               )}
             </p>
           </AlertDescription>
@@ -90,7 +129,9 @@ function ClientDetailsPageView({
 
   // State for sessions
   const [isSessionDialogOpen, setIsSessionDialogOpen] = useState(false);
-  const [editingSession, setEditingSession] = useState<SessionResponse | null>(null);
+  const [editingSession, setEditingSession] = useState<SessionResponse | null>(
+    null,
+  );
   const [sessionForm, setSessionForm] = useState({
     sessionDate: new Date().toISOString().split("T")[0],
     sessionTime: new Date().toTimeString().slice(0, 5),
@@ -101,9 +142,10 @@ function ClientDetailsPageView({
   const [sessionSuccess, setSessionSuccess] = useState<string | null>(null);
   const [isSubmittingSession, setIsSubmittingSession] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sessionToDelete, setSessionToDelete] = useState<
-    Pick<SessionResponse, "id" | "sessionDate"> | null
-  >(null);
+  const [sessionToDelete, setSessionToDelete] = useState<Pick<
+    SessionResponse,
+    "id" | "sessionDate"
+  > | null>(null);
   const itemsPerPage = 10;
 
   // State for schedule modal
@@ -123,16 +165,23 @@ function ClientDetailsPageView({
   });
 
   // Fetch somatic logs for this client
-  const { data: somaticLogs, isLoading, error } = useQuery(getSomaticLogs, {
+  const {
+    data: somaticLogs,
+    isLoading,
+    error,
+  } = useQuery(getSomaticLogs, {
     clientId,
   });
 
   // Fetch sessions for this client
-  const { data: sessionsResponse, refetch: refetchSessions } = useQuery(getSessionsForClient, {
-    clientId,
-    page: currentPage,
-    limit: itemsPerPage,
-  });
+  const { data: sessionsResponse, refetch: refetchSessions } = useQuery(
+    getSessionsForClient,
+    {
+      clientId,
+      page: currentPage,
+      limit: itemsPerPage,
+    },
+  );
 
   const createSessionFn = useAction(createSession);
   const updateSessionFn = useAction(updateSession);
@@ -148,7 +197,7 @@ function ClientDetailsPageView({
 
     // Filter logs from last 30 days
     const recentLogs = somaticLogs.filter(
-      (log) => new Date(log.createdAt) >= thirtyDaysAgo
+      (log) => new Date(log.createdAt) >= thirtyDaysAgo,
     );
 
     // Group by zone and calculate average intensity
@@ -213,7 +262,9 @@ function ClientDetailsPageView({
 
     try {
       setIsSubmittingSession(true);
-      const sessionDateTime = new Date(`${sessionForm.sessionDate}T${sessionForm.sessionTime}`);
+      const sessionDateTime = new Date(
+        `${sessionForm.sessionDate}T${sessionForm.sessionTime}`,
+      );
 
       if (editingSession) {
         await updateSessionFn({
@@ -276,7 +327,9 @@ function ClientDetailsPageView({
     setScheduleSuccess(null);
 
     // NOTE: updateClientSchedule operation was removed (Module 10 - incomplete)
-    setScheduleError("Schedule management feature is currently unavailable. Please contact support.");
+    setScheduleError(
+      "Schedule management feature is currently unavailable. Please contact support.",
+    );
     setIsSubmittingSchedule(false);
 
     // try {
@@ -384,17 +437,22 @@ function ClientDetailsPageView({
                 </span>
               )}
             </div>
-            {clientProfile?.clientType === "REGISTERED" && clientProfile?.user?.email && (
-              <p className="text-muted-foreground mt-2">{clientProfile.user.email}</p>
-            )}
-            {clientProfile?.clientType === "OFFLINE" && clientProfile?.contactEmail && (
-              <p className="text-muted-foreground text-sm mt-2">
-                Contact: {clientProfile.contactEmail}
-              </p>
-            )}
+            {clientProfile?.clientType === "REGISTERED" &&
+              clientProfile?.user?.email && (
+                <p className="text-muted-foreground mt-2">
+                  {clientProfile.user.email}
+                </p>
+              )}
+            {clientProfile?.clientType === "OFFLINE" &&
+              clientProfile?.contactEmail && (
+                <p className="text-muted-foreground text-sm mt-2">
+                  Contact: {clientProfile.contactEmail}
+                </p>
+              )}
             {clientProfile?.lastActivityDate && (
               <p className="text-muted-foreground text-xs mt-1">
-                Last activity: {formatRelativeTime(clientProfile.lastActivityDate)}
+                Last activity:{" "}
+                {formatRelativeTime(clientProfile.lastActivityDate)}
               </p>
             )}
             {!clientProfile?.lastActivityDate && (
@@ -475,9 +533,7 @@ function ClientDetailsPageView({
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Total Logs</p>
-                <p className="text-2xl font-bold">
-                  {somaticLogs?.length || 0}
-                </p>
+                <p className="text-2xl font-bold">{somaticLogs?.length || 0}</p>
               </div>
               {somaticLogs && somaticLogs.length > 0 && (
                 <>
@@ -564,7 +620,9 @@ function ClientDetailsPageView({
                                 <div
                                   key={i}
                                   className={`w-1.5 h-4 rounded-sm ${
-                                    i < log.intensity ? "bg-primary" : "bg-gray-200"
+                                    i < log.intensity
+                                      ? "bg-primary"
+                                      : "bg-gray-200"
                                   }`}
                                 />
                               ))}
@@ -668,7 +726,8 @@ function ClientDetailsPageView({
         <CardContent>
           {!sessionsResponse || sessionsResponse.sessions.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No sessions logged yet. Click &ldquo;Log Session&rdquo; to create one.
+              No sessions logged yet. Click &ldquo;Log Session&rdquo; to create
+              one.
             </p>
           ) : (
             <>
@@ -700,20 +759,28 @@ function ClientDetailsPageView({
                           {session.privateNotes ? (
                             <p
                               className="text-xs text-muted-foreground italic truncate"
-                              dangerouslySetInnerHTML={renderSanitizedHtml(session.privateNotes)}
+                              dangerouslySetInnerHTML={renderSanitizedHtml(
+                                session.privateNotes,
+                              )}
                             />
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
                           )}
                         </td>
                         <td className="py-3 max-w-xs">
                           {session.sharedSummary ? (
                             <p
                               className="text-xs text-muted-foreground italic truncate"
-                              dangerouslySetInnerHTML={renderSanitizedHtml(session.sharedSummary)}
+                              dangerouslySetInnerHTML={renderSanitizedHtml(
+                                session.sharedSummary,
+                              )}
                             />
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
                           )}
                         </td>
                         <td className="py-3">
@@ -791,7 +858,9 @@ function ClientDetailsPageView({
                         </p>
                         <div
                           className="text-xs text-muted-foreground prose prose-sm"
-                          dangerouslySetInnerHTML={renderSanitizedHtml(session.privateNotes)}
+                          dangerouslySetInnerHTML={renderSanitizedHtml(
+                            session.privateNotes,
+                          )}
                         />
                       </div>
                     )}
@@ -803,7 +872,9 @@ function ClientDetailsPageView({
                         </p>
                         <div
                           className="text-xs text-muted-foreground prose prose-sm"
-                          dangerouslySetInnerHTML={renderSanitizedHtml(session.sharedSummary)}
+                          dangerouslySetInnerHTML={renderSanitizedHtml(
+                            session.sharedSummary,
+                          )}
                         />
                       </div>
                     )}
@@ -815,13 +886,17 @@ function ClientDetailsPageView({
               {sessionsResponse && sessionsResponse.totalPages > 1 && (
                 <div className="flex justify-between items-center mt-4 pt-4 border-t">
                   <p className="text-xs text-muted-foreground">
-                    Page {sessionsResponse.page} of {sessionsResponse.totalPages} ({sessionsResponse.total} total)
+                    Page {sessionsResponse.page} of{" "}
+                    {sessionsResponse.totalPages} ({sessionsResponse.total}{" "}
+                    total)
                   </p>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
                       disabled={currentPage === 1}
                     >
                       Previous
@@ -866,7 +941,10 @@ function ClientDetailsPageView({
                   type="date"
                   value={sessionForm.sessionDate}
                   onChange={(e) =>
-                    setSessionForm({ ...sessionForm, sessionDate: e.target.value })
+                    setSessionForm({
+                      ...sessionForm,
+                      sessionDate: e.target.value,
+                    })
                   }
                   disabled={isSubmittingSession}
                 />
@@ -878,7 +956,10 @@ function ClientDetailsPageView({
                   type="time"
                   value={sessionForm.sessionTime}
                   onChange={(e) =>
-                    setSessionForm({ ...sessionForm, sessionTime: e.target.value })
+                    setSessionForm({
+                      ...sessionForm,
+                      sessionTime: e.target.value,
+                    })
                   }
                   disabled={isSubmittingSession}
                 />
@@ -887,26 +968,26 @@ function ClientDetailsPageView({
 
             {/* Private Notes */}
             <RichTextEditor
-              label={t('session.privateNotesLabel')}
-              description={t('session.privateNotesDescription')}
+              label={t("session.privateNotesLabel")}
+              description={t("session.privateNotesDescription")}
               value={sessionForm.privateNotes}
               onChange={(value) =>
                 setSessionForm({ ...sessionForm, privateNotes: value })
               }
               storageKey={`session-${clientId}-privateNotes`}
-              placeholder={t('session.privateNotesPlaceholder')}
+              placeholder={t("session.privateNotesPlaceholder")}
             />
 
             {/* Shared Summary */}
             <RichTextEditor
-              label={t('session.sharedSummaryLabel')}
-              description={t('session.sharedSummaryDescription')}
+              label={t("session.sharedSummaryLabel")}
+              description={t("session.sharedSummaryDescription")}
               value={sessionForm.sharedSummary}
               onChange={(value) =>
                 setSessionForm({ ...sessionForm, sharedSummary: value })
               }
               storageKey={`session-${clientId}-sharedSummary`}
-              placeholder={t('session.sharedSummaryPlaceholder')}
+              placeholder={t("session.sharedSummaryPlaceholder")}
             />
 
             {/* Error Message */}
@@ -942,8 +1023,10 @@ function ClientDetailsPageView({
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
+                ) : editingSession ? (
+                  "Update Session"
                 ) : (
-                  editingSession ? "Update Session" : "Log Session"
+                  "Log Session"
                 )}
               </Button>
             </DialogFooter>
@@ -958,7 +1041,9 @@ function ClientDetailsPageView({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("session.deleteSession", "Delete Session")}</DialogTitle>
+            <DialogTitle>
+              {t("session.deleteSession", "Delete Session")}
+            </DialogTitle>
             <DialogDescription>
               {t(
                 "session.deleteConfirm",
@@ -967,7 +1052,7 @@ function ClientDetailsPageView({
                   date: sessionToDelete
                     ? formatDate(sessionToDelete.sessionDate, "MMM d, yyyy")
                     : "",
-                }
+                },
               )}
             </DialogDescription>
           </DialogHeader>
@@ -995,7 +1080,10 @@ function ClientDetailsPageView({
       </Dialog>
 
       {/* Schedule Dialog Modal */}
-      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+      <Dialog
+        open={isScheduleDialogOpen}
+        onOpenChange={setIsScheduleDialogOpen}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Set Recurring Session Schedule</DialogTitle>

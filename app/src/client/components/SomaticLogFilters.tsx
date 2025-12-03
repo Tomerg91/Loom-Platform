@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "../../components/ui/button";
+import { Card } from "../../components/ui/card";
+import { ChevronDown } from "lucide-react";
+import { cn } from "../../lib/utils";
 
-type BodyZone = 'HEAD' | 'THROAT' | 'CHEST' | 'SOLAR_PLEXUS' | 'BELLY' | 'PELVIS' | 'ARMS' | 'LEGS' | 'FULL_BODY';
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
 
 export interface SomaticLogFiltersState {
-  dateRange: 'today' | 'thisWeek' | 'thisMonth' | 'allTime';
+  dateRange: "today" | "thisWeek" | "thisMonth" | "allTime";
   bodyZones: BodyZone[];
   minIntensity: number;
   maxIntensity: number;
@@ -20,22 +29,27 @@ interface SomaticLogFiltersProps {
 }
 
 const BODY_ZONES: { value: BodyZone; label: string }[] = [
-  { value: 'HEAD', label: 'somatic.bodyZones.HEAD' },
-  { value: 'THROAT', label: 'somatic.bodyZones.THROAT' },
-  { value: 'CHEST', label: 'somatic.bodyZones.CHEST' },
-  { value: 'SOLAR_PLEXUS', label: 'somatic.bodyZones.SOLAR_PLEXUS' },
-  { value: 'BELLY', label: 'somatic.bodyZones.BELLY' },
-  { value: 'PELVIS', label: 'somatic.bodyZones.PELVIS' },
-  { value: 'ARMS', label: 'somatic.bodyZones.ARMS' },
-  { value: 'LEGS', label: 'somatic.bodyZones.LEGS' },
-  { value: 'FULL_BODY', label: 'somatic.bodyZones.FULL_BODY' },
+  { value: "HEAD", label: "somatic.bodyZones.HEAD" },
+  { value: "THROAT", label: "somatic.bodyZones.THROAT" },
+  { value: "CHEST", label: "somatic.bodyZones.CHEST" },
+  { value: "SOLAR_PLEXUS", label: "somatic.bodyZones.SOLAR_PLEXUS" },
+  { value: "BELLY", label: "somatic.bodyZones.BELLY" },
+  { value: "PELVIS", label: "somatic.bodyZones.PELVIS" },
+  { value: "ARMS", label: "somatic.bodyZones.ARMS" },
+  { value: "LEGS", label: "somatic.bodyZones.LEGS" },
+  { value: "FULL_BODY", label: "somatic.bodyZones.FULL_BODY" },
 ];
 
-export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticLogFiltersProps) {
+export default function SomaticLogFilters({
+  filters,
+  onFiltersChange,
+}: SomaticLogFiltersProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleDateRangeChange = (range: 'today' | 'thisWeek' | 'thisMonth' | 'allTime') => {
+  const handleDateRangeChange = (
+    range: "today" | "thisWeek" | "thisMonth" | "allTime",
+  ) => {
     onFiltersChange({
       ...filters,
       dateRange: range,
@@ -63,7 +77,7 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
 
   const handleClearFilters = () => {
     onFiltersChange({
-      dateRange: 'allTime',
+      dateRange: "allTime",
       bodyZones: [],
       minIntensity: 1,
       maxIntensity: 10,
@@ -71,7 +85,7 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
   };
 
   const activeFilterCount = [
-    filters.dateRange !== 'allTime' ? 1 : 0,
+    filters.dateRange !== "allTime" ? 1 : 0,
     filters.bodyZones.length > 0 ? 1 : 0,
     filters.minIntensity > 1 || filters.maxIntensity < 10 ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
@@ -83,7 +97,7 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
         className="w-full flex items-center justify-between mb-0"
       >
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{t('filters.dateRange')}</h3>
+          <h3 className="font-semibold">{t("filters.dateRange")}</h3>
           {activeFilterCount > 0 && (
             <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded">
               {activeFilterCount}
@@ -91,7 +105,10 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
           )}
         </div>
         <ChevronDown
-          className={cn('h-5 w-5 transition-transform', isExpanded && 'rotate-180')}
+          className={cn(
+            "h-5 w-5 transition-transform",
+            isExpanded && "rotate-180",
+          )}
         />
       </button>
 
@@ -99,17 +116,21 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
         <div className="mt-4 space-y-4">
           {/* Date Range */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t('filters.dateRange')}</label>
+            <label className="text-sm font-medium">
+              {t("filters.dateRange")}
+            </label>
             <div className="flex gap-2 flex-wrap">
               {[
-                { value: 'today' as const, label: t('filters.today') },
-                { value: 'thisWeek' as const, label: t('filters.thisWeek') },
-                { value: 'thisMonth' as const, label: t('filters.thisMonth') },
-                { value: 'allTime' as const, label: t('filters.allTime') },
+                { value: "today" as const, label: t("filters.today") },
+                { value: "thisWeek" as const, label: t("filters.thisWeek") },
+                { value: "thisMonth" as const, label: t("filters.thisMonth") },
+                { value: "allTime" as const, label: t("filters.allTime") },
               ].map((option) => (
                 <Button
                   key={option.value}
-                  variant={filters.dateRange === option.value ? 'default' : 'outline'}
+                  variant={
+                    filters.dateRange === option.value ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => handleDateRangeChange(option.value)}
                 >
@@ -121,12 +142,18 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
 
           {/* Body Zones */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t('filters.bodyZone')}</label>
+            <label className="text-sm font-medium">
+              {t("filters.bodyZone")}
+            </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {BODY_ZONES.map((zone) => (
                 <Button
                   key={zone.value}
-                  variant={filters.bodyZones.includes(zone.value) ? 'default' : 'outline'}
+                  variant={
+                    filters.bodyZones.includes(zone.value)
+                      ? "default"
+                      : "outline"
+                  }
                   size="sm"
                   onClick={() => handleBodyZoneToggle(zone.value)}
                   className="text-xs"
@@ -139,35 +166,51 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
 
           {/* Intensity Range */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t('filters.intensity')}</label>
+            <label className="text-sm font-medium">
+              {t("filters.intensity")}
+            </label>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="text-xs text-muted-foreground">{t('filters.minIntensity')}</label>
+                <label className="text-xs text-muted-foreground">
+                  {t("filters.minIntensity")}
+                </label>
                 <input
                   type="range"
                   min="1"
                   max="10"
                   value={filters.minIntensity}
                   onChange={(e) =>
-                    handleIntensityChange(parseInt(e.target.value), filters.maxIntensity)
+                    handleIntensityChange(
+                      parseInt(e.target.value),
+                      filters.maxIntensity,
+                    )
                   }
                   className="w-full"
                 />
-                <div className="text-sm font-medium">{filters.minIntensity}</div>
+                <div className="text-sm font-medium">
+                  {filters.minIntensity}
+                </div>
               </div>
               <div className="flex-1">
-                <label className="text-xs text-muted-foreground">{t('filters.maxIntensity')}</label>
+                <label className="text-xs text-muted-foreground">
+                  {t("filters.maxIntensity")}
+                </label>
                 <input
                   type="range"
                   min="1"
                   max="10"
                   value={filters.maxIntensity}
                   onChange={(e) =>
-                    handleIntensityChange(filters.minIntensity, parseInt(e.target.value))
+                    handleIntensityChange(
+                      filters.minIntensity,
+                      parseInt(e.target.value),
+                    )
                   }
                   className="w-full"
                 />
-                <div className="text-sm font-medium">{filters.maxIntensity}</div>
+                <div className="text-sm font-medium">
+                  {filters.maxIntensity}
+                </div>
               </div>
             </div>
           </div>
@@ -180,7 +223,7 @@ export default function SomaticLogFilters({ filters, onFiltersChange }: SomaticL
               onClick={handleClearFilters}
               className="w-full"
             >
-              {t('filters.clearFilters')}
+              {t("filters.clearFilters")}
             </Button>
           )}
         </div>

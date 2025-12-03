@@ -147,7 +147,9 @@ interface ExampleCardProps {
 const ExampleCard = forwardRef<HTMLDivElement, ExampleCardProps>(
   ({ example, index, isCurrent, onMouseEnter, t }, ref) => {
     const name = example.nameKey ? t(example.nameKey) : example.name;
-    const description = example.descriptionKey ? t(example.descriptionKey) : example.description;
+    const description = example.descriptionKey
+      ? t(example.descriptionKey)
+      : example.description;
 
     return (
       <a
@@ -170,9 +172,7 @@ const ExampleCard = forwardRef<HTMLDivElement, ExampleCardProps>(
             />
             <div className="p-4">
               <p className="font-bold">{name}</p>
-              <p className="text-muted-foreground text-xs">
-                {description}
-              </p>
+              <p className="text-muted-foreground text-xs">{description}</p>
             </div>
           </CardContent>
         </Card>

@@ -7,11 +7,23 @@ import type {
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
-import { computeClientAnalytics } from "./analytics";
-import { requireAuth, requireRole } from "../server/rbac";
+import {
+  computeClientAnalytics,
+  type ClientAnalyticsResult,
+} from "./analytics";
+import { isAdmin, isCoach, requireAuth, requireRole } from "../server/rbac";
 
 // BodyZone type definition matching Prisma schema
-type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
 
 // ============================================
 // CREATE SOMATIC LOG
@@ -40,39 +52,108 @@ export const createSomaticLog: CreateSomaticLog<
   CreateSomaticLogInput,
   void
 > = async (rawArgs, context) => {
-  const { bodyZone, sensation, intensity, note, sharedWithCoach } =
-    ensureArgsSchemaOrThrowHttpError(createSomaticLogSchema, rawArgs);
-  const clientContext = requireRole(context, ["CLIENT"], {
-    unauthenticatedMessage: "You must be logged in to create somatic logs",
-    unauthorizedMessage: "Only clients can create somatic logs",
-  });
+  try {
+    // ============================================
+    // STEP 1: VALIDATE INPUT
+    // ============================================
+    const { bodyZone, sensation, intensity, note, sharedWithCoach } =
+      ensureArgsSchemaOrThrowHttpError(createSomaticLogSchema, rawArgs);
 
-  // Get the client profile
-  const clientProfile = await clientContext.entities.ClientProfile.findUnique({
-    where: { userId: clientContext.user.id },
-  });
+    // ============================================
+    // STEP 2: AUTHENTICATE & AUTHORIZE
+    // ============================================
+    const clientContext = requireRole(context, ["CLIENT"], {
+      unauthenticatedMessage: "You must be logged in to create somatic logs",
+      unauthorizedMessage: "Only clients can create somatic logs",
+    });
 
-  if (!clientProfile) {
-    throw new HttpError(404, "Client profile not found");
+    // ============================================
+    // STEP 3: GET OR CREATE CLIENT PROFILE
+    // ============================================
+    let clientProfile = await clientContext.entities.ClientProfile.findUnique({
+      where: { userId: clientContext.user.id },
+    });
+
+    // If profile doesn't exist, attempt to create it
+    // This handles cases where a user is created but profile isn't auto-created
+    if (!clientProfile) {
+      console.warn(
+        `[SomaticLog] Creating missing client profile for user ${clientContext.user.id}`,
+      );
+
+      try {
+        clientProfile = await clientContext.entities.ClientProfile.create({
+          data: {
+            userId: clientContext.user.id,
+          },
+        });
+      } catch (profileCreateError) {
+        console.error(
+          `[SomaticLog] Failed to create client profile for user ${clientContext.user.id}:`,
+          profileCreateError,
+        );
+
+        throw new HttpError(
+          500,
+          "Failed to initialize client profile. Please contact support if this persists.",
+        );
+      }
+    }
+
+    // ============================================
+    // STEP 4: CREATE SOMATIC LOG
+    // ============================================
+    try {
+      await clientContext.entities.SomaticLog.create({
+        data: {
+          bodyZone,
+          sensation,
+          intensity,
+          note: note || null,
+          sharedWithCoach,
+          clientId: clientProfile.id,
+        },
+      });
+    } catch (logCreateError) {
+      console.error(
+        `[SomaticLog] Failed to create log for client ${clientProfile.id}:`,
+        logCreateError,
+      );
+
+      throw new HttpError(500, "Failed to save sensation. Please try again.");
+    }
+
+    // ============================================
+    // STEP 5: UPDATE CLIENT ACTIVITY
+    // ============================================
+    try {
+      await clientContext.entities.ClientProfile.update({
+        where: { id: clientProfile.id },
+        data: { lastActivityDate: new Date() },
+      });
+    } catch (activityError) {
+      // Log error but don't fail the request
+      // Activity tracking is non-critical
+      console.warn(
+        `[SomaticLog] Failed to update activity date for client ${clientProfile.id}:`,
+        activityError,
+      );
+    }
+  } catch (error) {
+    // Re-throw known errors
+    if (error instanceof HttpError) {
+      throw error;
+    }
+
+    // Log unexpected errors
+    console.error("[SomaticLog] Unexpected error in createSomaticLog:", error);
+
+    // Return generic error to client
+    throw new HttpError(
+      500,
+      "An unexpected error occurred while logging your sensation. Please try again.",
+    );
   }
-
-  // Create the somatic log
-  await clientContext.entities.SomaticLog.create({
-    data: {
-      bodyZone,
-      sensation,
-      intensity,
-      note: note || null,
-      sharedWithCoach,
-      clientId: clientProfile.id,
-    },
-  });
-
-  // Update client's lastActivityDate
-  await clientContext.entities.ClientProfile.update({
-    where: { id: clientProfile.id },
-    data: { lastActivityDate: new Date() },
-  });
 };
 
 // ============================================
@@ -103,106 +184,178 @@ export const getSomaticLogs: GetSomaticLogs<
   GetSomaticLogsInput,
   SomaticLogResponse[]
 > = async (rawArgs, context) => {
-  const args = ensureArgsSchemaOrThrowHttpError(getSomaticLogsSchema, rawArgs);
-  const authenticatedContext = requireAuth(
-    context,
-    "You must be logged in to view somatic logs",
-  );
+  try {
+    const args = ensureArgsSchemaOrThrowHttpError(
+      getSomaticLogsSchema,
+      rawArgs,
+    );
+    const authenticatedContext = requireAuth(
+      context,
+      "You must be logged in to view somatic logs",
+    );
 
-  // Build filter conditions
-  const whereConditions: any = {};
-  if (args.startDate) {
-    whereConditions.createdAt = { ...whereConditions.createdAt, gte: args.startDate };
-  }
-  if (args.endDate) {
-    whereConditions.createdAt = { ...whereConditions.createdAt, lte: args.endDate };
-  }
-  if (args.bodyZones && args.bodyZones.length > 0) {
-    whereConditions.bodyZone = { in: args.bodyZones };
-  }
-  if (args.minIntensity !== undefined) {
-    whereConditions.intensity = { ...whereConditions.intensity, gte: args.minIntensity };
-  }
-  if (args.maxIntensity !== undefined) {
-    whereConditions.intensity = { ...whereConditions.intensity, lte: args.maxIntensity };
-  }
-
-  // If user is CLIENT: return their own logs
-  if (authenticatedContext.user.role === "CLIENT") {
-    const clientProfile = await authenticatedContext.entities.ClientProfile.findUnique({
-      where: { userId: authenticatedContext.user.id },
-      include: {
-        somaticLogs: {
-          where: whereConditions,
-          orderBy: { createdAt: "desc" },
-        },
-      },
-    });
-
-    if (!clientProfile) {
-      return [];
+    // Build filter conditions with type safety
+    const whereConditions: any = {};
+    if (args.startDate) {
+      whereConditions.createdAt = {
+        ...whereConditions.createdAt,
+        gte: args.startDate,
+      };
+    }
+    if (args.endDate) {
+      whereConditions.createdAt = {
+        ...whereConditions.createdAt,
+        lte: args.endDate,
+      };
+    }
+    if (args.bodyZones && args.bodyZones.length > 0) {
+      whereConditions.bodyZone = { in: args.bodyZones };
+    }
+    if (args.minIntensity !== undefined) {
+      whereConditions.intensity = {
+        ...whereConditions.intensity,
+        gte: args.minIntensity,
+      };
+    }
+    if (args.maxIntensity !== undefined) {
+      whereConditions.intensity = {
+        ...whereConditions.intensity,
+        lte: args.maxIntensity,
+      };
     }
 
-    return clientProfile.somaticLogs.map((log) => ({
-      id: log.id,
-      createdAt: log.createdAt,
-      bodyZone: log.bodyZone as BodyZone,
-      sensation: log.sensation,
-      intensity: log.intensity,
-      note: log.note,
-      sharedWithCoach: log.sharedWithCoach,
-    }));
-  }
-
-  // If user is COACH: return only shared logs for their clients
-  if (authenticatedContext.user.role === "COACH") {
-    if (!args.clientId) {
-      throw new HttpError(400, "Client ID is required for coaches");
-    }
-
-    const coachProfile = await authenticatedContext.entities.CoachProfile.findUnique({
-      where: { userId: authenticatedContext.user.id },
-      include: {
-        clients: {
-          where: { id: args.clientId },
+    // If user is CLIENT: return their own logs
+    if (authenticatedContext.user.role === "CLIENT") {
+      let clientProfile =
+        await authenticatedContext.entities.ClientProfile.findUnique({
+          where: { userId: authenticatedContext.user.id },
           include: {
             somaticLogs: {
-              where: {
-                ...whereConditions,
-                sharedWithCoach: true, // Only show shared logs to coaches
-              },
+              where: whereConditions,
               orderBy: { createdAt: "desc" },
             },
           },
-        },
-      },
-    });
+        });
 
-    if (!coachProfile) {
-      throw new HttpError(404, "Coach profile not found");
+      // If profile doesn't exist, create it gracefully
+      if (!clientProfile) {
+        console.warn(
+          `[GetSomaticLogs] Creating missing client profile for user ${authenticatedContext.user.id}`,
+        );
+
+        try {
+          clientProfile =
+            await authenticatedContext.entities.ClientProfile.create({
+              data: {
+                userId: authenticatedContext.user.id,
+              },
+              include: {
+                somaticLogs: {
+                  where: whereConditions,
+                  orderBy: { createdAt: "desc" },
+                },
+              },
+            });
+        } catch (error) {
+          console.error(
+            `[GetSomaticLogs] Failed to create client profile:`,
+            error,
+          );
+          // Return empty array instead of failing
+          return [];
+        }
+      }
+
+      return clientProfile.somaticLogs.map((log) => ({
+        id: log.id,
+        createdAt: log.createdAt,
+        bodyZone: log.bodyZone as BodyZone,
+        sensation: log.sensation,
+        intensity: log.intensity,
+        note: log.note,
+        sharedWithCoach: log.sharedWithCoach,
+      }));
     }
 
-    const client = coachProfile.clients[0];
-    if (!client) {
-      throw new HttpError(
-        403,
-        "You do not have access to this client's logs"
-      );
+    // If user is COACH: return only shared logs for their clients
+    if (authenticatedContext.user.role === "COACH") {
+      if (!args.clientId) {
+        throw new HttpError(
+          400,
+          "Client ID is required for coaches to view logs",
+        );
+      }
+
+      try {
+        const coachProfile =
+          await authenticatedContext.entities.CoachProfile.findUnique({
+            where: { userId: authenticatedContext.user.id },
+            include: {
+              clients: {
+                where: { id: args.clientId },
+                include: {
+                  somaticLogs: {
+                    where: {
+                      ...whereConditions,
+                      sharedWithCoach: true, // Only show shared logs to coaches
+                    },
+                    orderBy: { createdAt: "desc" },
+                  },
+                },
+              },
+            },
+          });
+
+        if (!coachProfile) {
+          console.warn(
+            `[GetSomaticLogs] Coach profile not found for user ${authenticatedContext.user.id}`,
+          );
+          throw new HttpError(
+            404,
+            "Coach profile not found. Please contact support.",
+          );
+        }
+
+        const client = coachProfile.clients[0];
+        if (!client) {
+          console.warn(
+            `[GetSomaticLogs] Coach ${authenticatedContext.user.id} attempted unauthorized access to client ${args.clientId}`,
+          );
+          throw new HttpError(
+            403,
+            "You do not have access to this client's logs",
+          );
+        }
+
+        return client.somaticLogs.map((log) => ({
+          id: log.id,
+          createdAt: log.createdAt,
+          bodyZone: log.bodyZone as BodyZone,
+          sensation: log.sensation,
+          intensity: log.intensity,
+          note: log.note,
+          sharedWithCoach: log.sharedWithCoach,
+        }));
+      } catch (error) {
+        if (error instanceof HttpError) {
+          throw error;
+        }
+
+        console.error("[GetSomaticLogs] Unexpected error:", error);
+        throw new HttpError(500, "Failed to fetch logs. Please try again.");
+      }
     }
 
-    return client.somaticLogs.map((log) => ({
-      id: log.id,
-      createdAt: log.createdAt,
-      bodyZone: log.bodyZone as BodyZone,
-      sensation: log.sensation,
-      intensity: log.intensity,
-      note: log.note,
-      sharedWithCoach: log.sharedWithCoach,
-    }));
+    // ADMIN can view any client's logs (if needed in the future)
+    throw new HttpError(403, "Invalid user role for this operation");
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+
+    console.error("[GetSomaticLogs] Unexpected error:", error);
+    throw new HttpError(500, "Failed to fetch logs. Please try again.");
   }
-
-  // ADMIN can view any client's logs (if needed in the future)
-  throw new HttpError(403, "Invalid user role");
 };
 
 // ============================================
@@ -213,58 +366,110 @@ const updateSomaticLogVisibilitySchema = z.object({
   sharedWithCoach: z.boolean(),
 });
 
-type UpdateSomaticLogVisibilityInput = z.infer<typeof updateSomaticLogVisibilitySchema>;
+type UpdateSomaticLogVisibilityInput = z.infer<
+  typeof updateSomaticLogVisibilitySchema
+>;
 
 export const updateSomaticLogVisibility: UpdateSomaticLogVisibility<
   UpdateSomaticLogVisibilityInput,
   SomaticLogResponse
 > = async (rawArgs, context) => {
-  const { logId, sharedWithCoach } = ensureArgsSchemaOrThrowHttpError(
-    updateSomaticLogVisibilitySchema,
-    rawArgs
-  );
+  try {
+    const { logId, sharedWithCoach } = ensureArgsSchemaOrThrowHttpError(
+      updateSomaticLogVisibilitySchema,
+      rawArgs,
+    );
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in");
+    if (!context.user) {
+      throw new HttpError(
+        401,
+        "You must be logged in to update log visibility",
+      );
+    }
+
+    if (context.user.role !== "CLIENT") {
+      throw new HttpError(403, "Only clients can update log visibility");
+    }
+
+    // Get client profile to ensure they own this log
+    let clientProfile = await context.entities.ClientProfile.findUnique({
+      where: { userId: context.user.id },
+    });
+
+    // If profile doesn't exist, create it
+    if (!clientProfile) {
+      console.warn(
+        `[UpdateLogVisibility] Creating missing client profile for user ${context.user.id}`,
+      );
+
+      try {
+        clientProfile = await context.entities.ClientProfile.create({
+          data: {
+            userId: context.user.id,
+          },
+        });
+      } catch (error) {
+        console.error(
+          `[UpdateLogVisibility] Failed to create client profile:`,
+          error,
+        );
+        throw new HttpError(
+          500,
+          "Failed to initialize client profile. Please contact support.",
+        );
+      }
+    }
+
+    // Verify the log exists and belongs to this client
+    const log = await context.entities.SomaticLog.findUnique({
+      where: { id: logId },
+    });
+
+    if (!log) {
+      throw new HttpError(404, "Sensation log not found");
+    }
+
+    if (log.clientId !== clientProfile.id) {
+      console.warn(
+        `[UpdateLogVisibility] Client ${context.user.id} attempted unauthorized access to log ${logId}`,
+      );
+      throw new HttpError(403, "You do not have permission to update this log");
+    }
+
+    // Update the visibility
+    try {
+      const updatedLog = await context.entities.SomaticLog.update({
+        where: { id: logId },
+        data: { sharedWithCoach },
+      });
+
+      return {
+        id: updatedLog.id,
+        createdAt: updatedLog.createdAt,
+        bodyZone: updatedLog.bodyZone as BodyZone,
+        sensation: updatedLog.sensation,
+        intensity: updatedLog.intensity,
+        note: updatedLog.note,
+        sharedWithCoach: updatedLog.sharedWithCoach,
+      };
+    } catch (updateError) {
+      console.error(
+        `[UpdateLogVisibility] Failed to update log ${logId}:`,
+        updateError,
+      );
+      throw new HttpError(
+        500,
+        "Failed to update log visibility. Please try again.",
+      );
+    }
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+
+    console.error("[UpdateLogVisibility] Unexpected error:", error);
+    throw new HttpError(500, "An unexpected error occurred. Please try again.");
   }
-
-  if (context.user.role !== "CLIENT") {
-    throw new HttpError(403, "Only clients can update log visibility");
-  }
-
-  // Get client profile to ensure they own this log
-  const clientProfile = await context.entities.ClientProfile.findUnique({
-    where: { userId: context.user.id },
-  });
-
-  if (!clientProfile) {
-    throw new HttpError(404, "Client profile not found");
-  }
-
-  // Verify the log belongs to this client
-  const log = await context.entities.SomaticLog.findUnique({
-    where: { id: logId },
-  });
-
-  if (!log || log.clientId !== clientProfile.id) {
-    throw new HttpError(403, "You do not have permission to update this log");
-  }
-
-  // Update the visibility
-  const updatedLog = await context.entities.SomaticLog.update({
-    where: { id: logId },
-    data: { sharedWithCoach },
-  });
-
-  return {
-    id: updatedLog.id,
-    createdAt: updatedLog.createdAt,
-    bodyZone: updatedLog.bodyZone as BodyZone,
-    sensation: updatedLog.sensation,
-    intensity: updatedLog.intensity,
-    note: updatedLog.note,
-    sharedWithCoach: updatedLog.sharedWithCoach,
-  };
 };
 
 // ============================================
@@ -283,7 +488,7 @@ export const getClientAnalytics: GetClientAnalytics<
 > = async (rawArgs, context) => {
   const { clientId, period } = ensureArgsSchemaOrThrowHttpError(
     getClientAnalyticsSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -311,14 +516,11 @@ export const getClientAnalytics: GetClientAnalytics<
     if (!coach || coach.userId !== context.user.id) {
       throw new HttpError(
         403,
-        "You do not have permission to view this client's analytics"
+        "You do not have permission to view this client's analytics",
       );
     }
   } else if (context.user.role === "CLIENT") {
-    throw new HttpError(
-      403,
-      "Clients cannot view analytics data"
-    );
+    throw new HttpError(403, "Clients cannot view analytics data");
   } else if (context.user.role !== "ADMIN") {
     throw new HttpError(403, "Invalid user role");
   }
@@ -350,7 +552,7 @@ export const getClientAnalytics: GetClientAnalytics<
   const analytics = await computeClientAnalytics(
     context.entities,
     clientId,
-    period
+    period,
   );
 
   return analytics;

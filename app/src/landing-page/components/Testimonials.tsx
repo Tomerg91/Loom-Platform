@@ -42,7 +42,11 @@ export default function Testimonials({
             <Card className="flex flex-col justify-between">
               <CardContent className="p-6">
                 <blockquote className="mb-4 leading-6">
-                  <p className="text-sm italic">{testimonial.quoteKey ? t(testimonial.quoteKey) : testimonial.quote}</p>
+                  <p className="text-sm italic">
+                    {testimonial.quoteKey
+                      ? t(testimonial.quoteKey)
+                      : testimonial.quote}
+                  </p>
                 </blockquote>
               </CardContent>
               <CardFooter className="flex flex-col pt-0">
@@ -53,15 +57,23 @@ export default function Testimonials({
                   <img
                     src={testimonial.avatarSrc}
                     loading="lazy"
-                    alt={`${testimonial.nameKey ? t(testimonial.nameKey) : testimonial.name}'s avatar`}
+                    alt={`${
+                      testimonial.nameKey
+                        ? t(testimonial.nameKey)
+                        : testimonial.name
+                    }'s avatar`}
                     className="ring-border/20 group-hover:ring-primary/30 h-10 w-10 flex-shrink-0 rounded-full ring-2 transition-all duration-200"
                   />
                   <div className="min-w-0 flex-1">
                     <CardTitle className="group-hover:text-card-foreground truncate text-sm font-semibold transition-colors duration-200">
-                      {testimonial.nameKey ? t(testimonial.nameKey) : testimonial.name}
+                      {testimonial.nameKey
+                        ? t(testimonial.nameKey)
+                        : testimonial.name}
                     </CardTitle>
                     <CardDescription className="truncate text-xs">
-                      {testimonial.roleKey ? t(testimonial.roleKey) : testimonial.role}
+                      {testimonial.roleKey
+                        ? t(testimonial.roleKey)
+                        : testimonial.role}
                     </CardDescription>
                   </div>
                 </a>
@@ -79,7 +91,9 @@ export default function Testimonials({
           >
             {isExpanded
               ? t("landing.testimonials.showLess")
-              : t("landing.testimonials.showMore", { count: testimonials.length - mobileItemsToShow })}
+              : t("landing.testimonials.showMore", {
+                  count: testimonials.length - mobileItemsToShow,
+                })}
           </button>
         </div>
       )}

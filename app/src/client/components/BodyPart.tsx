@@ -1,7 +1,15 @@
-import { motion } from 'framer-motion';
-import React from 'react';
+import { motion } from "framer-motion";
+import React from "react";
 
-type BodyZone = 'HEAD' | 'THROAT' | 'CHEST' | 'SOLAR_PLEXUS' | 'BELLY' | 'PELVIS' | 'ARMS' | 'LEGS';
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS";
 
 interface BodyPartProps {
   zone: BodyZone;
@@ -16,14 +24,14 @@ interface BodyPartProps {
 }
 
 const zoneLabels: Record<BodyZone, string> = {
-  HEAD: 'Head',
-  THROAT: 'Throat',
-  CHEST: 'Chest',
-  SOLAR_PLEXUS: 'Solar Plexus',
-  BELLY: 'Belly',
-  PELVIS: 'Pelvis',
-  ARMS: 'Arms',
-  LEGS: 'Legs',
+  HEAD: "Head",
+  THROAT: "Throat",
+  CHEST: "Chest",
+  SOLAR_PLEXUS: "Solar Plexus",
+  BELLY: "Belly",
+  PELVIS: "Pelvis",
+  ARMS: "Arms",
+  LEGS: "Legs",
 };
 
 /**
@@ -47,7 +55,7 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
       onHoverStart,
       onHoverEnd,
     },
-    ref
+    ref,
   ) => {
     const maskId = `clip-${zone}`;
 
@@ -56,20 +64,20 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
       idle: {
         opacity: 0,
         scale: 0.8,
-        filter: 'blur(10px)',
+        filter: "blur(10px)",
       },
       hover: {
         opacity: 0.6,
         scale: 1.1,
-        filter: 'blur(20px)', // Bloom effect
-        transition: { duration: 0.4, ease: "easeOut" as const }
+        filter: "blur(20px)", // Bloom effect
+        transition: { duration: 0.4, ease: "easeOut" as const },
       },
       active: {
         opacity: 0.9,
         scale: 1.2,
-        filter: 'blur(15px)',
-        transition: { duration: 0.5, ease: "easeOut" as const }
-      }
+        filter: "blur(15px)",
+        transition: { duration: 0.5, ease: "easeOut" as const },
+      },
     };
 
     // Pulse animation for active state
@@ -78,14 +86,14 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         duration: 2.5,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut" as const
+        ease: "easeInOut" as const,
       },
       scale: {
         duration: 3,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut" as const
-      }
+        ease: "easeInOut" as const,
+      },
     };
 
     return (
@@ -138,7 +146,7 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
           onMouseEnter={onHoverStart}
           onMouseLeave={onHoverEnd}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               onClick();
             }
@@ -147,9 +155,9 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         />
       </g>
     );
-  }
+  },
 );
 
-BodyPart.displayName = 'BodyPart';
+BodyPart.displayName = "BodyPart";
 
 export default BodyPart;

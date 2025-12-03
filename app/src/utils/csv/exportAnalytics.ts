@@ -1,5 +1,9 @@
 import Papa from "papaparse";
-import type { BodyZoneStats, SensationStats, IntensityTrendPoint } from "@src/somatic-logs/analytics";
+import type {
+  BodyZoneStats,
+  SensationStats,
+  IntensityTrendPoint,
+} from "@src/somatic-logs/analytics";
 
 export interface ClientAnalyticsResult {
   topBodyZones: BodyZoneStats[];
@@ -22,7 +26,7 @@ export interface SessionData {
 export function formatAnalyticsToCSV(
   analytics: ClientAnalyticsResult,
   clientName: string,
-  period: string
+  period: string,
 ): string {
   const rows: string[][] = [];
   const timestamp = new Date().toISOString().split("T")[0];
@@ -73,7 +77,7 @@ export function formatAnalyticsToCSV(
  */
 export function formatSessionsToCSV(
   sessions: SessionData[],
-  clientName: string
+  clientName: string,
 ): string {
   const rows: string[][] = [];
   const timestamp = new Date().toISOString().split("T")[0];
@@ -104,7 +108,7 @@ export function formatSessionsToCSV(
 export function generateCSVFilename(
   clientName: string,
   dataType: "analytics" | "sessions",
-  period?: string
+  period?: string,
 ): string {
   const sanitizedName = clientName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
   const timestamp = new Date().toISOString().split("T")[0];
@@ -144,7 +148,7 @@ export function downloadCSV(csvContent: string, filename: string): void {
 export function exportAnalyticsAsCSV(
   analytics: ClientAnalyticsResult,
   clientName: string,
-  period: string
+  period: string,
 ): void {
   const csvContent = formatAnalyticsToCSV(analytics, clientName, period);
   const filename = generateCSVFilename(clientName, "analytics", period);
@@ -156,7 +160,7 @@ export function exportAnalyticsAsCSV(
  */
 export function exportSessionsAsCSV(
   sessions: SessionData[],
-  clientName: string
+  clientName: string,
 ): void {
   const csvContent = formatSessionsToCSV(sessions, clientName);
   const filename = generateCSVFilename(clientName, "sessions");

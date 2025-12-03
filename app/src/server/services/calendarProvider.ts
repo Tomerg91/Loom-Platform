@@ -1,4 +1,4 @@
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { zonedTimeToUtc } from "date-fns-tz";
 
 export type CalendarEvent = {
   id?: string;
@@ -23,7 +23,10 @@ export interface CalendarProvider {
  * Only Google Calendar is implemented for now.
  */
 export class GoogleCalendarProvider implements CalendarProvider {
-  constructor(private readonly fetcher: typeof fetch, private readonly accessToken: string) {}
+  constructor(
+    private readonly fetcher: typeof fetch,
+    private readonly accessToken: string,
+  ) {}
 
   private async request<T>(url: string, init: RequestInit): Promise<T> {
     let attempt = 0;
@@ -33,7 +36,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
       const response = await this.fetcher(url, {
         ...init,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${this.accessToken}`,
           ...(init.headers || {}),
         },
@@ -46,27 +49,29 @@ export class GoogleCalendarProvider implements CalendarProvider {
       attempt += 1;
       if (attempt >= 3) {
         const body = await response.text();
-        throw new Error(`Google Calendar request failed (${response.status}): ${body}`);
+        throw new Error(
+          `Google Calendar request failed (${response.status}): ${body}`,
+        );
       }
 
       await new Promise((resolve) => setTimeout(resolve, delay));
       delay *= 2;
     }
 
-    throw new Error('Exceeded retry attempts for Google Calendar request');
+    throw new Error("Exceeded retry attempts for Google Calendar request");
   }
 
   async listEvents(): Promise<CalendarEvent[]> {
     const data = await this.request<any>(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-      { method: 'GET' }
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      { method: "GET" },
     );
     return (data.items || []).map((item: any) => ({
       id: item.id,
       title: item.summary,
       start: item.start?.dateTime || item.start?.date,
       end: item.end?.dateTime || item.end?.date,
-      timezone: item.start?.timeZone || 'UTC',
+      timezone: item.start?.timeZone || "UTC",
       description: item.description,
       attendees: item.attendees,
     }));
@@ -75,18 +80,18 @@ export class GoogleCalendarProvider implements CalendarProvider {
   async createEvent(event: CalendarEvent): Promise<CalendarEvent> {
     const payload = this.normalizeEvent(event);
     const created = await this.request<any>(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-      { method: 'POST', body: JSON.stringify(payload) }
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      { method: "POST", body: JSON.stringify(payload) },
     );
     return this.toEvent(created);
   }
 
   async updateEvent(event: CalendarEvent): Promise<CalendarEvent> {
-    if (!event.id) throw new Error('Event ID is required for updates');
+    if (!event.id) throw new Error("Event ID is required for updates");
     const payload = this.normalizeEvent(event);
     const updated = await this.request<any>(
       `https://www.googleapis.com/calendar/v3/calendars/primary/events/${event.id}`,
-      { method: 'PATCH', body: JSON.stringify(payload) }
+      { method: "PATCH", body: JSON.stringify(payload) },
     );
     return this.toEvent(updated);
   }
@@ -94,7 +99,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
   async deleteEvent(eventId: string): Promise<void> {
     await this.request<void>(
       `https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`,
-      { method: 'DELETE' }
+      { method: "DELETE" },
     );
   }
 
@@ -106,12 +111,15 @@ export class GoogleCalendarProvider implements CalendarProvider {
       summary: event.title,
       description: event.description,
       attendees: event.attendees,
-      start: { dateTime: startUtc, timeZone: 'UTC' },
-      end: { dateTime: endUtc, timeZone: 'UTC' },
+      start: { dateTime: startUtc, timeZone: "UTC" },
+      end: { dateTime: endUtc, timeZone: "UTC" },
       reminders: event.remindersMinutes
         ? {
             useDefault: false,
-            overrides: event.remindersMinutes.map((minutes) => ({ method: 'email', minutes })),
+            overrides: event.remindersMinutes.map((minutes) => ({
+              method: "email",
+              minutes,
+            })),
           }
         : undefined,
     };
@@ -123,7 +131,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
       title: item.summary,
       start: item.start?.dateTime || item.start?.date,
       end: item.end?.dateTime || item.end?.date,
-      timezone: item.start?.timeZone || 'UTC',
+      timezone: item.start?.timeZone || "UTC",
       description: item.description,
       attendees: item.attendees,
     };

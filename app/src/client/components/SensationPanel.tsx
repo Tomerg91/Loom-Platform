@@ -1,8 +1,16 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
-type BodyZone = 'HEAD' | 'THROAT' | 'CHEST' | 'SOLAR_PLEXUS' | 'BELLY' | 'PELVIS' | 'ARMS' | 'LEGS';
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS";
 
 interface SensationPanelProps {
   selectedZone: BodyZone;
@@ -10,25 +18,25 @@ interface SensationPanelProps {
 }
 
 const zoneLabels: Record<BodyZone, string> = {
-  HEAD: 'Head',
-  THROAT: 'Throat',
-  CHEST: 'Chest',
-  SOLAR_PLEXUS: 'Solar Plexus',
-  BELLY: 'Belly',
-  PELVIS: 'Pelvis',
-  ARMS: 'Arms',
-  LEGS: 'Legs',
+  HEAD: "Head",
+  THROAT: "Throat",
+  CHEST: "Chest",
+  SOLAR_PLEXUS: "Solar Plexus",
+  BELLY: "Belly",
+  PELVIS: "Pelvis",
+  ARMS: "Arms",
+  LEGS: "Legs",
 };
 
 const SENSATIONS = [
-  'Tight',
-  'Heavy',
-  'Hot',
-  'Cold',
-  'Tingling',
-  'Numb',
-  'Vibrating',
-  'Empty',
+  "Tight",
+  "Heavy",
+  "Hot",
+  "Cold",
+  "Tingling",
+  "Numb",
+  "Vibrating",
+  "Empty",
 ];
 
 /**
@@ -42,7 +50,9 @@ export default function SensationPanel({
   selectedZone,
   onClose,
 }: SensationPanelProps) {
-  const [selectedSensation, setSelectedSensation] = useState<string | null>(null);
+  const [selectedSensation, setSelectedSensation] = useState<string | null>(
+    null,
+  );
 
   const handleSaveToJournal = () => {
     if (!selectedSensation) return;
@@ -54,10 +64,10 @@ export default function SensationPanel({
       timestamp: new Date().toISOString(),
     };
 
-    sessionStorage.setItem('pending_somatic_log', JSON.stringify(pendingLog));
+    sessionStorage.setItem("pending_somatic_log", JSON.stringify(pendingLog));
 
     // Redirect to signup
-    window.location.href = '/signup';
+    window.location.href = "/signup";
   };
 
   return (
@@ -65,13 +75,14 @@ export default function SensationPanel({
       initial={{ x: 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 100, opacity: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg p-6 shadow-xl"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground">
-          What do you feel in your <span className="text-teal-600">{zoneLabels[selectedZone]}</span>?
+          What do you feel in your{" "}
+          <span className="text-teal-600">{zoneLabels[selectedZone]}</span>?
         </h2>
         <button
           onClick={onClose}
@@ -105,8 +116,8 @@ export default function SensationPanel({
             }}
             className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 transform ${
               selectedSensation === sensation
-                ? 'bg-teal-600 text-white shadow-md scale-105'
-                : 'bg-white dark:bg-slate-700 text-foreground hover:bg-teal-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'
+                ? "bg-teal-600 text-white shadow-md scale-105"
+                : "bg-white dark:bg-slate-700 text-foreground hover:bg-teal-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600"
             }`}
           >
             {sensation}

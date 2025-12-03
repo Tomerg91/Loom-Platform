@@ -1,17 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createSomaticLog, useAction } from "wasp/client/operations";
 import BodyMapSelector from "./components/BodyMapSelector";
 import { useTranslation } from "react-i18next";
+import { useSomaticLogDraft } from "./hooks/use-somatic-log-draft";
+import { useRetryOperation } from "./hooks/use-retry-operation";
+import { useSomaticLogErrorHandler } from "./hooks/use-somatic-log-error-handler";
 
 // BodyZone type definition matching Prisma schema
-type BodyZone = "HEAD" | "THROAT" | "CHEST" | "SOLAR_PLEXUS" | "BELLY" | "PELVIS" | "ARMS" | "LEGS" | "FULL_BODY";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+type BodyZone =
+  | "HEAD"
+  | "THROAT"
+  | "CHEST"
+  | "SOLAR_PLEXUS"
+  | "BELLY"
+  | "PELVIS"
+  | "ARMS"
+  | "LEGS"
+  | "FULL_BODY";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Slider } from "../components/ui/slider";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertCircle, RefreshCw } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
 
 const SENSATIONS = [
@@ -36,7 +53,19 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [draftAvailable, setDraftAvailable] = useState(false);
+  const [showRetryButton, setShowRetryButton] = useState(false);
   const { t } = useTranslation();
+
+  // Initialize custom hooks
+  const { loadDraft, saveDraft, clearDraft, isDraftLoaded, setIsDraftLoaded } =
+    useSomaticLogDraft();
+  const { executeWithRetry, retryState, resetRetryState } = useRetryOperation({
+    maxRetries: 3,
+    initialDelayMs: 1000,
+  });
+  const { parseError, getRecoveryAction, shouldShowRetryButton } =
+    useSomaticLogErrorHandler();
 
   // ============================================
   // VALIDATION STATE
@@ -56,6 +85,52 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   const createSomaticLogFn = useAction(createSomaticLog);
 
   // ============================================
+  // LOAD DRAFT ON MOUNT
+  // ============================================
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft) {
+      setSelectedZone(draft.selectedZone);
+      setSelectedSensation(draft.selectedSensation);
+      setIntensity(draft.intensity);
+      setNote(draft.note);
+      setSharedWithCoach(draft.sharedWithCoach);
+      setDraftAvailable(true);
+    }
+    setIsDraftLoaded(true);
+  }, [loadDraft, setIsDraftLoaded]);
+
+  // ============================================
+  // AUTO-SAVE DRAFT ON FORM CHANGES
+  // ============================================
+  useEffect(() => {
+    if (!isDraftLoaded) return; // Don't save while loading
+
+    // Debounce draft saving (only save if form has substantive content)
+    const timeout = setTimeout(() => {
+      if (selectedZone || selectedSensation || note) {
+        saveDraft({
+          selectedZone,
+          selectedSensation,
+          intensity,
+          note,
+          sharedWithCoach,
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [
+    selectedZone,
+    selectedSensation,
+    intensity,
+    note,
+    sharedWithCoach,
+    isDraftLoaded,
+    saveDraft,
+  ]);
+
+  // ============================================
   // VALIDATION FUNCTIONS
   // ============================================
   const validateField = (name: string, value: any) => {
@@ -64,19 +139,28 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
     switch (name) {
       case "bodyZone":
         if (!value) {
-          error = t("somatic.validation.bodyZoneRequired", "Please select a body zone");
+          error = t(
+            "somatic.validation.bodyZoneRequired",
+            "Please select a body zone",
+          );
         }
         break;
 
       case "sensation":
         if (!value) {
-          error = t("somatic.validation.sensationRequired", "Please select a sensation");
+          error = t(
+            "somatic.validation.sensationRequired",
+            "Please select a sensation",
+          );
         }
         break;
 
       case "note":
         if (value && value.length > 1000) {
-          error = t("somatic.validation.noteTooLong", "Notes cannot exceed 1000 characters");
+          error = t(
+            "somatic.validation.noteTooLong",
+            "Notes cannot exceed 1000 characters",
+          );
         }
         break;
     }
@@ -124,6 +208,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
+    resetRetryState();
 
     // ============================================
     // VALIDATE ALL FIELDS BEFORE SUBMIT
@@ -144,21 +229,58 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
     // Check if there are any errors
     const hasErrors = Object.values(newErrors).some((error) => error !== "");
     if (hasErrors) {
-      setErrorMessage(t("somatic.validation.fixErrors", "Please fix validation errors before submitting"));
+      setErrorMessage(
+        t(
+          "somatic.validation.fixErrors",
+          "Please fix validation errors before submitting",
+        ),
+      );
+      setShowRetryButton(false);
       return;
     }
 
+    // ============================================
+    // SUBMIT WITH RETRY LOGIC
+    // ============================================
     try {
       setIsSubmitting(true);
-      await createSomaticLogFn({
-        bodyZone: selectedZone!,
-        sensation: selectedSensation,
-        intensity,
-        note: note.trim() || undefined,
-        sharedWithCoach,
-      });
+      setShowRetryButton(false);
 
-      setSuccessMessage("Sensation logged successfully!");
+      const { success, error: retryError } = await executeWithRetry(
+        async () => {
+          return await createSomaticLogFn({
+            bodyZone: selectedZone!,
+            sensation: selectedSensation,
+            intensity,
+            note: note.trim() || undefined,
+            sharedWithCoach,
+          });
+        },
+        (attemptNumber, error, nextRetryIn) => {
+          console.log(
+            `Retry attempt ${attemptNumber}, next retry in ${nextRetryIn}ms:`,
+            error,
+          );
+        },
+      );
+
+      if (!success) {
+        // Retry mechanism exhausted
+        const errorDetail = parseError(retryError);
+        setErrorMessage(errorDetail.userMessage);
+        setShowRetryButton(shouldShowRetryButton(errorDetail));
+
+        // Draft is automatically saved, no need to clear it
+        return;
+      }
+
+      // ============================================
+      // SUCCESS: CLEAR DRAFT AND RESET FORM
+      // ============================================
+      setSuccessMessage(
+        t("somatic.success.logged", "Sensation logged successfully!"),
+      );
+      clearDraft(); // Clear the draft after successful submission
 
       // Reset form
       setSelectedZone(undefined);
@@ -166,6 +288,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
       setIntensity(5);
       setNote("");
       setSharedWithCoach(true);
+      setDraftAvailable(false);
 
       // Reset validation state
       setTouched({
@@ -184,10 +307,21 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
         onSuccess();
       }
     } catch (error: any) {
-      setErrorMessage(error.message || "Failed to log sensation");
+      // Fallback for unexpected errors
+      const errorDetail = parseError(error);
+      setErrorMessage(errorDetail.userMessage);
+      setShowRetryButton(shouldShowRetryButton(errorDetail));
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // ============================================
+  // HANDLE RETRY
+  // ============================================
+  const handleRetry = async () => {
+    setShowRetryButton(false);
+    await handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
   return (
@@ -205,7 +339,10 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             success={touched.bodyZone && !errors.bodyZone && !!selectedZone}
             required={true}
           >
-            <div className="flex justify-center py-4 bg-gray-50 rounded-lg" onBlur={() => handleFieldBlur("bodyZone")}>
+            <div
+              className="flex justify-center py-4 bg-gray-50 rounded-lg"
+              onBlur={() => handleFieldBlur("bodyZone")}
+            >
               <BodyMapSelector
                 selectedZone={selectedZone}
                 onZoneSelect={handleZoneChange}
@@ -218,10 +355,15 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             label="What are you feeling?"
             error={errors.sensation}
             touched={touched.sensation}
-            success={touched.sensation && !errors.sensation && !!selectedSensation}
+            success={
+              touched.sensation && !errors.sensation && !!selectedSensation
+            }
             required={true}
           >
-            <div className="flex flex-wrap gap-2" onBlur={() => handleFieldBlur("sensation")}>
+            <div
+              className="flex flex-wrap gap-2"
+              onBlur={() => handleFieldBlur("sensation")}
+            >
               {SENSATIONS.map((sensation) => (
                 <button
                   key={sensation}
@@ -240,7 +382,8 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             </div>
             {selectedSensation && (
               <p className="text-sm text-muted-foreground mt-2">
-                Selected: <span className="font-medium">{selectedSensation}</span>
+                Selected:{" "}
+                <span className="font-medium">{selectedSensation}</span>
               </p>
             )}
           </FormFieldWithValidation>
@@ -302,10 +445,10 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               )}
               <div>
                 <Label className="font-medium cursor-pointer">
-                  {t('sharing.sharedWithCoach')}
+                  {t("sharing.sharedWithCoach")}
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {t('sharing.shareExplanation')}
+                  {t("sharing.shareExplanation")}
                 </p>
               </div>
             </div>
@@ -314,22 +457,61 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               onClick={() => setSharedWithCoach(!sharedWithCoach)}
               disabled={isSubmitting}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                sharedWithCoach ? 'bg-primary' : 'bg-muted-foreground'
+                sharedWithCoach ? "bg-primary" : "bg-muted-foreground"
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  sharedWithCoach ? 'translate-x-6' : 'translate-x-1'
+                  sharedWithCoach ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
 
+          {/* Draft Recovery Message */}
+          {draftAvailable && !errorMessage && !successMessage && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription className="text-blue-800 flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>
+                  {t(
+                    "somatic.draft.recovered",
+                    "We've recovered your previous draft. Feel free to edit or submit it.",
+                  )}
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Error Message */}
           {errorMessage && (
             <Alert className="bg-red-50 border-red-200">
-              <AlertDescription className="text-red-800">
-                {errorMessage}
+              <AlertDescription className="text-red-800 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p>{errorMessage}</p>
+                    {retryState.nextRetryIn && retryState.isRetrying && (
+                      <p className="text-sm mt-1 opacity-75">
+                        {t(
+                          "somatic.error.retrying",
+                          "Retrying in {{time}}ms...",
+                          {
+                            time: retryState.nextRetryIn,
+                          },
+                        )}
+                      </p>
+                    )}
+                    {showRetryButton && (
+                      <p className="text-sm mt-1 opacity-75">
+                        {t(
+                          "somatic.error.savedDraft",
+                          "Your work is saved. You can try again.",
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </AlertDescription>
             </Alert>
           )}
@@ -343,17 +525,32 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
             </Alert>
           )}
 
-          {/* Submit Button */}
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Logging...
-              </>
-            ) : (
-              "Log Sensation"
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {retryState.isRetrying ? "Retrying..." : "Logging..."}
+                </>
+              ) : (
+                t("somatic.action.log", "Log Sensation")
+              )}
+            </Button>
+
+            {/* Retry Button */}
+            {showRetryButton && !isSubmitting && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRetry}
+                className="flex gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {t("somatic.action.retry", "Retry")}
+              </Button>
             )}
-          </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

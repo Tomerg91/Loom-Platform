@@ -1,5 +1,10 @@
 import PDFDocument from "pdfkit";
-import type { BodyZoneStats, SensationStats, IntensityTrendPoint, ClientAnalyticsResult } from "@src/somatic-logs/analytics";
+import type {
+  BodyZoneStats,
+  SensationStats,
+  IntensityTrendPoint,
+  ClientAnalyticsResult,
+} from "@src/somatic-logs/analytics";
 
 export interface SessionData {
   id: string;
@@ -21,7 +26,7 @@ export async function generateAnalyticsPdf(
   clientData: ClientData,
   analytics: ClientAnalyticsResult,
   sessions: SessionData[],
-  period: string
+  period: string,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
@@ -36,7 +41,10 @@ export async function generateAnalyticsPdf(
       doc.on("error", reject);
 
       // ========== HEADER ==========
-      doc.fontSize(20).font("Helvetica-Bold").text("Somatic Analytics Report", { align: "center" });
+      doc
+        .fontSize(20)
+        .font("Helvetica-Bold")
+        .text("Somatic Analytics Report", { align: "center" });
       doc.moveDown(0.3);
 
       // Client info
@@ -46,13 +54,18 @@ export async function generateAnalyticsPdf(
         doc.text(`Email: ${clientData.email}`, { align: "center" });
       }
       doc.text(`Report Period: ${period}`, { align: "center" });
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, { align: "center" });
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, {
+        align: "center",
+      });
 
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
       doc.moveDown(0.5);
 
       // ========== ANALYTICS SUMMARY ==========
-      doc.fontSize(14).font("Helvetica-Bold").text("Analytics Summary", { align: "left" });
+      doc
+        .fontSize(14)
+        .font("Helvetica-Bold")
+        .text("Analytics Summary", { align: "left" });
       doc.moveDown(0.3);
 
       doc.fontSize(11).font("Helvetica");
@@ -60,16 +73,21 @@ export async function generateAnalyticsPdf(
       doc.moveDown(0.3);
 
       // ========== TOP BODY ZONES TABLE ==========
-      doc.fontSize(12).font("Helvetica-Bold").text("Top Body Zones", { align: "left" });
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Top Body Zones", { align: "left" });
       doc.moveDown(0.2);
 
       if (analytics.topBodyZones.length > 0) {
-        drawTable(doc, ["Zone", "Count", "Avg Intensity"],
+        drawTable(
+          doc,
+          ["Zone", "Count", "Avg Intensity"],
           analytics.topBodyZones.map((zone: BodyZoneStats) => [
             zone.zone,
             zone.count.toString(),
-            zone.avgIntensity.toString()
-          ])
+            zone.avgIntensity.toString(),
+          ]),
         );
       } else {
         doc.fontSize(10).text("No data available");
@@ -78,16 +96,21 @@ export async function generateAnalyticsPdf(
       doc.moveDown(0.4);
 
       // ========== TOP SENSATIONS TABLE ==========
-      doc.fontSize(12).font("Helvetica-Bold").text("Top Sensations", { align: "left" });
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Top Sensations", { align: "left" });
       doc.moveDown(0.2);
 
       if (analytics.topSensations.length > 0) {
-        drawTable(doc, ["Sensation", "Count", "Avg Intensity"],
+        drawTable(
+          doc,
+          ["Sensation", "Count", "Avg Intensity"],
           analytics.topSensations.map((sensation: SensationStats) => [
             sensation.sensation,
             sensation.count.toString(),
-            sensation.avgIntensity.toString()
-          ])
+            sensation.avgIntensity.toString(),
+          ]),
         );
       } else {
         doc.fontSize(10).text("No data available");
@@ -96,15 +119,20 @@ export async function generateAnalyticsPdf(
       doc.moveDown(0.4);
 
       // ========== INTENSITY TREND TABLE ==========
-      doc.fontSize(12).font("Helvetica-Bold").text("Weekly Intensity Trend", { align: "left" });
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Weekly Intensity Trend", { align: "left" });
       doc.moveDown(0.2);
 
       if (analytics.intensityTrendOverTime.length > 0) {
-        drawTable(doc, ["Week Starting", "Avg Intensity"],
+        drawTable(
+          doc,
+          ["Week Starting", "Avg Intensity"],
           analytics.intensityTrendOverTime.map((trend: IntensityTrendPoint) => [
             new Date(trend.weekStart).toLocaleDateString(),
-            trend.avgIntensity.toString()
-          ])
+            trend.avgIntensity.toString(),
+          ]),
         );
       } else {
         doc.fontSize(10).text("No data available");
@@ -114,16 +142,21 @@ export async function generateAnalyticsPdf(
 
       // ========== SESSION HISTORY ==========
       if (sessions.length > 0) {
-        doc.fontSize(14).font("Helvetica-Bold").text("Session History", { align: "left" });
+        doc
+          .fontSize(14)
+          .font("Helvetica-Bold")
+          .text("Session History", { align: "left" });
         doc.moveDown(0.2);
 
-        drawTable(doc, ["Session #", "Date", "Topic", "Summary"],
-          sessions.map(session => [
+        drawTable(
+          doc,
+          ["Session #", "Date", "Topic", "Summary"],
+          sessions.map((session) => [
             session.sessionNumber?.toString() || "-",
             new Date(session.sessionDate).toLocaleDateString(),
             session.topic || "-",
-            (session.sharedSummary || "-").substring(0, 40) // Truncate for table
-          ])
+            (session.sharedSummary || "-").substring(0, 40), // Truncate for table
+          ]),
         );
 
         doc.moveDown(0.4);
@@ -133,7 +166,9 @@ export async function generateAnalyticsPdf(
       doc.fontSize(9).font("Helvetica");
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
       doc.moveDown(0.2);
-      doc.text("Generated by Loom Platform - Somatic Coaching System", { align: "center" });
+      doc.text("Generated by Loom Platform - Somatic Coaching System", {
+        align: "center",
+      });
       doc.text(`${new Date().toLocaleString()}`, { align: "center" });
 
       doc.end();
@@ -152,7 +187,7 @@ export async function generateAnalyticsPdf(
 function drawTable(
   doc: PDFKit.PDFDocument,
   headers: string[],
-  rows: string[][]
+  rows: string[][],
 ): void {
   const startX = 50;
   const startY = doc.y;
@@ -215,7 +250,7 @@ export function base64ToBuffer(base64: string): Buffer {
  */
 export function generatePdfFilename(
   clientName: string,
-  period: string
+  period: string,
 ): string {
   const sanitizedName = clientName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
   const timestamp = new Date().toISOString().split("T")[0];

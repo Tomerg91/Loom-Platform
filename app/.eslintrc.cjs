@@ -10,12 +10,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: [
-    "@typescript-eslint",
-    "react",
-    "react-hooks",
-    "jsx-a11y",
-  ],
+  plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -40,10 +35,5 @@ module.exports = {
       { prefer: "type-imports" },
     ],
   },
-  ignorePatterns: [
-    "node_modules",
-    "dist",
-    ".wasp",
-    ".wasp/**/*",
-  ],
+  ignorePatterns: ["node_modules", "dist", ".wasp", ".wasp/**/*"],
 };

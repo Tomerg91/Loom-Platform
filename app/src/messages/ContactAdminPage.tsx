@@ -2,7 +2,12 @@ import { useState } from "react";
 import { useAction, submitContactFormMessage } from "wasp/client/operations";
 import type { User } from "wasp/entities";
 import { AlertTriangle, Mail } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@src/components/ui/card";
 import { Textarea } from "@src/components/ui/textarea";
 import { Label } from "@src/components/ui/label";
 import { Button } from "@src/components/ui/button";
@@ -39,7 +44,9 @@ export default function ContactAdminPage({ user }: { user: User }) {
       });
     } catch (error: unknown) {
       const messageFromError =
-        error instanceof Error ? error.message : "Please try again in a moment.";
+        error instanceof Error
+          ? error.message
+          : "Please try again in a moment.";
       toast({
         title: "Unable to send message",
         description: messageFromError,
@@ -57,8 +64,8 @@ export default function ContactAdminPage({ user }: { user: User }) {
           <CardHeader>
             <CardTitle className="text-xl">Contact Loom Admin</CardTitle>
             <p className="text-muted-foreground text-sm">
-              Let us know how we can help. Your account details will be attached to the
-              request so we can respond quickly.
+              Let us know how we can help. Your account details will be attached
+              to the request so we can respond quickly.
             </p>
           </CardHeader>
           <CardContent>
@@ -81,7 +88,10 @@ export default function ContactAdminPage({ user }: { user: User }) {
                 <div className="text-muted-foreground text-xs">
                   We typically reply within one business day.
                 </div>
-                <Button type="submit" disabled={isSubmitting || message.trim().length < 5}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || message.trim().length < 5}
+                >
                   {isSubmitting ? "Sending..." : "Send message"}
                 </Button>
               </div>
@@ -94,14 +104,18 @@ export default function ContactAdminPage({ user }: { user: User }) {
             <CardHeader className="flex flex-row items-center gap-3">
               <Mail className="text-primary size-5" />
               <div>
-                <CardTitle className="text-base">Your contact details</CardTitle>
+                <CardTitle className="text-base">
+                  Your contact details
+                </CardTitle>
                 <p className="text-muted-foreground text-sm">
                   We use your account email for replies.
                 </p>
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-sm font-semibold">{user.username || "Account"}</p>
+              <p className="text-sm font-semibold">
+                {user.username || "Account"}
+              </p>
               <p className="text-muted-foreground text-sm">
                 {user.email || "No email on file"}
               </p>
@@ -114,7 +128,8 @@ export default function ContactAdminPage({ user }: { user: User }) {
               <div>
                 <CardTitle className="text-base">Urgent issues</CardTitle>
                 <p className="text-muted-foreground text-sm">
-                  Include steps to reproduce and any error messages so we can investigate faster.
+                  Include steps to reproduce and any error messages so we can
+                  investigate faster.
                 </p>
               </div>
             </CardHeader>

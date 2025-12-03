@@ -12,7 +12,12 @@ import {
 import type { ContactMessageWithUser } from "@src/messages/operations";
 import { Badge } from "@src/components/ui/badge";
 import { Button } from "@src/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@src/components/ui/card";
 import { Separator } from "@src/components/ui/separator";
 import { cn } from "@src/shared/utils";
 import DefaultLayout from "../../layout/DefaultLayout";
@@ -103,7 +108,10 @@ function MessageDetail({
         <div>
           <CardTitle className="text-xl">Message Detail</CardTitle>
           <p className="text-muted-foreground text-sm">
-            Received {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+            Received{" "}
+            {formatDistanceToNow(new Date(message.createdAt), {
+              addSuffix: true,
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -118,7 +126,9 @@ function MessageDetail({
             {message.user.username || message.user.email || "Unknown user"}
           </p>
           {message.user.email && (
-            <p className="text-muted-foreground text-sm">{message.user.email}</p>
+            <p className="text-muted-foreground text-sm">
+              {message.user.email}
+            </p>
           )}
         </div>
 
@@ -201,7 +211,9 @@ function MessagesList({
       </CardHeader>
       <Separator />
       <CardContent className="space-y-3 p-4">
-        {messages.length === 0 && <p className="text-muted-foreground text-sm">No messages</p>}
+        {messages.length === 0 && (
+          <p className="text-muted-foreground text-sm">No messages</p>
+        )}
         <div className="flex flex-col gap-3">
           {messages.map((message) => (
             <MessageListItem
@@ -222,7 +234,11 @@ function AdminMessages({ user }: { user: AuthUser }) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data: messages, isLoading, refetch } = useQuery(getContactMessages, {
+  const {
+    data: messages,
+    isLoading,
+    refetch,
+  } = useQuery(getContactMessages, {
     status: statusFilter,
   });
 
@@ -240,7 +256,11 @@ function AdminMessages({ user }: { user: AuthUser }) {
     if (messages?.length && !selectedId) {
       setSelectedId(messages[0].id);
     }
-    if (selectedId && messages && !messages.some((msg) => msg.id === selectedId)) {
+    if (
+      selectedId &&
+      messages &&
+      !messages.some((msg) => msg.id === selectedId)
+    ) {
       setSelectedId(messages[0]?.id ?? null);
     }
   }, [messages, selectedId]);
@@ -287,8 +307,12 @@ function AdminMessages({ user }: { user: AuthUser }) {
           {selectedMessage ? (
             <MessageDetail
               message={selectedMessage}
-              onMarkRead={() => handleStatusUpdate(selectedMessage.id, { isRead: true })}
-              onMarkUnread={() => handleStatusUpdate(selectedMessage.id, { isRead: false })}
+              onMarkRead={() =>
+                handleStatusUpdate(selectedMessage.id, { isRead: true })
+              }
+              onMarkUnread={() =>
+                handleStatusUpdate(selectedMessage.id, { isRead: false })
+              }
               onToggleReplied={(markReplied) =>
                 handleStatusUpdate(selectedMessage.id, { markReplied })
               }
