@@ -225,13 +225,21 @@ export const updateNotificationPreferences: UpdateNotificationPreferences<
 // GET UNREAD NOTIFICATION COUNT (Query)
 // ============================================
 
-export const getUnreadNotificationCount = async (userId: string) => {
-  // This is a helper function for the Prisma client
-  // Can be used in other operations to get unread count
-  if (process.env.NODE_ENV !== "production") {
-    console.debug("Unread notification count requested for", userId);
+export const getUnreadNotificationCount = async (
+  rawArgs: any,
+  context: any,
+) => {
+  if (!context.user) {
+    throw new HttpError(401, "You must be logged in");
   }
-  return {
-    count: 0,
-  };
+
+  const count = await context.entities.Notification.count({
+    where: {
+      userId: context.user.id,
+      read: false,
+      deletedAt: null,
+    },
+  });
+
+  return { count };
 };
