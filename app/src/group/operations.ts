@@ -1,4 +1,10 @@
-import type { CreateGroup, GetGroupFeed, CreateGroupPost, CreateGroupPostReply, GetGroupMembers } from "wasp/server/operations";
+import type {
+  CreateGroup,
+  GetGroupFeed,
+  CreateGroupPost,
+  CreateGroupPostReply,
+  GetGroupMembers,
+} from "wasp/server/operations";
 import { HttpError } from "wasp/server";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
@@ -63,10 +69,10 @@ async function getCoachProfile(context: any) {
 // CREATE GROUP
 // ============================================
 
-export const createGroup: CreateGroup<CreateGroupInput, { id: string; name: string }> = async (
-  rawArgs,
-  context
-) => {
+export const createGroup: CreateGroup<
+  CreateGroupInput,
+  { id: string; name: string }
+> = async (rawArgs, context) => {
   const args = ensureArgsSchemaOrThrowHttpError(createGroupSchema, rawArgs);
 
   const coachProfile = await getCoachProfile(context);
@@ -80,6 +86,16 @@ export const createGroup: CreateGroup<CreateGroupInput, { id: string; name: stri
       name: args.name,
       description: args.description,
       mentorId: coachProfile.id,
+    },
+  });
+
+  // Ensure the creator is an ACTIVE member of the group
+  await context.entities.GroupMember.create({
+    data: {
+      groupId: group.id,
+      coachId: coachProfile.id,
+      status: "ACTIVE",
+      joinedAt: new Date(),
     },
   });
 
@@ -240,7 +256,7 @@ export const getGroupFeed: GetGroupFeed<
           },
         })),
       };
-    })
+    }),
   );
 
   return processedPosts;
@@ -299,7 +315,10 @@ export const createGroupPostReply: CreateGroupPostReply<
   CreateGroupPostReplyInput,
   { id: string; content: string }
 > = async (rawArgs, context) => {
-  const args = ensureArgsSchemaOrThrowHttpError(createGroupPostReplySchema, rawArgs);
+  const args = ensureArgsSchemaOrThrowHttpError(
+    createGroupPostReplySchema,
+    rawArgs,
+  );
 
   const coachProfile = await getCoachProfile(context);
 
