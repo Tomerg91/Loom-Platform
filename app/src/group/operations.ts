@@ -458,3 +458,205 @@ export const deleteGroupPost: any = async (rawArgs: any, context: any) => {
 
   return { success: true };
 };
+
+// ============================================
+// MENTOR REQUEST OPERATIONS
+// ============================================
+
+const requestMentorStatusSchema = z.object({
+  reason: z.string().min(1, "Please provide a reason").max(1000),
+});
+type RequestMentorStatusInput = z.infer<typeof requestMentorStatusSchema>;
+
+/**
+ * Coach requests to become a mentor (requires admin approval)
+ */
+export const requestMentorStatus: any = async (
+  rawArgs: any,
+  context: any
+) => {
+  const args = ensureArgsSchemaOrThrowHttpError(requestMentorStatusSchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Check if already a mentor
+  if (coachProfile.isMentor) {
+    throw new HttpError(400, "You are already a mentor");
+  }
+
+  // Check for pending request
+  const existingRequest = await context.entities.MentorRequest.findFirst({
+    where: {
+      coachId: coachProfile.id,
+      status: "PENDING",
+      deletedAt: null,
+    },
+  });
+
+  if (existingRequest) {
+    throw new HttpError(400, "You already have a pending mentor request");
+  }
+
+  // Create mentor request
+  const request = await context.entities.MentorRequest.create({
+    data: {
+      coachId: coachProfile.id,
+      rejectionNote: args.reason, // Store reason in rejectionNote for now (will replace with description field if needed)
+    },
+  });
+
+  // TODO: Send notification to admins about new mentor request
+
+  return {
+    id: request.id,
+    status: request.status,
+    createdAt: request.createdAt,
+  };
+};
+
+const approveMentorRequestSchema = z.object({
+  requestId: z.string().uuid("Invalid request ID"),
+});
+type ApproveMentorRequestInput = z.infer<typeof approveMentorRequestSchema>;
+
+/**
+ * Admin approves a coach to become a mentor
+ */
+export const approveMentorRequest: any = async (
+  rawArgs: any,
+  context: any
+) => {
+  const args = ensureArgsSchemaOrThrowHttpError(approveMentorRequestSchema, rawArgs);
+
+  // Verify user is admin
+  if (!context.user?.isAdmin) {
+    throw new HttpError(403, "Only admins can approve mentor requests");
+  }
+
+  // Get the request
+  const request = await context.entities.MentorRequest.findUnique({
+    where: { id: args.requestId, deletedAt: null },
+  });
+
+  if (!request) {
+    throw new HttpError(404, "Mentor request not found");
+  }
+
+  if (request.status !== "PENDING") {
+    throw new HttpError(400, "This request has already been reviewed");
+  }
+
+  // Update request status
+  await context.entities.MentorRequest.update({
+    where: { id: args.requestId },
+    data: {
+      status: "APPROVED",
+      reviewedByUserId: context.user.id,
+      reviewedAt: new Date(),
+    },
+  });
+
+  // Update coach profile to isMentor=true
+  const coachProfile = await context.entities.CoachProfile.update({
+    where: { id: request.coachId },
+    data: { isMentor: true },
+  });
+
+  // TODO: Send notification to coach that they're now a mentor
+
+  return {
+    coachId: coachProfile.id,
+    isMentor: coachProfile.isMentor,
+  };
+};
+
+const rejectMentorRequestSchema = z.object({
+  requestId: z.string().uuid("Invalid request ID"),
+  reason: z.string().min(1, "Please provide a rejection reason").max(1000),
+});
+type RejectMentorRequestInput = z.infer<typeof rejectMentorRequestSchema>;
+
+/**
+ * Admin rejects a coach's mentor request
+ */
+export const rejectMentorRequest: any = async (
+  rawArgs: any,
+  context: any
+) => {
+  const args = ensureArgsSchemaOrThrowHttpError(rejectMentorRequestSchema, rawArgs);
+
+  // Verify user is admin
+  if (!context.user?.isAdmin) {
+    throw new HttpError(403, "Only admins can reject mentor requests");
+  }
+
+  // Get the request
+  const request = await context.entities.MentorRequest.findUnique({
+    where: { id: args.requestId, deletedAt: null },
+  });
+
+  if (!request) {
+    throw new HttpError(404, "Mentor request not found");
+  }
+
+  if (request.status !== "PENDING") {
+    throw new HttpError(400, "This request has already been reviewed");
+  }
+
+  // Update request status
+  await context.entities.MentorRequest.update({
+    where: { id: args.requestId },
+    data: {
+      status: "REJECTED",
+      rejectionNote: args.reason,
+      reviewedByUserId: context.user.id,
+      reviewedAt: new Date(),
+    },
+  });
+
+  // TODO: Send notification to coach with rejection reason
+
+  return {
+    requestId: request.id,
+    status: "REJECTED",
+  };
+};
+
+/**
+ * Admin gets all pending mentor requests
+ */
+export const getPendingMentorRequests: any = async (
+  rawArgs: any,
+  context: any
+) => {
+  // Verify user is admin
+  if (!context.user?.isAdmin) {
+    throw new HttpError(403, "Only admins can view mentor requests");
+  }
+
+  const requests = await context.entities.MentorRequest.findMany({
+    where: {
+      status: "PENDING",
+      deletedAt: null,
+    },
+    include: {
+      coachProfile: {
+        include: {
+          user: {
+            select: { id: true, email: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return requests.map((req) => ({
+    id: req.id,
+    coach: {
+      id: req.coachProfile.id,
+      user: { email: req.coachProfile.user.email },
+    },
+    createdAt: req.createdAt,
+  }));
+};

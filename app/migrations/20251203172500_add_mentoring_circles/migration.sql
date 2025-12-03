@@ -1,6 +1,21 @@
 -- Add isMentor field to CoachProfile
 ALTER TABLE "CoachProfile" ADD COLUMN "isMentor" BOOLEAN NOT NULL DEFAULT false;
 
+-- CreateTable MentorRequest
+CREATE TABLE "MentorRequest" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "rejectionNote" TEXT,
+    "coachId" TEXT NOT NULL,
+    "reviewedByUserId" TEXT,
+    "reviewedAt" TIMESTAMP(3),
+
+    CONSTRAINT "MentorRequest_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateTable Group
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
@@ -96,6 +111,15 @@ CREATE INDEX "GroupPostReply_authorId_idx" ON "GroupPostReply"("authorId");
 -- CreateIndex
 CREATE INDEX "GroupPostReply_deletedAt_idx" ON "GroupPostReply"("deletedAt");
 
+-- CreateIndex for MentorRequest
+CREATE INDEX "MentorRequest_coachId_status_idx" ON "MentorRequest"("coachId", "status");
+
+-- CreateIndex
+CREATE INDEX "MentorRequest_status_idx" ON "MentorRequest"("status");
+
+-- CreateIndex
+CREATE INDEX "MentorRequest_createdAt_idx" ON "MentorRequest"("createdAt");
+
 -- AddForeignKey
 ALTER TABLE "Group" ADD CONSTRAINT "Group_mentorId_fkey" FOREIGN KEY ("mentorId") REFERENCES "CoachProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -116,3 +140,9 @@ ALTER TABLE "GroupPostReply" ADD CONSTRAINT "GroupPostReply_postId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "GroupPostReply" ADD CONSTRAINT "GroupPostReply_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "CoachProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey for MentorRequest
+ALTER TABLE "MentorRequest" ADD CONSTRAINT "MentorRequest_coachId_fkey" FOREIGN KEY ("coachId") REFERENCES "CoachProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MentorRequest" ADD CONSTRAINT "MentorRequest_reviewedByUserId_fkey" FOREIGN KEY ("reviewedByUserId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

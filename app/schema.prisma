@@ -110,6 +110,9 @@ model User {
   workspaceFilesUploaded WorkspaceFile[]
   actionItemsAssigned    ActionItem[]
 
+  // Mentor request reviews (admin only)
+  mentorRequestsReviewed MentorRequest[]
+
   // Google Calendar integration
   calendarConnection UserCalendarConnection?
 }
@@ -129,6 +132,7 @@ model CoachProfile {
   groupMemberships      GroupMember[] @relation("CoachGroupMemberships")
   authoredPosts         GroupPost[]   @relation("AuthoredPosts")
   repliedToPosts        GroupPostReply[] @relation("RepliedToPosts")
+  mentorRequests        MentorRequest[] // Requests to become mentor
 
   // A Coach manages many Clients
   clients     ClientProfile[]
@@ -632,6 +636,33 @@ model GoogleCalendarEvent {
   // Track sync status
   syncedAt  DateTime @default(now())
   createdAt DateTime @default(now())
+}
+
+// ============================================
+// MENTOR REQUEST (Admin Approval Required)
+// ============================================
+model MentorRequest {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Coach requesting mentor status
+  coachProfile  CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId       String
+
+  // Request status
+  status        String    @default("PENDING") // 'PENDING', 'APPROVED', 'REJECTED'
+  rejectionNote String?   @db.Text // Reason if rejected
+
+  // Admin who approved/rejected
+  reviewedBy   User?     @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId String?
+  reviewedAt    DateTime?
+
+  @@index([coachId, status])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ============================================
