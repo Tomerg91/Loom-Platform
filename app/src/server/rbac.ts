@@ -103,3 +103,100 @@ export async function requireCoachOwnsClient<TContext extends OperationContext>(
     clientProfile,
   };
 }
+
+type WorkspaceEntities = {
+  CoachProfile: {
+    findUnique: (...args: any[]) => Promise<{ id: string } | null>;
+  };
+  ClientProfile: {
+    findUnique: (
+      ...args: any[]
+    ) => Promise<{ id: string; coachId: string | null } | null>;
+  };
+};
+
+/**
+ * Verify user has access to a coach-client workspace
+ * CRITICAL SECURITY: Actually verifies database relationships
+ * Coaches can access their own client's workspaces
+ * Clients can access their own workspace
+ */
+export async function requireWorkspaceAccess(
+  coachId: string,
+  clientId: string,
+  userId: string,
+  userRole: UserRole | string,
+  entities?: WorkspaceEntities,
+) {
+  if (userRole === "ADMIN") {
+    // Admins can access any workspace
+    return;
+  }
+
+  if (!entities) {
+    // If no entities provided, do basic role check (for backward compatibility)
+    if (userRole === "COACH" || userRole === "CLIENT") {
+      return;
+    }
+    throw new HttpError(
+      403,
+      "You do not have permission to access this workspace",
+    );
+  }
+
+  if (userRole === "COACH") {
+    // Verify coach owns this coachId
+    const coachProfile = await entities.CoachProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (!coachProfile) {
+      throw new HttpError(404, "Coach profile not found");
+    }
+
+    if (coachProfile.id !== coachId) {
+      throw new HttpError(403, "You do not own this workspace");
+    }
+
+    // Verify client belongs to this coach
+    const clientProfile = await entities.ClientProfile.findUnique({
+      where: { id: clientId },
+      select: { id: true, coachId: true },
+    });
+
+    if (!clientProfile) {
+      throw new HttpError(404, "Client not found");
+    }
+
+    if (clientProfile.coachId !== coachId) {
+      throw new HttpError(403, "Client does not belong to your workspace");
+    }
+  } else if (userRole === "CLIENT") {
+    // Verify client owns this clientId
+    const clientProfile = await entities.ClientProfile.findUnique({
+      where: { userId },
+      select: { id: true, coachId: true },
+    });
+
+    if (!clientProfile) {
+      throw new HttpError(404, "Client profile not found");
+    }
+
+    if (clientProfile.id !== clientId) {
+      throw new HttpError(403, "You do not have access to this workspace");
+    }
+
+    if (clientProfile.coachId !== coachId) {
+      throw new HttpError(
+        403,
+        "Workspace does not match your client assignment",
+      );
+    }
+  } else {
+    throw new HttpError(
+      403,
+      "You do not have permission to access this workspace",
+    );
+  }
+}

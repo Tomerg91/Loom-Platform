@@ -464,6 +464,58 @@ action deleteResource {
 }
 //#endregion
 
+//#region Workspace (Shared Files & Action Items)
+action getWorkspaceUploadUrl {
+  fn: import { getWorkspaceUploadUrl } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, WorkspaceFile]
+}
+
+action createWorkspaceFile {
+  fn: import { createWorkspaceFile } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, WorkspaceFile]
+}
+
+query getWorkspaceFiles {
+  fn: import { getWorkspaceFiles } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, WorkspaceFile]
+}
+
+action deleteWorkspaceFile {
+  fn: import { deleteWorkspaceFile } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, WorkspaceFile]
+}
+
+query getWorkspaceFileDownloadUrl {
+  fn: import { getWorkspaceFileDownloadUrl } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, WorkspaceFile]
+}
+
+action createActionItem {
+  fn: import { createActionItem } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, ActionItem]
+}
+
+action updateActionItem {
+  fn: import { updateActionItem } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, ActionItem]
+}
+
+action completeActionItem {
+  fn: import { completeActionItem } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, ActionItem]
+}
+
+query getActionItems {
+  fn: import { getActionItems } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, ActionItem]
+}
+
+action deleteActionItem {
+  fn: import { deleteActionItem } from "@src/workspace/operations",
+  entities: [User, CoachProfile, ClientProfile, ActionItem]
+}
+//#endregion
+
 //#region Analytics
 query getDailyStats {
   fn: import { getDailyStats } from "@src/analytics/operations",

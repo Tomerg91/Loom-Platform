@@ -106,6 +106,10 @@ model User {
   contactFormMessages ContactFormMessage[]
   files               File[]
 
+  // Workspace file uploads and action item assignments
+  workspaceFilesUploaded WorkspaceFile[]
+  actionItemsAssigned    ActionItem[]
+
   // Google Calendar integration
   calendarConnection UserCalendarConnection?
 }
@@ -128,6 +132,10 @@ model CoachProfile {
 
   // Resources uploaded by this Coach
   resources Resource[]
+
+  // Workspace files and action items
+  workspaceFiles WorkspaceFile[]
+  actionItems    ActionItem[]
 
   // Availability slots for scheduling
   availabilitySlots AvailabilitySlot[]
@@ -165,6 +173,10 @@ model ClientProfile {
 
   // MODULE 11: Goals & Milestones
   goals Goal[]
+
+  // Workspace files and action items
+  workspaceFiles WorkspaceFile[]
+  actionItems    ActionItem[]
 
   // ANALYTICS: Somatic pattern insights (cached)
   analytics SomaticLogAnalytics[]
@@ -265,6 +277,10 @@ model CoachSession {
   // HARMONY UPDATE: Somatic Anchor & Resource Attachments
   somaticAnchor BodyZone? // Body zone discussed in session
   resources     Resource[] // Resources attached as homework
+
+  // Workspace files and action items linked to this session
+  workspaceFiles WorkspaceFile[]
+  actionItems    ActionItem[]
 
   // Google Calendar integration
   googleCalendarEvent GoogleCalendarEvent?
@@ -380,6 +396,74 @@ model Resource {
 
   @@index([coachId])
   @@index([coachId, deletedAt])
+}
+
+// ============================================
+// WORKSPACE (Shared Files & Action Items)
+// ============================================
+model WorkspaceFile {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Coach-Client Pair
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+
+  // Optional: Link to specific session
+  session   CoachSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  sessionId String?
+
+  // File metadata
+  name  String
+  type  String // MIME type: "application/pdf", "image/jpeg", etc.
+  s3Key String
+
+  // Track who uploaded
+  uploadedBy   User   @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  uploadedByUserId String
+
+  @@index([coachId, clientId])
+  @@index([clientId, deletedAt])
+  @@index([sessionId])
+}
+
+model ActionItem {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Coach-Client Pair
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId String
+
+  // Optional: Link to specific session
+  session   CoachSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  sessionId String?
+
+  // Action item details
+  title       String
+  description String? @db.Text
+  dueDate     DateTime?
+
+  // Completion tracking
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  // Track who assigned
+  assignedBy   User   @relation(fields: [assignedByUserId], references: [id], onDelete: Restrict)
+  assignedByUserId String
+
+  @@index([coachId, clientId])
+  @@index([clientId, completed])
+  @@index([clientId, dueDate])
+  @@index([sessionId])
 }
 
 // ============================================
