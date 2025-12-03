@@ -561,6 +561,66 @@ job sessionRemindersJob {
   },
   entities: [ClientProfile, User, Notification, NotificationPreferences]
 }
+
+job releaseExpiredHoldsJob {
+  executor: PgBoss,
+  perform: {
+    fn: import { releaseExpiredHolds } from "@src/availability/jobs"
+  },
+  schedule: {
+    cron: "*/15 * * * *" // Every 15 minutes
+  },
+  entities: [AvailabilitySlot]
+}
+//#endregion
+
+//#region Availability Scheduling
+route CoachAvailabilityRoute { path: "/coach/availability", to: CoachAvailabilityPage }
+page CoachAvailabilityPage {
+  authRequired: true,
+  component: import CoachAvailabilityPage from "@src/availability/pages/CoachAvailabilityPage"
+}
+
+route ClientBookingRoute { path: "/client/book-session", to: ClientBookingPage }
+page ClientBookingPage {
+  authRequired: true,
+  component: import ClientBookingPage from "@src/availability/pages/ClientBookingPage"
+}
+
+action createAvailabilitySlot {
+  fn: import { createAvailabilitySlot } from "@src/availability/operations",
+  entities: [User, CoachProfile, AvailabilitySlot]
+}
+
+action updateAvailabilitySlot {
+  fn: import { updateAvailabilitySlot } from "@src/availability/operations",
+  entities: [User, CoachProfile, AvailabilitySlot]
+}
+
+action deleteAvailabilitySlot {
+  fn: import { deleteAvailabilitySlot } from "@src/availability/operations",
+  entities: [User, CoachProfile, AvailabilitySlot]
+}
+
+query getCoachAvailability {
+  fn: import { getCoachAvailability } from "@src/availability/operations",
+  entities: [User, CoachProfile, ClientProfile, AvailabilitySlot]
+}
+
+action bookAvailabilitySlot {
+  fn: import { bookAvailabilitySlot } from "@src/availability/operations",
+  entities: [User, ClientProfile, CoachProfile, AvailabilitySlot, CoachSession]
+}
+
+action holdAvailabilitySlot {
+  fn: import { holdAvailabilitySlot } from "@src/availability/operations",
+  entities: [User, ClientProfile, CoachProfile, AvailabilitySlot]
+}
+
+action releaseHeldSlot {
+  fn: import { releaseHeldSlot } from "@src/availability/operations",
+  entities: [User, ClientProfile, CoachProfile, AvailabilitySlot]
+}
 //#endregion
 
 //#region Admin Dashboard
