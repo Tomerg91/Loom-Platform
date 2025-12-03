@@ -12,6 +12,9 @@ import {
   deleteSession,
   getClientProfile,
 } from "wasp/client/operations";
+import ActionItemList from "../workspace/components/ActionItemList";
+import WorkspaceFileList from "../workspace/components/WorkspaceFileList";
+import WorkspaceFileUpload from "../workspace/components/WorkspaceFileUpload";
 import {
   Card,
   CardContent,
@@ -49,12 +52,13 @@ import {
   Clock,
   AlertCircle,
   TrendingUp,
+  FileText,
 } from "lucide-react";
 import {
   formatClockTime,
   formatDate,
   formatRelativeTime,
-} from "@src/shared/date";
+} from "../shared/date";
 import type { SessionResponse } from "../session/operations";
 
 type BodyZone =
@@ -158,6 +162,10 @@ function ClientDetailsPageView({
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [scheduleSuccess, setScheduleSuccess] = useState<string | null>(null);
   const [isSubmittingSchedule, setIsSubmittingSchedule] = useState(false);
+
+  // State for workspace file upload
+  const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
+  const [workspaceRefreshKey, setWorkspaceRefreshKey] = useState(0);
 
   // Fetch client profile (for offline client details)
   const { data: clientProfile } = useQuery(getClientProfile, {
@@ -917,6 +925,49 @@ function ClientDetailsPageView({
         </CardContent>
       </Card>
 
+      {/* Workspace Section - Files and Action Items */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Workspace
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          {/* Workspace Files Section */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {t("workspace.files")}
+            </h3>
+            <WorkspaceFileList
+              coachId={clientProfile?.coachId || ""}
+              clientId={clientId}
+              isCoachView={true}
+              onUploadClick={() => setIsFileUploadOpen(true)}
+              key={workspaceRefreshKey}
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t pt-8" />
+
+          {/* Action Items Section */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              {t("workspace.actionItems")}
+            </h3>
+            <ActionItemList
+              coachId={clientProfile?.coachId || ""}
+              clientId={clientId}
+              isCoachView={true}
+              key={workspaceRefreshKey}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Session Dialog Modal */}
       <Dialog open={isSessionDialogOpen} onOpenChange={setIsSessionDialogOpen}>
         <DialogContent className="max-w-2xl">
@@ -1209,6 +1260,17 @@ function ClientDetailsPageView({
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Workspace File Upload Dialog */}
+      <WorkspaceFileUpload
+        coachId={clientProfile?.coachId || ""}
+        clientId={clientId}
+        isOpen={isFileUploadOpen}
+        onOpenChange={setIsFileUploadOpen}
+        onUploadComplete={() => {
+          setWorkspaceRefreshKey((key) => key + 1);
+        }}
+      />
     </div>
   );
 }

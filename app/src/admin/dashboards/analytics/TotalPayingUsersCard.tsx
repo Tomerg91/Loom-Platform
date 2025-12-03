@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { type DailyStatsProps } from "../../../analytics/stats";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
-import { formatNumber } from "@src/shared/format";
+import { formatNumber } from "../../../shared/format";
 
 const TotalPayingUsersCard = ({ dailyStats, isLoading }: DailyStatsProps) => {
   const isDeltaPositive = useMemo(() => {

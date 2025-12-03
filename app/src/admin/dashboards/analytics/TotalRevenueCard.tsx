@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { type DailyStatsProps } from "../../../analytics/stats";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
-import { formatCurrency, formatPercentage } from "@src/shared/format";
+import { formatCurrency, formatPercentage } from "../../../shared/format";
 
 const TotalRevenueCard = ({
   dailyStats,

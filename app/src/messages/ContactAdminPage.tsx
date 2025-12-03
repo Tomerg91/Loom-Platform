@@ -7,11 +7,11 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@src/components/ui/card";
-import { Textarea } from "@src/components/ui/textarea";
-import { Label } from "@src/components/ui/label";
-import { Button } from "@src/components/ui/button";
-import { useToast } from "@src/hooks/use-toast";
+} from "../components/ui/card";
+import { Textarea } from "../components/ui/textarea";
+import { Label } from "../components/ui/label";
+import { Button } from "../components/ui/button";
+import { useToast } from "../hooks/use-toast";
 
 export default function ContactAdminPage({ user }: { user: User }) {
   const [message, setMessage] = useState("");

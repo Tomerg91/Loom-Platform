@@ -39,7 +39,7 @@ import { Textarea } from "../components/ui/textarea";
 import { toast } from "../hooks/use-toast";
 import { uploadFileWithProgress } from "../file-upload/fileUploading";
 import { validateResourceFile } from "../resources/validation";
-import { formatRelativeTime } from "@src/shared/date";
+import { formatRelativeTime } from "../shared/date";
 
 export default function CoachResourcesPage({ user }: { user: User }) {
   const { t } = useTranslation();

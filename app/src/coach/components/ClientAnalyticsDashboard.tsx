@@ -24,7 +24,7 @@ import { IntensityTrendChart } from "./charts/IntensityTrendChart";
 import {
   exportAnalyticsAsCSV,
   type ClientAnalyticsResult,
-} from "@src/utils/csv/exportAnalytics";
+} from "../../utils/csv/exportAnalytics";
 
 interface ClientAnalyticsDashboardProps {
   clientId: string;

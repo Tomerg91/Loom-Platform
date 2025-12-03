@@ -3,7 +3,7 @@ import type {
   BodyZoneStats,
   SensationStats,
   IntensityTrendPoint,
-} from "@src/somatic-logs/analytics";
+} from "../../somatic-logs/analytics";
 
 export interface ClientAnalyticsResult {
   topBodyZones: BodyZoneStats[];

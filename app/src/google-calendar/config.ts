@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { JWT } from "google-auth-library";
-import { requireNodeEnvVar } from "@src/server/utils";
+import { requireNodeEnvVar } from "../server/utils";
 
 let serviceAccountAuth: JWT | null = null;
 

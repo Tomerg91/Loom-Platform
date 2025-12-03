@@ -40,7 +40,7 @@ import {
   X,
 } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
-import { formatRelativeTime } from "@src/shared/date";
+import { formatRelativeTime } from "../shared/date";
 import UpcomingSessions from "./components/UpcomingSessions";
 import OnboardingModal from "../components/OnboardingModal";
 import AddOfflineClientDialog from "./components/AddOfflineClientDialog";

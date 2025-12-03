@@ -9,21 +9,21 @@ import {
   useAction,
   useQuery,
 } from "wasp/client/operations";
-import type { ContactMessageWithUser } from "@src/messages/operations";
-import { Badge } from "@src/components/ui/badge";
-import { Button } from "@src/components/ui/button";
+import type { ContactMessageWithUser } from "../../../messages/operations";
+import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@src/components/ui/card";
-import { Separator } from "@src/components/ui/separator";
-import { cn } from "@src/lib/utils";
+} from "../../../components/ui/card";
+import { Separator } from "../../../components/ui/separator";
+import { cn } from "../../../lib/utils";
 import DefaultLayout from "../../layout/DefaultLayout";
 import Breadcrumb from "../../layout/Breadcrumb";
 import LoadingSpinner from "../../layout/LoadingSpinner";
-import { useToast } from "@src/hooks/use-toast";
+import { useToast } from "../../../hooks/use-toast";
 
 const statusFilters = [
   { id: "all", label: "All" },

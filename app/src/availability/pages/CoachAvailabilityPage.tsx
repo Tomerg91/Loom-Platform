@@ -7,8 +7,8 @@ import {
 } from "wasp/client/operations";
 import type { User } from "wasp/entities";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@src/components/ui/card";
-import { Button } from "@src/components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@src/components/ui/dialog";
+} from "../../components/ui/dialog";
 import { AlertCircle, Plus } from "lucide-react";
 import { CreateAvailabilitySlotForm } from "../components/CreateAvailabilitySlotForm";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";

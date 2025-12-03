@@ -12,8 +12,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@src/components/ui/card";
-import { Button } from "@src/components/ui/button";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 import { Calendar, Clock, MapPin, AlertCircle } from "lucide-react";
 import { toZonedTime, format } from "date-fns-tz";
 import { formatDistanceToNow } from "date-fns";
