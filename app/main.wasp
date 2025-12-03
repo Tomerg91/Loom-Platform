@@ -550,6 +550,26 @@ action deleteGroupPost {
   fn: import { deleteGroupPost } from "@src/group/operations",
   entities: [User, CoachProfile, Group, GroupPost]
 }
+
+action requestMentorStatus {
+  fn: import { requestMentorStatus } from "@src/group/operations",
+  entities: [User, CoachProfile, MentorRequest]
+}
+
+action approveMentorRequest {
+  fn: import { approveMentorRequest } from "@src/group/operations",
+  entities: [User, CoachProfile, MentorRequest]
+}
+
+action rejectMentorRequest {
+  fn: import { rejectMentorRequest } from "@src/group/operations",
+  entities: [User, CoachProfile, MentorRequest]
+}
+
+query getPendingMentorRequests {
+  fn: import { getPendingMentorRequests } from "@src/group/operations",
+  entities: [User, CoachProfile, MentorRequest]
+}
 //#endregion
 
 //#region Analytics
