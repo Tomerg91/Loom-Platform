@@ -33,6 +33,7 @@ function getTranzillaApiSecretForSignature(): string {
  */
 function createTranzillaHmacSignature(data: string): string {
   const secretString = getTranzillaApiSecretForSignature();
+  // lgtm[js/insufficient-password-hash]
   return createHmac("sha256", secretString).update(data).digest("hex");
 }
 
