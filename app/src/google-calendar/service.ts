@@ -1,5 +1,4 @@
 import { getGoogleCalendarClient } from "./config";
-import { HttpError } from "wasp/server";
 
 export class GoogleCalendarService {
   /**

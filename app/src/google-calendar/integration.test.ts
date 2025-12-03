@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
 
 describe("Google Calendar Sync Integration", () => {
   describe("Session creation with calendar sync", () => {

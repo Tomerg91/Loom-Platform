@@ -5,7 +5,6 @@ import type {
 } from "wasp/server/operations";
 import { HttpError } from "wasp/server";
 import { GoogleCalendarService } from "./service";
-import type { UserCalendarConnection } from "wasp/entities";
 
 /**
  * Connect user's Google Calendar

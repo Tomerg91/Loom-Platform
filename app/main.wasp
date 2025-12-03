@@ -531,6 +531,11 @@ action updateNotificationPreferences {
   entities: [User, NotificationPreferences]
 }
 
+query getUnreadNotificationCount {
+  fn: import { getUnreadNotificationCount } from "@src/notifications/operations",
+  entities: [User, Notification]
+}
+
 action connectGoogleCalendar {
   fn: import { connectGoogleCalendar } from "@src/google-calendar/operations",
   entities: [User, UserCalendarConnection]
