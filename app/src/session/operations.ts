@@ -9,8 +9,6 @@ import type {
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
-import { addDays, setHours, setMinutes, format } from "date-fns";
-import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
   notificationEmitter,
   NotificationEventType,
@@ -130,34 +128,6 @@ export type SessionResponsePublic = {
 // ============================================
 // TIMEZONE UTILITIES
 // ============================================
-function calculateNextSessionDate(
-  scheduleDay: number,
-  scheduleTime: string,
-  scheduleTimezone: string,
-  startDate: Date = new Date(),
-): Date {
-  // Parse time (format: "14:00")
-  const [hours, minutes] = scheduleTime.split(":").map(Number);
-
-  // Get today's date in the user's timezone
-  const zonedNow = toZonedTime(startDate, scheduleTimezone);
-  const todayDayOfWeek = zonedNow.getDay();
-
-  // Calculate days until the target day
-  let daysUntil = scheduleDay - todayDayOfWeek;
-  if (daysUntil <= 0) {
-    daysUntil += 7;
-  }
-
-  // Create the next session date in the user's timezone
-  let nextDate = new Date(zonedNow);
-  nextDate.setDate(nextDate.getDate() + daysUntil);
-  nextDate.setHours(hours, minutes, 0, 0);
-
-  // Convert back to UTC
-  const utcDate = fromZonedTime(nextDate, scheduleTimezone);
-  return utcDate;
-}
 
 // ============================================
 // TEXT SANITIZATION HELPERS
