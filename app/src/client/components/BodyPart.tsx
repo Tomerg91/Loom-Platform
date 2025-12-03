@@ -101,15 +101,15 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         {/* 1. VOLUMETRIC HEAT LAYER (Masked) */}
         <g clipPath={`url(#${maskId})`}>
           <motion.circle
-          cx={center.x}
-          cy={center.y}
-          r={center.r}
-          fill={`url(#${gradientId})`}
-          initial="idle"
-          animate={isSelected ? "active" : isHovered ? "hover" : "idle"}
-          variants={orbVariants}
-          transition={isSelected ? pulseTransition : undefined}
-        />
+            cx={center.x}
+            cy={center.y}
+            r={center.r}
+            fill={`url(#${gradientId})`}
+            initial="idle"
+            animate={isSelected ? "active" : isHovered ? "hover" : "idle"}
+            variants={orbVariants}
+            transition={isSelected ? pulseTransition : undefined}
+          />
 
           {/* Secondary "Core" for extra depth when active */}
           {isSelected && (
