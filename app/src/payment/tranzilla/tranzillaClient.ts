@@ -10,7 +10,7 @@ export function getTranzillaTerminalName(): string {
   return requireNodeEnvVar("TRANZILLA_TERMINAL_NAME");
 }
 
-export function getTranzillaApiPassword(): string {
+export function getTranzillaApiSecret(): string {
   return requireNodeEnvVar("TRANZILLA_API_PASSWORD");
 }
 
@@ -78,7 +78,7 @@ export function validateTranzillaSignature(
   body: Record<string, any>,
 ): boolean {
   try {
-    const apiPassword = getTranzillaApiPassword();
+    const apiSecret = getTranzillaApiSecret();
 
     // Extract authentication headers
     const appKey = headers["x-tranzila-api-app-key"] as string;
@@ -124,9 +124,9 @@ export function validateTranzillaSignature(
     }
 
     // Calculate expected signature: HMAC-SHA256(app_key + secret + request_time + nonce)
-    const dataToSign = `${appKey}${apiPassword}${requestTime}${nonce}`;
+    const dataToSign = `${appKey}${apiSecret}${requestTime}${nonce}`;
     const expectedSignature = crypto
-      .createHmac("sha256", apiPassword)
+      .createHmac("sha256", apiSecret)
       .update(dataToSign)
       .digest("hex");
 
@@ -190,16 +190,16 @@ export function getTranzillaErrorMessage(response: string): string {
  * - X-tranzila-api-access-token: HMAC-SHA256(app_key + secret + request_time + nonce)
  */
 export function generateTranzillaAuthHeaders(appKey: string): Record<string, string> {
-  const apiPassword = getTranzillaApiPassword();
+  const apiSecret = getTranzillaApiSecret();
   const requestTime = Date.now().toString();
 
   // Generate 40-byte random nonce (80 hex characters)
   const nonce = crypto.randomBytes(40).toString("hex");
 
   // Calculate HMAC-SHA256 signature
-  const dataToSign = `${appKey}${apiPassword}${requestTime}${nonce}`;
+  const dataToSign = `${appKey}${apiSecret}${requestTime}${nonce}`;
   const accessToken = crypto
-    .createHmac("sha256", apiPassword)
+    .createHmac("sha256", apiSecret)
     .update(dataToSign)
     .digest("hex");
 
