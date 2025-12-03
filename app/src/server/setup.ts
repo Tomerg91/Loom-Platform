@@ -10,7 +10,11 @@ export const setupServer = async (app: Application) => {
   // Get Plausible configuration from environment (optional)
   const plausibleSiteId = process.env.PLAUSIBLE_SITE_ID;
   const plausibleBaseUrl =
-    process.env.PLAUSIBLE_BASE_URL || "https://plausible.io";
+    process.env.PLAUSIBLE_BASE_URL || "https://plausible.io/api";
+  const plausibleBaseOrigin =
+    plausibleSiteId && plausibleBaseUrl
+      ? new URL(plausibleBaseUrl).origin
+      : null;
 
   // Build Content Security Policy directives
   const cspDirectives = {
@@ -23,7 +27,7 @@ export const setupServer = async (app: Application) => {
       "'unsafe-inline'", // Required for Wasp's inline scripts - consider using nonces in production
       "https://www.googletagmanager.com",
       "https://www.google-analytics.com",
-      ...(plausibleSiteId ? ["https://plausible.io"] : []),
+      ...(plausibleBaseOrigin ? [plausibleBaseOrigin] : []),
     ],
 
     // Styles: allow self and inline styles (required for React/Tailwind)
@@ -46,7 +50,7 @@ export const setupServer = async (app: Application) => {
       "'self'",
       "https://www.google-analytics.com",
       "https://analytics.google.com",
-      ...(plausibleSiteId ? [plausibleBaseUrl] : []),
+      ...(plausibleBaseOrigin ? [plausibleBaseOrigin] : []),
       // Allow S3 bucket connections for file downloads
       `https://${process.env.AWS_S3_FILES_BUCKET || "*"}.s3.${
         process.env.AWS_S3_REGION || "*"
