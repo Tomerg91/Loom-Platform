@@ -12,11 +12,6 @@ export const setupServer = async (app: Application) => {
   const plausibleSiteId = process.env.PLAUSIBLE_SITE_ID;
   const plausibleBaseUrl =
     process.env.PLAUSIBLE_BASE_URL || "https://plausible.io/api";
-  const plausibleBaseOrigin =
-    plausibleSiteId && plausibleBaseUrl
-      ? new URL(plausibleBaseUrl).origin
-      : null;
-
   const awsS3Bucket = process.env.AWS_S3_FILES_BUCKET;
   const awsS3Region = process.env.AWS_S3_REGION;
   const stripeConfigured = Boolean(process.env.STRIPE_API_KEY);
@@ -54,12 +49,7 @@ export const setupServer = async (app: Application) => {
         `'nonce-${cspNonce}'`,
         "https://fonts.googleapis.com",
       ],
-      "img-src": [
-        "'self'",
-        "data:",
-        ...analyticsDomains,
-        ...s3Origins,
-      ],
+      "img-src": ["'self'", "data:", ...analyticsDomains, ...s3Origins],
       "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
       "connect-src": [
         "'self'",
@@ -68,9 +58,7 @@ export const setupServer = async (app: Application) => {
         "https://www.googleapis.com",
         ...s3Origins,
         ...(stripeConfigured ? ["https://api.stripe.com"] : []),
-        ...(lemonSqueezyConfigured
-          ? ["https://api.lemonsqueezy.com"]
-          : []),
+        ...(lemonSqueezyConfigured ? ["https://api.lemonsqueezy.com"] : []),
       ],
       "frame-src": [
         "'self'",
@@ -81,9 +69,7 @@ export const setupServer = async (app: Application) => {
       "form-action": [
         "'self'",
         ...(stripeConfigured ? ["https://checkout.stripe.com"] : []),
-        ...(lemonSqueezyConfigured
-          ? ["https://pay.lemonsqueezy.com"]
-          : []),
+        ...(lemonSqueezyConfigured ? ["https://pay.lemonsqueezy.com"] : []),
       ],
       "upgrade-insecure-requests": [],
     } as const;

@@ -406,7 +406,10 @@ export const bookAvailabilitySlot: OperationType<
 
         if (
           currentSlot.status !== "OPEN" &&
-          !(currentSlot.status === "HELD" && currentSlot.clientId === clientProfile.id)
+          !(
+            currentSlot.status === "HELD" &&
+            currentSlot.clientId === clientProfile.id
+          )
         ) {
           throw new HttpError(400, "Slot is no longer available for booking");
         }

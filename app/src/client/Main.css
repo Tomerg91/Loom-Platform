@@ -445,11 +445,7 @@
 }
 
 .somatic-body-map-surface {
-  background: radial-gradient(
-    circle at 50% 40%,
-    #ffffff 0%,
-    #fdfbf7 100%
-  );
+  background: radial-gradient(circle at 50% 40%, #ffffff 0%, #fdfbf7 100%);
 }
 
 @layer base {

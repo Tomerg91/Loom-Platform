@@ -107,8 +107,7 @@ const Celebration: React.FC<{ show: boolean }> = ({ show }) => {
   if (!show) return null;
 
   const celebrationPieces = Array.from({ length: 12 }, (_, index) => ({
-    positionClass:
-      CELEBRATION_POSITIONS[index % CELEBRATION_POSITIONS.length],
+    positionClass: CELEBRATION_POSITIONS[index % CELEBRATION_POSITIONS.length],
     durationClass: CELEBRATION_DURATIONS[index % CELEBRATION_DURATIONS.length],
     symbol: CELEBRATION_SYMBOLS[index % CELEBRATION_SYMBOLS.length],
   }));
