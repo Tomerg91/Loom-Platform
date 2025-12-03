@@ -2,7 +2,6 @@ import type { OperationType } from "wasp/server/operations";
 import { HttpError } from "wasp/server";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
-import { toZonedTime } from "date-fns-tz";
 
 // ============================================
 // ZOD VALIDATION SCHEMAS
@@ -73,7 +72,7 @@ export const createAvailabilitySlot: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     createAvailabilitySlotSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -112,10 +111,7 @@ export const createAvailabilitySlot: OperationType<
       coachId: coachProfile.id,
       deletedAt: null,
       status: "OPEN",
-      AND: [
-        { startTime: { lt: end } },
-        { endTime: { gt: start } },
-      ],
+      AND: [{ startTime: { lt: end } }, { endTime: { gt: start } }],
     },
   });
 
@@ -146,7 +142,7 @@ export const getCoachAvailability: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     getCoachAvailabilitySchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -173,15 +169,15 @@ export const getCoachAvailability: OperationType<
     const start = new Date(args.startDate);
     const end = new Date(args.endDate);
 
-    where.AND = [
-      { startTime: { gte: start } },
-      { endTime: { lte: end } },
-    ];
+    where.AND = [{ startTime: { gte: start } }, { endTime: { lte: end } }];
   }
 
   // If user is coach owner, show all statuses
   // If user is client, show only OPEN slots
-  if (context.user.role === "COACH" && context.user.id === coachProfile.userId) {
+  if (
+    context.user.role === "COACH" &&
+    context.user.id === coachProfile.userId
+  ) {
     // Coach sees all their slots
   } else if (context.user.role === "CLIENT") {
     // Clients only see OPEN slots
@@ -206,7 +202,7 @@ export const updateAvailabilitySlot: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     updateAvailabilitySlotSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -239,7 +235,7 @@ export const updateAvailabilitySlot: OperationType<
   if (slot.status !== "OPEN") {
     throw new HttpError(
       400,
-      "Cannot update a slot that has been held or booked"
+      "Cannot update a slot that has been held or booked",
     );
   }
 
@@ -259,10 +255,7 @@ export const updateAvailabilitySlot: OperationType<
         coachId: coachProfile.id,
         deletedAt: null,
         status: "OPEN",
-        AND: [
-          { startTime: { lt: end } },
-          { endTime: { gt: start } },
-        ],
+        AND: [{ startTime: { lt: end } }, { endTime: { gt: start } }],
       },
     });
 
@@ -291,7 +284,7 @@ export const deleteAvailabilitySlot: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     deleteAvailabilitySlotSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -343,7 +336,7 @@ export const bookAvailabilitySlot: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     bookAvailabilitySlotSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -393,46 +386,48 @@ export const bookAvailabilitySlot: OperationType<
   // Book the slot and create session in atomic transaction
   // This prevents race conditions where two clients could book the same slot
   try {
-    const result = await (context.entities as any).$transaction(async (tx: any) => {
-      // Re-fetch slot within transaction to prevent double-booking
-      const currentSlot = await tx.AvailabilitySlot.findUnique({
-        where: { id: args.slotId },
-      });
+    const result = await (context.entities as any).$transaction(
+      async (tx: any) => {
+        // Re-fetch slot within transaction to prevent double-booking
+        const currentSlot = await tx.AvailabilitySlot.findUnique({
+          where: { id: args.slotId },
+        });
 
-      // Double-check slot is still available
-      if (!currentSlot || currentSlot.status !== "OPEN") {
-        throw new HttpError(400, "Slot is no longer available for booking");
-      }
+        // Double-check slot is still available
+        if (!currentSlot || currentSlot.status !== "OPEN") {
+          throw new HttpError(400, "Slot is no longer available for booking");
+        }
 
-      // Update slot atomically
-      const bookedSlot = await tx.AvailabilitySlot.update({
-        where: { id: args.slotId },
-        data: {
-          status: "BOOKED",
-          clientId: clientProfile.id,
-        },
-      });
+        // Update slot atomically
+        const bookedSlot = await tx.AvailabilitySlot.update({
+          where: { id: args.slotId },
+          data: {
+            status: "BOOKED",
+            clientId: clientProfile.id,
+          },
+        });
 
-      // Calculate session number
-      const previousSessions = await tx.CoachSession.count({
-        where: {
-          clientId: clientProfile.id,
-          deletedAt: null,
-        },
-      });
+        // Calculate session number
+        const previousSessions = await tx.CoachSession.count({
+          where: {
+            clientId: clientProfile.id,
+            deletedAt: null,
+          },
+        });
 
-      // Create session in same transaction
-      await tx.CoachSession.create({
-        data: {
-          sessionDate: bookedSlot.startTime,
-          sessionNumber: previousSessions + 1,
-          coachId: coach.id,
-          clientId: clientProfile.id,
-        },
-      });
+        // Create session in same transaction
+        await tx.CoachSession.create({
+          data: {
+            sessionDate: bookedSlot.startTime,
+            sessionNumber: previousSessions + 1,
+            coachId: coach.id,
+            clientId: clientProfile.id,
+          },
+        });
 
-      return bookedSlot;
-    });
+        return bookedSlot;
+      },
+    );
 
     return result;
   } catch (error) {
@@ -454,7 +449,7 @@ export const holdAvailabilitySlot: OperationType<
 > = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(
     holdAvailabilitySlotSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -506,50 +501,49 @@ export const holdAvailabilitySlot: OperationType<
  * Releases a held availability slot (HELD → OPEN)
  * Can be triggered by client or by cron job for expired holds
  */
-export const releaseHeldSlot: OperationType<ReleaseHeldSlotInput, any> =
-  async (rawArgs: any, context: any) => {
-    const args = ensureArgsSchemaOrThrowHttpError(
-      releaseHeldSlotSchema,
-      rawArgs
-    );
+export const releaseHeldSlot: OperationType<ReleaseHeldSlotInput, any> = async (
+  rawArgs: any,
+  context: any,
+) => {
+  const args = ensureArgsSchemaOrThrowHttpError(releaseHeldSlotSchema, rawArgs);
 
-    if (!context.user) {
-      throw new HttpError(401, "Unauthorized");
-    }
+  if (!context.user) {
+    throw new HttpError(401, "Unauthorized");
+  }
 
-    // Get the slot
-    const slot = await context.entities.AvailabilitySlot.findUnique({
-      where: { id: args.slotId },
+  // Get the slot
+  const slot = await context.entities.AvailabilitySlot.findUnique({
+    where: { id: args.slotId },
+  });
+
+  if (!slot) {
+    throw new HttpError(404, "Availability slot not found");
+  }
+
+  if (slot.status !== "HELD") {
+    throw new HttpError(400, "Slot is not currently held");
+  }
+
+  // If client, verify they own the hold
+  if (context.user.role === "CLIENT") {
+    const clientProfile = await context.entities.ClientProfile.findUnique({
+      where: { userId: context.user.id },
     });
 
-    if (!slot) {
-      throw new HttpError(404, "Availability slot not found");
+    if (!clientProfile || clientProfile.id !== slot.clientId) {
+      throw new HttpError(403, "You cannot release this hold");
     }
+  } else if (context.user.role !== "ADMIN") {
+    // Only admin and client can release
+    throw new HttpError(403, "Cannot release this hold");
+  }
 
-    if (slot.status !== "HELD") {
-      throw new HttpError(400, "Slot is not currently held");
-    }
-
-    // If client, verify they own the hold
-    if (context.user.role === "CLIENT") {
-      const clientProfile = await context.entities.ClientProfile.findUnique({
-        where: { userId: context.user.id },
-      });
-
-      if (!clientProfile || clientProfile.id !== slot.clientId) {
-        throw new HttpError(403, "You cannot release this hold");
-      }
-    } else if (context.user.role !== "ADMIN") {
-      // Only admin and client can release
-      throw new HttpError(403, "Cannot release this hold");
-    }
-
-    // Release the hold
-    return context.entities.AvailabilitySlot.update({
-      where: { id: args.slotId },
-      data: {
-        status: "OPEN",
-        clientId: null,
-      },
-    });
-  };
+  // Release the hold
+  return context.entities.AvailabilitySlot.update({
+    where: { id: args.slotId },
+    data: {
+      status: "OPEN",
+      clientId: null,
+    },
+  });
+};

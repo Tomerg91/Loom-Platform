@@ -7,7 +7,7 @@ import {
 } from "wasp/client/operations";
 import type { User } from "wasp/entities";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@src/components/ui/card";
+import { Card, CardContent } from "@src/components/ui/card";
 import { Button } from "@src/components/ui/button";
 import {
   Dialog,
@@ -17,12 +17,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@src/components/ui/dialog";
-import { Badge } from "@src/components/ui/badge";
-import { AlertCircle, Trash2, Plus } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { CreateAvailabilitySlotForm } from "../components/CreateAvailabilitySlotForm";
 import { AvailabilityCalendar } from "../components/AvailabilityCalendar";
 import { AvailabilitySlotsList } from "../components/AvailabilitySlotsList";
-import { cn } from "@src/lib/utils";
 
 interface CoachAvailabilityPageProps {
   user: User;
@@ -39,14 +37,18 @@ export default function CoachAvailabilityPage({
   // The coachProfile should be populated in the user object
   const coachId = (user as any)?.coachProfile?.id || "";
 
-  const { data: slots = [], isLoading, refetch } = useQuery(
+  const {
+    data: slots = [],
+    isLoading,
+    refetch,
+  } = useQuery(
     getCoachAvailability,
     {
       coachId,
     },
     {
       enabled: !!coachId, // Only run query when coachId is available
-    }
+    },
   );
 
   const deleteSlot = useAction(deleteAvailabilitySlot);
@@ -142,7 +144,9 @@ export default function CoachAvailabilityPage({
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600">{t("availability.openSlots")}</p>
+            <p className="text-sm text-gray-600">
+              {t("availability.openSlots")}
+            </p>
             <p className="text-2xl font-bold mt-2">
               {slots.filter((s: any) => s.status === "OPEN").length}
             </p>
@@ -150,7 +154,9 @@ export default function CoachAvailabilityPage({
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600">{t("availability.bookedSlots")}</p>
+            <p className="text-sm text-gray-600">
+              {t("availability.bookedSlots")}
+            </p>
             <p className="text-2xl font-bold mt-2">
               {slots.filter((s: any) => s.status === "BOOKED").length}
             </p>
@@ -158,7 +164,9 @@ export default function CoachAvailabilityPage({
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-gray-600">{t("availability.heldSlots")}</p>
+            <p className="text-sm text-gray-600">
+              {t("availability.heldSlots")}
+            </p>
             <p className="text-2xl font-bold mt-2">
               {slots.filter((s: any) => s.status === "HELD").length}
             </p>
@@ -170,10 +178,7 @@ export default function CoachAvailabilityPage({
       {viewMode === "calendar" ? (
         <AvailabilityCalendar slots={slots} onDeleteSlot={handleDeleteSlot} />
       ) : (
-        <AvailabilitySlotsList
-          slots={slots}
-          onDeleteSlot={handleDeleteSlot}
-        />
+        <AvailabilitySlotsList slots={slots} onDeleteSlot={handleDeleteSlot} />
       )}
     </div>
   );

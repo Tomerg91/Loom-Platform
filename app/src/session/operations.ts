@@ -111,8 +111,8 @@ export type SessionResponse = {
   sessionDate: Date;
   sessionNumber?: number | null;
   topic?: string | null;
-  privateNotes: string | null;
-  sharedSummary: string | null;
+  privateNotes: string | null | undefined;
+  sharedSummary: string | null | undefined;
 };
 
 export type SessionResponsePublic = {
@@ -120,7 +120,7 @@ export type SessionResponsePublic = {
   sessionDate: Date;
   sessionNumber?: number | null;
   topic?: string | null;
-  sharedSummary: string | null;
+  sharedSummary: string | null | undefined;
   somaticAnchor: string | null;
   resources: { id: string; name: string; type: string; s3Key: string }[];
 };

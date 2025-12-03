@@ -7,9 +7,13 @@ import {
 } from "wasp/client/operations";
 import type { User } from "wasp/entities";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@src/components/ui/card";
 import { Button } from "@src/components/ui/button";
-import { Badge } from "@src/components/ui/badge";
 import { Calendar, Clock, MapPin, AlertCircle } from "lucide-react";
 import { toZonedTime, format } from "date-fns-tz";
 import { formatDistanceToNow } from "date-fns";
@@ -26,7 +30,11 @@ export default function ClientBookingPage({ user }: ClientBookingPageProps) {
   const coachId = (user as any)?.clientProfile?.coachId || "";
 
   // Fetch availability for the client's coach
-  const { data: slots = [], isLoading, error } = useQuery(
+  const {
+    data: slots = [],
+    isLoading,
+    error,
+  } = useQuery(
     getCoachAvailability,
     {
       coachId,
@@ -35,7 +43,7 @@ export default function ClientBookingPage({ user }: ClientBookingPageProps) {
     },
     {
       enabled: !!coachId, // Only run query when coachId is available
-    }
+    },
   );
 
   const bookSlot = useAction(bookAvailabilitySlot);
@@ -123,7 +131,9 @@ export default function ClientBookingPage({ user }: ClientBookingPageProps) {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">{t("availability.noAvailableSlots")}</p>
+              <p className="text-gray-600">
+                {t("availability.noAvailableSlots")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -152,16 +162,13 @@ export default function ClientBookingPage({ user }: ClientBookingPageProps) {
                     <Clock className="w-4 h-4" />
                     <span>
                       {format(
-                        toZonedTime(
-                          new Date(slot.startTime),
-                          slot.timezone
-                        ),
-                        "HH:mm zzzz"
+                        toZonedTime(new Date(slot.startTime), slot.timezone),
+                        "HH:mm zzzz",
                       )}{" "}
                       -{" "}
                       {format(
                         toZonedTime(new Date(slot.endTime), slot.timezone),
-                        "HH:mm"
+                        "HH:mm",
                       )}
                     </span>
                   </div>
@@ -176,7 +183,9 @@ export default function ClientBookingPage({ user }: ClientBookingPageProps) {
                 {/* Notes */}
                 {slot.notes && (
                   <div className="text-sm bg-gray-50 p-3 rounded">
-                    <p className="font-medium text-gray-700">{t("availability.notes")}</p>
+                    <p className="font-medium text-gray-700">
+                      {t("availability.notes")}
+                    </p>
                     <p className="text-gray-600">{slot.notes}</p>
                   </div>
                 )}

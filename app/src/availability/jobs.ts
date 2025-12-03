@@ -1,13 +1,8 @@
-import type { AvailabilitySlot } from "wasp/entities";
-
 /**
  * Releases any HELD availability slots that have been held for more than 15 minutes
  * This job runs every 15 minutes via PgBoss
  */
-export const releaseExpiredHolds = async (
-  _args: void,
-  context: any
-) => {
+export const releaseExpiredHolds = async (_args: void, context: any) => {
   try {
     // Calculate the cutoff time (15 minutes ago)
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
@@ -34,7 +29,7 @@ export const releaseExpiredHolds = async (
       });
 
       console.log(
-        `[Availability Job] Released ${expiredHolds.length} expired holds`
+        `[Availability Job] Released ${expiredHolds.length} expired holds`,
       );
     }
   } catch (error) {

@@ -45,7 +45,7 @@ export function AvailabilitySlotsList({
 
   // Sort by start time
   const sortedSlots = [...slots].sort(
-    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
   );
 
   return (
@@ -57,7 +57,7 @@ export function AvailabilitySlotsList({
             "transition-all",
             slot.status === "BOOKED" && "bg-green-50 border-green-200",
             slot.status === "HELD" && "bg-yellow-50 border-yellow-200",
-            slot.status === "OPEN" && "hover:shadow-md"
+            slot.status === "OPEN" && "hover:shadow-md",
           )}
         >
           <CardContent className="pt-6 flex items-center justify-between gap-4">
@@ -77,12 +77,12 @@ export function AvailabilitySlotsList({
                 <span className="text-sm text-gray-700">
                   {format(
                     toZonedTime(new Date(slot.startTime), slot.timezone),
-                    "HH:mm zzzz"
+                    "HH:mm zzzz",
                   )}{" "}
                   -{" "}
                   {format(
                     toZonedTime(new Date(slot.endTime), slot.timezone),
-                    "HH:mm"
+                    "HH:mm",
                   )}
                 </span>
               </div>
@@ -96,7 +96,9 @@ export function AvailabilitySlotsList({
               {/* Notes */}
               {slot.notes && (
                 <div className="text-sm text-gray-600 bg-white/50 p-2 rounded mt-2">
-                  <span className="font-medium">{t("availability.notes")}: </span>
+                  <span className="font-medium">
+                    {t("availability.notes")}:{" "}
+                  </span>
                   {slot.notes}
                 </div>
               )}

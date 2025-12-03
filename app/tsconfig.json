@@ -36,5 +36,12 @@
     "allowJs": true,
     "outDir": ".wasp/out/user"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "node_modules"
+  ]
 }

@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@src/components/ui/card";
 import { Separator } from "@src/components/ui/separator";
-import { cn } from "@src/shared/utils";
+import { cn } from "@src/lib/utils";
 import DefaultLayout from "../../layout/DefaultLayout";
 import Breadcrumb from "../../layout/Breadcrumb";
 import LoadingSpinner from "../../layout/LoadingSpinner";

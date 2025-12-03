@@ -204,9 +204,7 @@ export function CreateAvailabilitySlotForm({
 
         {/* Submit */}
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting
-            ? t("common.creating")
-            : t("availability.createSlot")}
+          {isSubmitting ? t("common.creating") : t("availability.createSlot")}
         </Button>
       </form>
     </Form>

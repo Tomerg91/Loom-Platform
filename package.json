@@ -1,0 +1,9 @@
+{
+  "name": "loom-platform-monorepo",
+  "private": true,
+  "scripts": {
+    "lint": "npm --prefix app run lint",
+    "format:check": "npm --prefix app run format:check",
+    "typecheck": "npm --prefix app run typecheck"
+  }
+}

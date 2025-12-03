@@ -552,10 +552,13 @@ const resources = {
       },
       availability: {
         title: "Availability Management",
-        description: "Set your available time slots for clients to book sessions",
+        description:
+          "Set your available time slots for clients to book sessions",
         createSlot: "Create Availability Slot",
-        createSlotDescription: "Add a new time slot when you're available for sessions",
-        infoBanner: "Open slots are visible to your clients. Booked slots are reserved, and held slots expire after 15 minutes.",
+        createSlotDescription:
+          "Add a new time slot when you're available for sessions",
+        infoBanner:
+          "Open slots are visible to your clients. Booked slots are reserved, and held slots expire after 15 minutes.",
         calendarView: "Calendar View",
         listView: "List View",
         openSlots: "Open Slots",
@@ -566,11 +569,14 @@ const resources = {
         startTime: "Start Time",
         endTime: "End Time",
         timezone: "Timezone",
-        timezoneDescription: "Select your timezone to ensure correct display to clients",
+        timezoneDescription:
+          "Select your timezone to ensure correct display to clients",
         notes: "Notes (Optional)",
         notesPlaceholder: "e.g., Video call or in-person session",
-        notesDescription: "Add any special instructions or details about this availability slot",
-        confirmDelete: "Are you sure you want to delete this availability slot?",
+        notesDescription:
+          "Add any special instructions or details about this availability slot",
+        confirmDelete:
+          "Are you sure you want to delete this availability slot?",
         bookSession: "Book a Session",
         selectSlot: "View your coach's available time slots and book a session",
         noAvailableSlots: "No available slots at this time",
@@ -578,7 +584,8 @@ const resources = {
         book: "Book",
         holdExpireTime: "This hold will expire in 15 minutes",
         noCoachAssigned: "You don't have a coach assigned yet",
-        contactCoachToBook: "Please contact your coach to get started booking sessions",
+        contactCoachToBook:
+          "Please contact your coach to get started booking sessions",
         statusOpen: "Open",
         statusHeld: "Held",
         statusBooked: "Booked",
@@ -1150,10 +1157,12 @@ const resources = {
       },
       availability: {
         title: "ניהול זמינות",
-        description: "הגדר את משבצות הזמן הזמינות שלך כדי שלקוחות יוכלו להזמין הפעלות",
+        description:
+          "הגדר את משבצות הזמן הזמינות שלך כדי שלקוחות יוכלו להזמין הפעלות",
         createSlot: "צור משבצת זמינות",
         createSlotDescription: "הוסף משבצת זמן חדשה כשאתה פנוי לתקשורות",
-        infoBanner: "משבצות פתוחות גלויות ללקוחות שלך. משבצות מוזמנות שמורות, והמשבצות המוחזקות פוקעות לאחר 15 דקות.",
+        infoBanner:
+          "משבצות פתוחות גלויות ללקוחות שלך. משבצות מוזמנות שמורות, והמשבצות המוחזקות פוקעות לאחר 15 דקות.",
         calendarView: "תצוגת לוח שנה",
         listView: "תצוגת רשימה",
         openSlots: "משבצות פתוחות",
@@ -1164,7 +1173,8 @@ const resources = {
         startTime: "שעת התחלה",
         endTime: "שעת סיום",
         timezone: "אזור זמן",
-        timezoneDescription: "בחר את אזור הזמן שלך כדי לוודא תצוגה נכונה ללקוחות",
+        timezoneDescription:
+          "בחר את אזור הזמן שלך כדי לוודא תצוגה נכונה ללקוחות",
         notes: "הערות (אופציונלי)",
         notesPlaceholder: "למשל, שיחת וידאו או הפעלה פנים אל פנים",
         notesDescription: "הוסף הנחיות או פרטים מיוחדים לגבי משבצת הזמינות הזו",

@@ -3,7 +3,7 @@ import type { User } from "wasp/entities";
 import type { UserRole } from "@prisma/client";
 
 export type OperationContext = {
-  user: User | null | undefined;
+  user?: User | null | undefined;
   entities: Record<string, any>;
 };
 

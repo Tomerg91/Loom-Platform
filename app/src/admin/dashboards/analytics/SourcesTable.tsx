@@ -33,7 +33,7 @@ const SourcesTable = ({
         {sources && sources.length > 0 ? (
           sources.map((source) => (
             <div
-              key={source.id ?? source.name}
+              key={source.name}
               className="border-border grid grid-cols-3 border-b"
             >
               <div className="flex items-center gap-3 p-2.5 xl:p-5">

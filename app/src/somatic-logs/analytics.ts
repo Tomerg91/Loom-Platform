@@ -1,4 +1,4 @@
-import type { Job } from "wasp/server/jobs";
+import type { ComputeSomaticAnalyticsJob } from "wasp/server/jobs";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -170,18 +170,16 @@ export async function computeClientAnalytics(
 // ============================================
 // CRON JOB: Compute analytics for all active clients
 // ============================================
-export const computeAllClientAnalytics: Job<
+export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
   never,
   { success: boolean; message: string }
 > = async (_args, context) => {
-  const prisma = context.entities;
-
   try {
     // Find all clients with activity in the last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const activeClients = await entities.clientProfile.findMany({
+    const activeClients = await context.entities.ClientProfile.findMany({
       where: {
         lastActivityDate: {
           gte: sevenDaysAgo,
@@ -204,7 +202,7 @@ export const computeAllClientAnalytics: Job<
       for (const period of periods) {
         try {
           const analytics = await computeClientAnalytics(
-            prisma,
+            context.entities,
             client.id,
             period,
           );
@@ -212,7 +210,7 @@ export const computeAllClientAnalytics: Job<
           const { startDate, endDate } = getDateRange(period);
 
           // Upsert the analytics record
-          await entities.somaticLogAnalytics.upsert({
+          await context.entities.SomaticLogAnalytics.upsert({
             where: {
               clientId_period: {
                 clientId: client.id,
@@ -225,18 +223,18 @@ export const computeAllClientAnalytics: Job<
               computedAt: new Date(),
               periodStartDate: startDate,
               periodEndDate: endDate,
-              topBodyZones: analytics.topBodyZones,
-              topSensations: analytics.topSensations,
-              intensityTrendOverTime: analytics.intensityTrendOverTime,
+              topBodyZones: analytics.topBodyZones as any,
+              topSensations: analytics.topSensations as any,
+              intensityTrendOverTime: analytics.intensityTrendOverTime as any,
               totalLogsInPeriod: analytics.totalLogsInPeriod,
             },
             update: {
               computedAt: new Date(),
               periodStartDate: startDate,
               periodEndDate: endDate,
-              topBodyZones: analytics.topBodyZones,
-              topSensations: analytics.topSensations,
-              intensityTrendOverTime: analytics.intensityTrendOverTime,
+              topBodyZones: analytics.topBodyZones as any,
+              topSensations: analytics.topSensations as any,
+              intensityTrendOverTime: analytics.intensityTrendOverTime as any,
               totalLogsInPeriod: analytics.totalLogsInPeriod,
             },
           });

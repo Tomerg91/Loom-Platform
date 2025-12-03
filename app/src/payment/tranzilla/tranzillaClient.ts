@@ -70,7 +70,7 @@ export function buildTranzillaCheckoutUrl(params: {
   const terminalName = getTranzillaTerminalName();
   const baseUrl = `https://direct.tranzilla.com/${terminalName}/iframe.php`;
 
-  const apiUrl = `${config.frontendUrl.replace(/\/$/, '')}/api`;
+  const apiUrl = `${config.frontendUrl.replace(/\/$/, "")}/api`;
   const queryParams = new URLSearchParams({
     sum: params.amount.toString(),
     currency: "1", // ILS
