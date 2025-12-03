@@ -1,6 +1,7 @@
 const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY!;
 const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID!;
-const PLAUSIBLE_BASE_URL = process.env.PLAUSIBLE_BASE_URL;
+const PLAUSIBLE_BASE_URL =
+  process.env.PLAUSIBLE_BASE_URL || "https://plausible.io/api";
 
 const headers = {
   "Content-Type": "application/json",

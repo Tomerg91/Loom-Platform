@@ -7,6 +7,8 @@ app OpenSaaS {
 
   head: [
     "<link rel='icon' href='/favicon.ico' />",
+    "<link rel='apple-touch-icon' href='/favicon.ico' />",
+    "<link rel='manifest' href='/site.webmanifest' />",
     "<meta charset='utf-8' />",
     "<meta name='description' content='The all-in-one workspace for Satya Method practitioners. Visualise client sensations, track session history, and manage your practice effortlessly.' />",
     "<meta name='author' content='Loom Platform' />",
@@ -15,18 +17,14 @@ app OpenSaaS {
     "<meta property='og:type' content='website' />",
     "<meta property='og:title' content='Loom - The Somatic Coaching Platform' />",
     "<meta property='og:site_name' content='Loom' />",
-    "<meta property='og:url' content='https://loom-platform.com' />",
+    "<meta property='og:url' content='https://loom-platform.com/' />",
     "<meta property='og:description' content='The all-in-one workspace for Satya Method practitioners. Visualise client sensations, track session history, and manage your practice effortlessly.' />",
     "<meta property='og:image' content='https://loom-platform.com/public-banner.webp' />",
     "<meta name='twitter:image' content='https://loom-platform.com/public-banner.webp' />",
     "<meta name='twitter:image:width' content='800' />",
     "<meta name='twitter:image:height' content='400' />",
     "<meta name='twitter:card' content='summary_large_image' />",
-    // Plausible Analytics - IMPORTANT: Update 'your-domain.com' with your actual domain before deployment
-    // The data-domain attribute should match your site's domain (e.g., 'loom-platform.com')
-    // Remove or comment out these scripts if you're not using Plausible Analytics
-    // "<script defer data-domain='your-domain.com' src='https://plausible.io/js/script.js'></script>",
-    // "<script defer data-domain='your-domain.com' src='https://plausible.io/js/script.local.js'></script>",
+    "<script defer data-domain='loom-platform.com' src='https://plausible.io/js/script.js'></script>",
   ],
 
   // 🔐 Auth out of the box! https://wasp.sh/docs/auth/overview

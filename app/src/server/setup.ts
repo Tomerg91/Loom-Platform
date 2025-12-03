@@ -11,7 +11,11 @@ export const setupServer = async (app: Application) => {
   // Get Plausible configuration from environment (optional)
   const plausibleSiteId = process.env.PLAUSIBLE_SITE_ID;
   const plausibleBaseUrl =
-    process.env.PLAUSIBLE_BASE_URL || "https://plausible.io";
+    process.env.PLAUSIBLE_BASE_URL || "https://plausible.io/api";
+  const plausibleBaseOrigin =
+    plausibleSiteId && plausibleBaseUrl
+      ? new URL(plausibleBaseUrl).origin
+      : null;
 
   const awsS3Bucket = process.env.AWS_S3_FILES_BUCKET;
   const awsS3Region = process.env.AWS_S3_REGION;
