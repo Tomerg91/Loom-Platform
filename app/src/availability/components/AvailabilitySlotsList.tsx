@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@src/components/ui/card";
-import { Button } from "@src/components/ui/button";
-import { Badge } from "@src/components/ui/badge";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
 import { Trash2, Calendar, Clock, MapPin } from "lucide-react";
 import { format, toZonedTime } from "date-fns-tz";
-import { cn } from "@src/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface AvailabilitySlot {
   id: string;

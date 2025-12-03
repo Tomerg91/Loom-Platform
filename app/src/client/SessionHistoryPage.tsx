@@ -24,8 +24,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
-import ActionItemList from "@src/workspace/components/ActionItemList";
-import WorkspaceFileList from "@src/workspace/components/WorkspaceFileList";
+import ActionItemList from "../workspace/components/ActionItemList";
+import WorkspaceFileList from "../workspace/components/WorkspaceFileList";
 
 export default function SessionHistoryPage({ user }: { user: User }) {
   const { t } = useTranslation();

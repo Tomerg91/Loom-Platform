@@ -13,7 +13,7 @@ import {
   notificationEmitter,
   NotificationEventType,
 } from "../notifications/eventEmitter";
-import { GoogleCalendarService } from "@src/google-calendar/service";
+import { GoogleCalendarService } from "../google-calendar/service";
 import { requireCoachOwnsClient } from "../server/rbac";
 import {
   sanitizeSensitiveTextInput,

@@ -7,11 +7,11 @@ import {
   completeActionItem,
   deleteActionItem,
 } from "wasp/client/operations";
-import { Button } from "@src/components/ui/button";
-import { Card, CardContent } from "@src/components/ui/card";
-import { Input } from "@src/components/ui/input";
-import { Checkbox } from "@src/components/ui/checkbox";
-import { Alert, AlertDescription } from "@src/components/ui/alert";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -19,9 +19,9 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "@src/components/ui/dialog";
+} from "../../components/ui/dialog";
 import { Trash2, Plus, Loader2, AlertCircle } from "lucide-react";
-import { formatDate } from "@src/shared/date";
+import { formatDate } from "../../shared/date";
 
 interface ActionItemListProps {
   coachId: string;

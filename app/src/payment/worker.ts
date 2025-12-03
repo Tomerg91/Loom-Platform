@@ -4,9 +4,9 @@ import {
   chargeTranzillaToken,
   getTranzillaPlanPrice,
 } from "./tranzilla/tranzillaClient";
-import { getSubscriptionRenewalSuccessEmailContent } from "@src/notifications/templates/subscriptionRenewalSuccess";
-import { getSubscriptionRenewalFailedEmailContent } from "@src/notifications/templates/subscriptionRenewalFailed";
-import { getSubscriptionCancelledEmailContent } from "@src/notifications/templates/subscriptionCancelled";
+import { getSubscriptionRenewalSuccessEmailContent } from "../notifications/templates/subscriptionRenewalSuccess";
+import { getSubscriptionRenewalFailedEmailContent } from "../notifications/templates/subscriptionRenewalFailed";
+import { getSubscriptionCancelledEmailContent } from "../notifications/templates/subscriptionCancelled";
 import type { PaymentPlanId } from "./plans";
 
 interface SubscriptionRenewalResult {

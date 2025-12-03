@@ -5,7 +5,7 @@ import {
   getWorkspaceUploadUrl,
   createWorkspaceFile,
 } from "wasp/client/operations";
-import { Button } from "@src/components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,8 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "@src/components/ui/dialog";
-import { Alert, AlertDescription } from "@src/components/ui/alert";
+} from "../../components/ui/dialog";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Upload, AlertCircle, Loader2 } from "lucide-react";
 
 interface WorkspaceFileUploadProps {

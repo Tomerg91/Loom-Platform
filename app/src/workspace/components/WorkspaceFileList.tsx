@@ -6,11 +6,11 @@ import {
   getWorkspaceFileDownloadUrl,
   deleteWorkspaceFile,
 } from "wasp/client/operations";
-import { Button } from "@src/components/ui/button";
-import { Card, CardContent } from "@src/components/ui/card";
-import { Alert, AlertDescription } from "@src/components/ui/alert";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Alert, AlertDescription } from "../../components/ui/alert";
 import { AlertCircle, Download, Trash2, Loader2, FileText } from "lucide-react";
-import { formatDate } from "@src/shared/date";
+import { formatDate } from "../../shared/date";
 
 interface WorkspaceFileListProps {
   coachId: string;

@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { toast } from "../hooks/use-toast";
-import { formatRelativeTime } from "@src/shared/date";
+import { formatRelativeTime } from "../shared/date";
 
 export default function ClientResourcesPage() {
   const { t } = useTranslation();

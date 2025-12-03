@@ -9,8 +9,8 @@ import {
   type UpdateContactFormMessageStatus,
 } from "wasp/server/operations";
 import * as z from "zod";
-import { requireAuth } from "@src/server/rbac";
-import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
+import { requireAuth } from "../server/rbac";
+import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 
 const contactMessageFilterSchema = z.object({
   status: z.enum(["all", "unread", "replied"]).default("all"),

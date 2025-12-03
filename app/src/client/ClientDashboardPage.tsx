@@ -27,7 +27,7 @@ import {
   formatClockTime,
   formatDate,
   formatRelativeTime,
-} from "@src/shared/date";
+} from "../shared/date";
 import { Calendar, Zap, BookOpen, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useMemo } from "react";

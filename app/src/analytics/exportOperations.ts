@@ -1,13 +1,13 @@
 import { HttpError as WaspHttpError } from "wasp/server";
 import * as z from "zod";
-import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
+import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 import {
   generateAnalyticsPdf,
   generatePdfFilename,
   bufferToBase64,
-} from "@src/server/pdf/exportPdf";
-import { computeClientAnalytics } from "@src/somatic-logs/analytics";
-import { isAdmin, isCoach, isClient, requireAuth } from "@src/server/rbac";
+} from "../server/pdf/exportPdf";
+import { computeClientAnalytics } from "../somatic-logs/analytics";
+import { isAdmin, isCoach, isClient, requireAuth } from "../server/rbac";
 import type { GenerateClientExportPdf } from "wasp/server/operations";
 
 // ============================================

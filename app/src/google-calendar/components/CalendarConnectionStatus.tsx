@@ -5,7 +5,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@src/components/ui/card";
+} from "../../components/ui/card";
 import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 import { ConnectGoogleCalendarButton } from "./ConnectGoogleCalendarButton";
 import { DisconnectGoogleCalendarButton } from "./DisconnectGoogleCalendarButton";

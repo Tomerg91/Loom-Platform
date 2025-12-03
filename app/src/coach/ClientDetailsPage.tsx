@@ -12,9 +12,9 @@ import {
   deleteSession,
   getClientProfile,
 } from "wasp/client/operations";
-import ActionItemList from "@src/workspace/components/ActionItemList";
-import WorkspaceFileList from "@src/workspace/components/WorkspaceFileList";
-import WorkspaceFileUpload from "@src/workspace/components/WorkspaceFileUpload";
+import ActionItemList from "../workspace/components/ActionItemList";
+import WorkspaceFileList from "../workspace/components/WorkspaceFileList";
+import WorkspaceFileUpload from "../workspace/components/WorkspaceFileUpload";
 import {
   Card,
   CardContent,
@@ -58,7 +58,7 @@ import {
   formatClockTime,
   formatDate,
   formatRelativeTime,
-} from "@src/shared/date";
+} from "../shared/date";
 import type { SessionResponse } from "../session/operations";
 
 type BodyZone =

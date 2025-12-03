@@ -1,7 +1,7 @@
 import type { OperationType } from "wasp/server/operations";
 import { HttpError } from "wasp/server";
 import * as z from "zod";
-import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
+import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
 
 // ============================================
 // ZOD VALIDATION SCHEMAS

@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { cn } from "../../../lib/utils";
-import { formatNumber, formatPercentage } from "@src/shared/format";
+import { formatNumber, formatPercentage } from "../../../shared/format";
 
 type PageViewsStats = {
   totalPageViews: number | undefined;

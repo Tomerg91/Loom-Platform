@@ -4,7 +4,7 @@ import type {
   SensationStats,
   IntensityTrendPoint,
   ClientAnalyticsResult,
-} from "@src/somatic-logs/analytics";
+} from "../../somatic-logs/analytics";
 
 export interface SessionData {
   id: string;
