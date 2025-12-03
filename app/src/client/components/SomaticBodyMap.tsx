@@ -145,12 +145,7 @@ export default function SomaticBodyMap() {
           width="300"
           height="650"
           viewBox="0 0 300 650"
-          className="max-w-full h-auto rounded-2xl overflow-visible"
-          style={{
-            // Subtle background gradient for depth
-            background:
-              "radial-gradient(circle at 50% 40%, #ffffff 0%, #FDFBF7 100%)",
-          }}
+          className="max-w-full h-auto rounded-2xl overflow-visible somatic-body-map-surface"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -297,24 +292,15 @@ export default function SomaticBodyMap() {
         <div className="mt-4 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full shadow-sm"
-                style={{ background: "#10B981" }}
-              ></div>
+              <div className="w-3 h-3 rounded-full shadow-sm bg-emerald-500"></div>
               <span className="text-gray-600 font-medium">Low (Calm)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full shadow-sm"
-                style={{ background: "#FCD34D" }}
-              ></div>
+              <div className="w-3 h-3 rounded-full shadow-sm bg-amber-300"></div>
               <span className="text-gray-600 font-medium">Medium (Active)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full shadow-sm"
-                style={{ background: "#EF4444" }}
-              ></div>
+              <div className="w-3 h-3 rounded-full shadow-sm bg-red-500"></div>
               <span className="text-gray-600 font-medium">High (Intense)</span>
             </div>
           </div>
