@@ -1,4 +1,3 @@
-import { type PrismaClient } from "@prisma/client";
 import express from "express";
 import { type MiddlewareConfigFn } from "wasp/server";
 import { type PaymentsWebhook } from "wasp/server/api";
@@ -47,7 +46,10 @@ export const tranzillaWebhook: PaymentsWebhook = async (
     const body = request.body as Record<string, string>;
 
     if (process.env.NODE_ENV === "development") {
-      console.log("🔔 Tranzilla webhook received:", JSON.stringify(body, null, 2));
+      console.log(
+        "🔔 Tranzilla webhook received:",
+        JSON.stringify(body, null, 2),
+      );
     }
 
     // Extract key fields from Tranzilla response
@@ -57,7 +59,6 @@ export const tranzillaWebhook: PaymentsWebhook = async (
       TranzilaTK,
       sum,
       index: transactionId,
-      ConfirmationCode,
     } = body;
 
     // Validate required fields
@@ -194,7 +195,7 @@ function getPaymentPlanIdByAmount(amount: number): PaymentPlanId {
       if (Math.abs(planPrice - amount) < 0.01) {
         return planId;
       }
-    } catch (error) {
+    } catch {
       // Skip if plan price not configured
       continue;
     }

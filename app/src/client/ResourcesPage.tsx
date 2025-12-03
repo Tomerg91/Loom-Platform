@@ -1,20 +1,32 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { User, Resource } from "wasp/entities";
 import {
   getCoachResources,
   getResourceDownloadUrl,
   useQuery,
 } from "wasp/client/operations";
-import { Download, FileText, Music, Image as ImageIcon, Loader2 } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Music,
+  Image as ImageIcon,
+  Loader2,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { toast } from "../hooks/use-toast";
 import { formatRelativeTime } from "@src/shared/date";
 
-export default function ClientResourcesPage({ user }: { user: User }) {
+export default function ClientResourcesPage() {
   const { t } = useTranslation();
-  const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
+  const [downloadingResourceId, setDownloadingResourceId] = useState<
+    string | null
+  >(null);
 
   const { data: resources, isLoading } = useQuery(getCoachResources);
 
@@ -37,7 +49,9 @@ export default function ClientResourcesPage({ user }: { user: User }) {
     } catch (error) {
       console.error("Error downloading resource:", error);
       const errorMessage =
-        error instanceof Error ? error.message : t("resources.errorDownloading");
+        error instanceof Error
+          ? error.message
+          : t("resources.errorDownloading");
       toast({
         title: t("resources.errorDownloading"),
         description: errorMessage,
@@ -51,7 +65,9 @@ export default function ClientResourcesPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">{t("resources.resources")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("resources.resources")}
+        </h1>
         <p className="text-muted-foreground mt-2">
           {t("resources.accessCoachResources")}
         </p>
@@ -59,7 +75,11 @@ export default function ClientResourcesPage({ user }: { user: User }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("resources.availableResources", { count: resources?.length || 0 })}</CardTitle>
+          <CardTitle>
+            {t("resources.availableResources", {
+              count: resources?.length || 0,
+            })}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (

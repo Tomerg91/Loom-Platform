@@ -7,9 +7,16 @@ import {
   useQuery,
   useAction,
 } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { ChevronDown, ChevronUp, Calendar, Clock, FileText, Loader2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  Clock,
+  FileText,
+  Loader2,
+} from "lucide-react";
 import { format } from "date-fns";
 
 export default function SessionHistoryPage({ user }: { user: User }) {
@@ -20,8 +27,12 @@ export default function SessionHistoryPage({ user }: { user: User }) {
     const zoneKey = `somatic.bodyZones.${zone}`;
     return t(zoneKey, { defaultValue: zone });
   };
-  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
-  const [downloadingResourceId, setDownloadingResourceId] = useState<string | null>(null);
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(
+    null,
+  );
+  const [downloadingResourceId, setDownloadingResourceId] = useState<
+    string | null
+  >(null);
 
   const getDownloadUrl = useAction(getResourceDownloadUrl);
 
@@ -29,7 +40,11 @@ export default function SessionHistoryPage({ user }: { user: User }) {
   // For now, we'll make a query that returns it
   const clientId = (user as any).clientProfile?.id;
 
-  const { data: response, isLoading, error } = useQuery(getSessionsForClient, {
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery(getSessionsForClient, {
     clientId: clientId || "",
   });
 
@@ -54,7 +69,9 @@ export default function SessionHistoryPage({ user }: { user: User }) {
         </h1>
         <Card>
           <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">{t("common.loading")}</p>
+            <p className="text-muted-foreground text-center">
+              {t("common.loading")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -79,7 +96,10 @@ export default function SessionHistoryPage({ user }: { user: User }) {
   const sessions = response?.sessions || [];
   const total = response?.total || 0;
 
-  const handleDownloadResource = async (resourceId: string, resourceName: string) => {
+  const handleDownloadResource = async (
+    resourceId: string,
+    resourceName: string,
+  ) => {
     try {
       setDownloadingResourceId(resourceId);
       const downloadUrl = await getDownloadUrl({ resourceId });
@@ -101,7 +121,9 @@ export default function SessionHistoryPage({ user }: { user: User }) {
   return (
     <div className="mt-10 px-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">{t("session.sessionHistory")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("session.sessionHistory")}
+        </h1>
         <p className="text-muted-foreground mt-2">
           {t("session.totalSessions", { total })}
         </p>
@@ -115,7 +137,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
               className="cursor-pointer hover:shadow-md transition-shadow"
               onClick={() =>
                 setExpandedSessionId(
-                  expandedSessionId === session.id ? null : session.id
+                  expandedSessionId === session.id ? null : session.id,
                 )
               }
             >
@@ -133,10 +155,7 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          {format(
-                            new Date(session.sessionDate),
-                            "MMM d, yyyy"
-                          )}
+                          {format(new Date(session.sessionDate), "MMM d, yyyy")}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="h-4 w-4" />
@@ -161,7 +180,12 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                   {(session as any).somaticAnchor && (
                     <div className="flex items-center gap-2">
                       <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                        🎯 {t("session.anchor", { zone: getBodyZoneLabel((session as any).somaticAnchor) })}
+                        🎯{" "}
+                        {t("session.anchor", {
+                          zone: getBodyZoneLabel(
+                            (session as any).somaticAnchor,
+                          ),
+                        })}
                       </span>
                     </div>
                   )}
@@ -185,48 +209,52 @@ export default function SessionHistoryPage({ user }: { user: User }) {
                   )}
 
                   {/* Attached Resources (Homework) */}
-                  {(session as any).resources && (session as any).resources.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        {t("session.homework")}
-                      </h3>
-                      <div className="space-y-2">
-                        {(session as any).resources.map(
-                          (resource: {
-                            id: string;
-                            name: string;
-                            type: string;
-                          }) => (
-                            <button
-                              key={resource.id}
-                              onClick={() =>
-                                handleDownloadResource(resource.id, resource.name)
-                              }
-                              disabled={downloadingResourceId === resource.id}
-                              className="w-full flex items-center gap-2 p-2 text-left bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors disabled:opacity-50"
-                            >
-                              {downloadingResourceId === resource.id ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                                  <span className="text-sm text-gray-700">
-                                    {t("session.downloading")}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                                  <span className="text-sm text-blue-600 underline">
-                                    📄 {resource.name}
-                                  </span>
-                                </>
-                              )}
-                            </button>
-                          )
-                        )}
+                  {(session as any).resources &&
+                    (session as any).resources.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          {t("session.homework")}
+                        </h3>
+                        <div className="space-y-2">
+                          {(session as any).resources.map(
+                            (resource: {
+                              id: string;
+                              name: string;
+                              type: string;
+                            }) => (
+                              <button
+                                key={resource.id}
+                                onClick={() =>
+                                  handleDownloadResource(
+                                    resource.id,
+                                    resource.name,
+                                  )
+                                }
+                                disabled={downloadingResourceId === resource.id}
+                                className="w-full flex items-center gap-2 p-2 text-left bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors disabled:opacity-50"
+                              >
+                                {downloadingResourceId === resource.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                    <span className="text-sm text-gray-700">
+                                      {t("session.downloading")}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                    <span className="text-sm text-blue-600 underline">
+                                      📄 {resource.name}
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </CardContent>
               )}
             </Card>

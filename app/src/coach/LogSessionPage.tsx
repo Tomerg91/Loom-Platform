@@ -11,7 +11,12 @@ import {
   getCoachResources,
   logSession,
 } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -20,15 +25,6 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
-
-type LogSessionFormState = {
-  sessionDate: string;
-  topic: string;
-  privateNotes: string;
-  sharedSummary: string;
-  somaticAnchor: BodyZone | "";
-  resourceIds: string[];
-};
 
 function LogSessionPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
@@ -57,7 +53,7 @@ function MissingLogSessionClient() {
             <p className="text-sm mb-4">
               {t(
                 "errors.missingClientId.message",
-                "The client ID is missing or invalid. Please select a client from your dashboard."
+                "The client ID is missing or invalid. Please select a client from your dashboard.",
               )}
             </p>
           </AlertDescription>
@@ -74,20 +70,13 @@ function MissingLogSessionClient() {
   );
 }
 
-function LogSessionForm({
-  user: _user,
-  clientId,
-}: {
-  user: User;
-  clientId: string;
-}) {
-  void _user;
+function LogSessionForm({ user, clientId }: { user: User; clientId: string }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
 
-  const [formData, setFormData] = useState<LogSessionFormState>({
+  const [formData, setFormData] = useState({
     sessionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     topic: "",
     privateNotes: "",
@@ -168,10 +157,7 @@ function LogSessionForm({
     setErrors((prev) => ({ ...prev, [fieldName]: error }));
   };
 
-  const handleFieldChange = (
-    fieldName: string,
-    value: string
-  ) => {
+  const handleFieldChange = (fieldName: string, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     if (touched[fieldName as keyof typeof touched]) {
       const error = validateField(fieldName, value);
@@ -188,11 +174,10 @@ function LogSessionForm({
   const {
     data: previousSessions,
     isLoading: isContextLoading,
+    error: contextError,
   } = useQuery(getRecentSessionsForClient, {
     clientId: clientId || "",
   });
-
-  const previousSession = previousSessions?.[0] ?? null;
 
   // Get the logSession action
   const logSessionFn = useAction(logSession);
@@ -212,7 +197,10 @@ function LogSessionForm({
   }, [sessionNumberParam]);
 
   // Get previous session (if any)
-  const previousSession = previousSessions && previousSessions.length > 0 ? previousSessions[0] : null;
+  const previousSession =
+    previousSessions && previousSessions.length > 0
+      ? previousSessions[0]
+      : null;
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = e.target.value;
@@ -277,12 +265,12 @@ function LogSessionForm({
         topic: formData.topic || null,
         privateNotes: formData.privateNotes || null,
         sharedSummary: formData.sharedSummary || null,
-        somaticAnchor: formData.somaticAnchor || null,
+        somaticAnchor: (formData.somaticAnchor || null) as any,
         resourceIds: formData.resourceIds,
       });
 
       setSuccessMessage(
-        t("session.sessionLoggedSuccess", { number: result.sessionNumber })
+        t("session.sessionLoggedSuccess", { number: result.sessionNumber }),
       );
 
       // Reset form
@@ -302,10 +290,8 @@ function LogSessionForm({
       setTimeout(() => {
         navigate(`/coach/client/${clientId}`);
       }, 2000);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to log session";
-      setErrorMessage(message);
+    } catch (error: any) {
+      setErrorMessage(error.message || "Failed to log session");
     } finally {
       setIsSubmitting(false);
     }
@@ -314,10 +300,15 @@ function LogSessionForm({
   return (
     <div className="mt-10 px-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">{t("session.logSession")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          {t("session.logSession")}
+        </h1>
         {sessionNumber && (
-          <p className="text-muted-foreground mt-2">
-            Session #{sessionNumber}
+          <p className="text-muted-foreground mt-2">Session #{sessionNumber}</p>
+        )}
+        {(user.username || (user as any).email) && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Coach: {user.username || (user as any).email}
           </p>
         )}
       </div>
@@ -333,7 +324,11 @@ function LogSessionForm({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isContextLoading ? (
+              {contextError ? (
+                <p className="text-sm text-destructive">
+                  Failed to load previous sessions.
+                </p>
+              ) : isContextLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
                   <p className="text-sm text-muted-foreground">
@@ -348,18 +343,25 @@ function LogSessionForm({
                       {t("session.sessionDate")}
                     </p>
                     <p className="text-sm text-foreground">
-                      {format(new Date(previousSession.sessionDate), "MMM d, yyyy 'at' h:mm a")}
+                      {format(
+                        new Date(previousSession.sessionDate),
+                        "MMM d, yyyy 'at' h:mm a",
+                      )}
                     </p>
                   </div>
 
                   {/* Somatic Anchor */}
-                  {previousSession?.somaticAnchor && (
+                  {(previousSession as any).somaticAnchor && (
                     <div>
                       <p className="text-xs text-muted-foreground font-semibold">
                         {t("session.bodyZoneDiscussed")}
                       </p>
                       <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mt-1">
-                        {t(`somatic.bodyZones.${previousSession.somaticAnchor}`)}
+                        {t(
+                          `somatic.bodyZones.${
+                            (previousSession as any).somaticAnchor
+                          }`,
+                        )}
                       </span>
                     </div>
                   )}
@@ -391,13 +393,17 @@ function LogSessionForm({
         <div>
           <Card className="h-full">
             <CardHeader>
-              <CardTitle className="text-lg">{t("session.sessionDetails")}</CardTitle>
+              <CardTitle className="text-lg">
+                {t("session.sessionDetails")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Session Date */}
                 <div className="space-y-2">
-                  <Label htmlFor="sessionDate">{t("session.sessionDate")}</Label>
+                  <Label htmlFor="sessionDate">
+                    {t("session.sessionDate")}
+                  </Label>
                   <Input
                     type="datetime-local"
                     id="sessionDate"
@@ -417,7 +423,9 @@ function LogSessionForm({
                     <div className="space-y-1 text-xs text-blue-800">
                       <p>
                         {t("session.yourTimezone")}:
-                        <span className="font-semibold ml-1">{getBrowserTimezone()}</span>
+                        <span className="font-semibold ml-1">
+                          {getBrowserTimezone()}
+                        </span>
                       </p>
                       <p className="mt-2 italic text-blue-700">
                         {t("session.timezoneNote")}
@@ -440,7 +448,9 @@ function LogSessionForm({
                   label={t("session.topic")}
                   error={errors.topic}
                   touched={touched.topic}
-                  success={touched.topic && !errors.topic && formData.topic.length > 0}
+                  success={
+                    touched.topic && !errors.topic && formData.topic.length > 0
+                  }
                   hint={t("session.topicHelp")}
                 >
                   <Input
@@ -454,7 +464,9 @@ function LogSessionForm({
                     className={`${
                       touched.topic && errors.topic ? "border-red-500" : ""
                     } ${
-                      touched.topic && !errors.topic && formData.topic ? "border-green-500" : ""
+                      touched.topic && !errors.topic && formData.topic
+                        ? "border-green-500"
+                        : ""
                     }`}
                   />
                 </FormFieldWithValidation>
@@ -468,21 +480,36 @@ function LogSessionForm({
                     id="somaticAnchor"
                     value={formData.somaticAnchor}
                     onChange={(e) =>
-                      setFormData({ ...formData, somaticAnchor: e.target.value })
+                      setFormData({
+                        ...formData,
+                        somaticAnchor: e.target.value,
+                      })
                     }
                     disabled={isSubmitting}
                     className="w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">{t("session.noAnchor")}</option>
                     <option value="HEAD">{t("somatic.bodyZones.HEAD")}</option>
-                    <option value="THROAT">{t("somatic.bodyZones.THROAT")}</option>
-                    <option value="CHEST">{t("somatic.bodyZones.CHEST")}</option>
-                    <option value="SOLAR_PLEXUS">{t("somatic.bodyZones.SOLAR_PLEXUS")}</option>
-                    <option value="BELLY">{t("somatic.bodyZones.BELLY")}</option>
-                    <option value="PELVIS">{t("somatic.bodyZones.PELVIS")}</option>
+                    <option value="THROAT">
+                      {t("somatic.bodyZones.THROAT")}
+                    </option>
+                    <option value="CHEST">
+                      {t("somatic.bodyZones.CHEST")}
+                    </option>
+                    <option value="SOLAR_PLEXUS">
+                      {t("somatic.bodyZones.SOLAR_PLEXUS")}
+                    </option>
+                    <option value="BELLY">
+                      {t("somatic.bodyZones.BELLY")}
+                    </option>
+                    <option value="PELVIS">
+                      {t("somatic.bodyZones.PELVIS")}
+                    </option>
                     <option value="ARMS">{t("somatic.bodyZones.ARMS")}</option>
                     <option value="LEGS">{t("somatic.bodyZones.LEGS")}</option>
-                    <option value="FULL_BODY">{t("somatic.bodyZones.FULL_BODY")}</option>
+                    <option value="FULL_BODY">
+                      {t("somatic.bodyZones.FULL_BODY")}
+                    </option>
                   </select>
                   <p className="text-xs text-muted-foreground">
                     {t("session.bodyZoneHelp")}
@@ -494,21 +521,35 @@ function LogSessionForm({
                   label={t("session.sharedSummary")}
                   error={errors.sharedSummary}
                   touched={touched.sharedSummary}
-                  success={touched.sharedSummary && !errors.sharedSummary && formData.sharedSummary.length > 0}
-                  hint={`${t("session.sharedSummaryHelp")} (${formData.sharedSummary.length}/2000)`}
+                  success={
+                    touched.sharedSummary &&
+                    !errors.sharedSummary &&
+                    formData.sharedSummary.length > 0
+                  }
+                  hint={`${t("session.sharedSummaryHelp")} (${
+                    formData.sharedSummary.length
+                  }/2000)`}
                 >
                   <textarea
                     id="sharedSummary"
                     placeholder={t("session.sharedSummaryPlaceholder")}
                     value={formData.sharedSummary}
-                    onChange={(e) => handleFieldChange("sharedSummary", e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("sharedSummary", e.target.value)
+                    }
                     onBlur={() => handleFieldBlur("sharedSummary")}
                     disabled={isSubmitting}
                     rows={4}
                     className={`w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      touched.sharedSummary && errors.sharedSummary ? "border-red-500" : ""
+                      touched.sharedSummary && errors.sharedSummary
+                        ? "border-red-500"
+                        : ""
                     } ${
-                      touched.sharedSummary && !errors.sharedSummary && formData.sharedSummary ? "border-green-500" : ""
+                      touched.sharedSummary &&
+                      !errors.sharedSummary &&
+                      formData.sharedSummary
+                        ? "border-green-500"
+                        : ""
                     }`}
                   />
                 </FormFieldWithValidation>
@@ -518,21 +559,35 @@ function LogSessionForm({
                   label={t("session.privateNotes")}
                   error={errors.privateNotes}
                   touched={touched.privateNotes}
-                  success={touched.privateNotes && !errors.privateNotes && formData.privateNotes.length > 0}
-                  hint={`${t("session.privateNotesHelp")} (${formData.privateNotes.length}/5000)`}
+                  success={
+                    touched.privateNotes &&
+                    !errors.privateNotes &&
+                    formData.privateNotes.length > 0
+                  }
+                  hint={`${t("session.privateNotesHelp")} (${
+                    formData.privateNotes.length
+                  }/5000)`}
                 >
                   <textarea
                     id="privateNotes"
                     placeholder={t("session.privateNotesPlaceholder")}
                     value={formData.privateNotes}
-                    onChange={(e) => handleFieldChange("privateNotes", e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("privateNotes", e.target.value)
+                    }
                     onBlur={() => handleFieldBlur("privateNotes")}
                     disabled={isSubmitting}
                     rows={3}
                     className={`w-full px-3 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      touched.privateNotes && errors.privateNotes ? "border-red-500" : ""
+                      touched.privateNotes && errors.privateNotes
+                        ? "border-red-500"
+                        : ""
                     } ${
-                      touched.privateNotes && !errors.privateNotes && formData.privateNotes ? "border-green-500" : ""
+                      touched.privateNotes &&
+                      !errors.privateNotes &&
+                      formData.privateNotes
+                        ? "border-green-500"
+                        : ""
                     }`}
                   />
                 </FormFieldWithValidation>
@@ -552,16 +607,15 @@ function LogSessionForm({
                   ) : resourcesData && resourcesData.length > 0 ? (
                     <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
                       {resourcesData.map((resource) => (
-                        <div key={resource.id} className="flex items-start gap-2">
+                        <div
+                          key={resource.id}
+                          className="flex items-start gap-2"
+                        >
                           <input
                             type="checkbox"
                             id={`resource-${resource.id}`}
-                            checked={formData.resourceIds.includes(
-                              resource.id
-                            )}
-                            onChange={() =>
-                              handleResourceToggle(resource.id)
-                            }
+                            checked={formData.resourceIds.includes(resource.id)}
+                            onChange={() => handleResourceToggle(resource.id)}
                             disabled={isSubmitting}
                             className="mt-1"
                           />
@@ -620,7 +674,9 @@ function LogSessionForm({
                     {isSubmitting && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    {isSubmitting ? t("session.saving") : t("session.logSession")}
+                    {isSubmitting
+                      ? t("session.saving")
+                      : t("session.logSession")}
                   </Button>
                   <Button
                     type="button"
@@ -644,11 +700,7 @@ function LogSessionForm({
  * Wrapper component that provides error boundary protection
  * for the LogSessionPage
  */
-export default function LogSessionPage({
-  user,
-}: {
-  user: User;
-}) {
+export default function LogSessionPage({ user }: { user: User }) {
   return (
     <ErrorBoundary>
       <LogSessionPageContent user={user} />

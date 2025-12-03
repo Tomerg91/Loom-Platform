@@ -1,4 +1,4 @@
-import { ApexOptions } from "apexcharts";
+import type { ApexOptions } from "apexcharts";
 import { useEffect, useMemo, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { type DailyStatsProps } from "../../../analytics/stats";
@@ -109,7 +109,7 @@ interface ChartOneState {
   }[];
 }
 
-const RevenueAndProfitChart = ({ weeklyStats, isLoading }: DailyStatsProps) => {
+const RevenueAndProfitChart = ({ weeklyStats }: DailyStatsProps) => {
   const dailyRevenueArray = useMemo(() => {
     if (!!weeklyStats && weeklyStats?.length > 0) {
       const sortedWeeks = weeklyStats?.sort((a, b) => {

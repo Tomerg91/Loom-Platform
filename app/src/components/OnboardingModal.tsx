@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
-import { Progress } from './ui/progress';
-import { CheckCircle2, Circle } from 'lucide-react';
-import type { User } from 'wasp/entities';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Progress } from "./ui/progress";
+import { CheckCircle2, Circle } from "lucide-react";
 
 export interface OnboardingStep {
   id: string;
@@ -30,63 +29,63 @@ export default function OnboardingModal({
 }: OnboardingModalProps) {
   const { t } = useTranslation();
   const [localSteps, setLocalSteps] = useState<Record<string, boolean>>(
-    onboardingSteps || {}
+    onboardingSteps || {},
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getStepsForRole = (): OnboardingStep[] => {
-    if (userRole === 'COACH') {
+    if (userRole === "COACH") {
       return [
         {
-          id: 'invite_client',
-          title: t('onboarding.coachChecklist.step1'),
-          description: t('onboarding.coachChecklist.step1Description'),
-          completed: localSteps['invite_client'] || false,
+          id: "invite_client",
+          title: t("onboarding.coachChecklist.step1"),
+          description: t("onboarding.coachChecklist.step1Description"),
+          completed: localSteps["invite_client"] || false,
         },
         {
-          id: 'learn_body_mapping',
-          title: t('onboarding.coachChecklist.step2'),
-          description: t('onboarding.coachChecklist.step2Description'),
-          completed: localSteps['learn_body_mapping'] || false,
+          id: "learn_body_mapping",
+          title: t("onboarding.coachChecklist.step2"),
+          description: t("onboarding.coachChecklist.step2Description"),
+          completed: localSteps["learn_body_mapping"] || false,
         },
         {
-          id: 'understand_sessions',
-          title: t('onboarding.coachChecklist.step3'),
-          description: t('onboarding.coachChecklist.step3Description'),
-          completed: localSteps['understand_sessions'] || false,
+          id: "understand_sessions",
+          title: t("onboarding.coachChecklist.step3"),
+          description: t("onboarding.coachChecklist.step3Description"),
+          completed: localSteps["understand_sessions"] || false,
         },
         {
-          id: 'discover_resources',
-          title: t('onboarding.coachChecklist.step4'),
-          description: t('onboarding.coachChecklist.step4Description'),
-          completed: localSteps['discover_resources'] || false,
+          id: "discover_resources",
+          title: t("onboarding.coachChecklist.step4"),
+          description: t("onboarding.coachChecklist.step4Description"),
+          completed: localSteps["discover_resources"] || false,
         },
       ];
     } else {
       return [
         {
-          id: 'log_sensation',
-          title: t('onboarding.clientChecklist.step1'),
-          description: t('onboarding.clientChecklist.step1Description'),
-          completed: localSteps['log_sensation'] || false,
+          id: "log_sensation",
+          title: t("onboarding.clientChecklist.step1"),
+          description: t("onboarding.clientChecklist.step1Description"),
+          completed: localSteps["log_sensation"] || false,
         },
         {
-          id: 'explore_body_map',
-          title: t('onboarding.clientChecklist.step2'),
-          description: t('onboarding.clientChecklist.step2Description'),
-          completed: localSteps['explore_body_map'] || false,
+          id: "explore_body_map",
+          title: t("onboarding.clientChecklist.step2"),
+          description: t("onboarding.clientChecklist.step2Description"),
+          completed: localSteps["explore_body_map"] || false,
         },
         {
-          id: 'review_sessions',
-          title: t('onboarding.clientChecklist.step3'),
-          description: t('onboarding.clientChecklist.step3Description'),
-          completed: localSteps['review_sessions'] || false,
+          id: "review_sessions",
+          title: t("onboarding.clientChecklist.step3"),
+          description: t("onboarding.clientChecklist.step3Description"),
+          completed: localSteps["review_sessions"] || false,
         },
         {
-          id: 'access_resources',
-          title: t('onboarding.clientChecklist.step4'),
-          description: t('onboarding.clientChecklist.step4Description'),
-          completed: localSteps['access_resources'] || false,
+          id: "access_resources",
+          title: t("onboarding.clientChecklist.step4"),
+          description: t("onboarding.clientChecklist.step4Description"),
+          completed: localSteps["access_resources"] || false,
         },
       ];
     }
@@ -109,28 +108,31 @@ export default function OnboardingModal({
       await onMarkComplete(localSteps);
       onClose();
     } catch (error) {
-      console.error('Failed to mark onboarding complete:', error);
+      console.error("Failed to mark onboarding complete:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const title = userRole === 'COACH'
-    ? t('onboarding.coachChecklist.title')
-    : t('onboarding.clientChecklist.title');
+  const title =
+    userRole === "COACH"
+      ? t("onboarding.coachChecklist.title")
+      : t("onboarding.clientChecklist.title");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t('onboarding.welcome')}</DialogTitle>
+          <DialogTitle>{t("onboarding.welcome")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Title */}
           <div>
             <h2 className="text-lg font-semibold mb-2">{title}</h2>
-            <p className="text-sm text-muted-foreground">{t('onboarding.getStarted')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("onboarding.getStarted")}
+            </p>
           </div>
 
           {/* Progress Bar */}
@@ -160,7 +162,11 @@ export default function OnboardingModal({
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className={`font-medium ${step.completed ? 'line-through text-muted-foreground' : ''}`}>
+                  <h3
+                    className={`font-medium ${
+                      step.completed ? "line-through text-muted-foreground" : ""
+                    }`}
+                  >
                     {step.title}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -173,18 +179,16 @@ export default function OnboardingModal({
 
           {/* Actions */}
           <div className="flex gap-3 justify-end">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              {t('onboarding.skipForNow')}
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+              {t("onboarding.skipForNow")}
             </Button>
             <Button
               onClick={handleMarkComplete}
               disabled={isSubmitting || completedCount === 0}
             >
-              {isSubmitting ? t('common.loading') : t('onboarding.markComplete')}
+              {isSubmitting
+                ? t("common.loading")
+                : t("onboarding.markComplete")}
             </Button>
           </div>
         </div>

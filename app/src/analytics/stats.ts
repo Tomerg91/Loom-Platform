@@ -1,5 +1,5 @@
 import { listOrders } from "@lemonsqueezy/lemonsqueezy.js";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { type DailyStats } from "wasp/entities";
 import { type DailyStatsJob } from "wasp/server/jobs";
 import { stripeClient } from "../payment/stripe/stripeClient";
@@ -145,7 +145,7 @@ export const calculateDailyStats: DailyStatsJob<never, void> = async (
 
 async function fetchTotalStripeRevenue() {
   let totalRevenue = 0;
-  let params: Stripe.BalanceTransactionListParams = {
+  const params: Stripe.BalanceTransactionListParams = {
     limit: 100,
     // created: {
     //   gte: startTimestamp,

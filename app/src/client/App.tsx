@@ -8,7 +8,6 @@ import "./Main.css";
 import i18nInstance from "./i18n";
 import NavBar from "./components/NavBar/NavBar";
 import {
-  demoNavigationitems,
   marketingNavigationItems,
   getNavigationItemsForUser,
 } from "./components/NavBar/constants";
@@ -68,7 +67,9 @@ export default function App() {
         bodyZone: zone,
         sensation,
         intensity: 5, // Default intensity for landing page saves
-        note: `Saved from landing page on ${new Date(timestamp).toLocaleString()}`,
+        note: `Saved from landing page on ${new Date(
+          timestamp,
+        ).toLocaleString()}`,
         sharedWithCoach: true,
       })
         .then(() => {

@@ -66,9 +66,9 @@ const getConfig = () => {
                   return;
                 }
                 window.dataLayer = window.dataLayer || [];
-                function gtag(..._args: unknown[]) {
-                  (window.dataLayer as Array<any>).push(arguments);
-                }
+                const gtag = (...args: unknown[]) => {
+                  (window.dataLayer as Array<unknown>).push(args);
+                };
                 gtag("js", new Date());
                 gtag("config", GA_ANALYTICS_ID);
 

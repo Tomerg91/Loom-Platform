@@ -1,5 +1,5 @@
-import Stripe from "stripe";
-import { User } from "wasp/entities";
+import type Stripe from "stripe";
+import type { User } from "wasp/entities";
 import { config } from "wasp/server";
 import { stripeClient } from "./stripeClient";
 

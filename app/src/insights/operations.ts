@@ -68,7 +68,7 @@ export const getClientInsights: GetClientInsights<
   // Validate input
   const args = ensureArgsSchemaOrThrowHttpError(
     getClientInsightsSchema,
-    rawArgs
+    rawArgs,
   );
 
   // ============================================
@@ -104,7 +104,7 @@ export const getClientInsights: GetClientInsights<
   if (clientProfile.coachId !== coachProfile.id) {
     throw new HttpError(
       403,
-      "You do not have access to this client's insights"
+      "You do not have access to this client's insights",
     );
   }
 
@@ -201,7 +201,7 @@ export const getClientInsights: GetClientInsights<
       bodyZone: item.bodyZone as BodyZone,
       count: item._count.bodyZone,
       percentage: Math.round((item._count.bodyZone / totalLogs) * 100),
-    })
+    }),
   );
 
   // ============================================

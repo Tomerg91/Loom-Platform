@@ -22,12 +22,15 @@ export function encryptText(value: string | null): string | null {
 
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(ALGORITHM, getKey(), iv);
-  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(value, "utf8"),
+    cipher.final(),
+  ]);
   const authTag = cipher.getAuthTag();
 
-  return `${iv.toString("base64")}:${authTag.toString("base64")}:${encrypted.toString(
+  return `${iv.toString("base64")}:${authTag.toString(
     "base64",
-  )}`;
+  )}:${encrypted.toString("base64")}`;
 }
 
 export function decryptText(value: string | null): string | null {

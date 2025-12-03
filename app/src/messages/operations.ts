@@ -37,7 +37,10 @@ export const getContactMessages: GetContactMessages<
   const adminContext = requireAuth(context, "Only admins can view messages");
 
   if (!adminContext.user.isAdmin) {
-    throw new HttpError(403, "Only admins are allowed to perform this operation");
+    throw new HttpError(
+      403,
+      "Only admins are allowed to perform this operation",
+    );
   }
 
   const { status } = ensureArgsSchemaOrThrowHttpError(
@@ -70,10 +73,16 @@ export const getContactMessageById: GetContactMessageById<
   z.infer<typeof contactMessageIdSchema>,
   ContactMessageWithUser
 > = async (rawArgs, context) => {
-  const adminContext = requireAuth(context, "Only admins can view message details");
+  const adminContext = requireAuth(
+    context,
+    "Only admins can view message details",
+  );
 
   if (!adminContext.user.isAdmin) {
-    throw new HttpError(403, "Only admins are allowed to perform this operation");
+    throw new HttpError(
+      403,
+      "Only admins are allowed to perform this operation",
+    );
   }
 
   const { id } = ensureArgsSchemaOrThrowHttpError(
@@ -149,7 +158,10 @@ export const updateContactFormMessageStatus: UpdateContactFormMessageStatus<
   );
 
   if (!adminContext.user.isAdmin) {
-    throw new HttpError(403, "Only admins are allowed to perform this operation");
+    throw new HttpError(
+      403,
+      "Only admins are allowed to perform this operation",
+    );
   }
 
   const { id, isRead, markReplied } = ensureArgsSchemaOrThrowHttpError(

@@ -17,7 +17,7 @@ import { notificationEmitter, NotificationEventType } from "./eventEmitter";
  */
 export async function checkUpcomingSessionsJob(
   args: Record<string, never>,
-  context: { entities: PrismaClient }
+  context: { entities: PrismaClient },
 ): Promise<void> {
   try {
     console.log("[Job] Starting session reminders job...");
@@ -45,7 +45,7 @@ export async function checkUpcomingSessionsJob(
       });
 
     console.log(
-      `[Job] Found ${clientsWithUpcomingSessions.length} clients with upcoming sessions`
+      `[Job] Found ${clientsWithUpcomingSessions.length} clients with upcoming sessions`,
     );
 
     // Emit reminder event for each client
@@ -70,16 +70,14 @@ export async function checkUpcomingSessionsJob(
               clientId: clientProfile.id,
               sessionDate: clientProfile.nextSessionDate,
               coachName,
-            }
+            },
           );
 
-          console.log(
-            `[Job] Reminder emitted for client ${clientProfile.id}`
-          );
+          console.log(`[Job] Reminder emitted for client ${clientProfile.id}`);
         } catch (error) {
           console.error(
             `[Job] Error emitting reminder for client ${clientProfile.id}:`,
-            error
+            error,
           );
         }
       }

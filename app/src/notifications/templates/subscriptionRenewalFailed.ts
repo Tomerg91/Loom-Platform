@@ -57,7 +57,9 @@ export function getSubscriptionRenewalFailedEmailContent(
       <p style="color: #666; font-size: 16px; line-height: 1.6; margin-left: 20px;">
         ${
           !isLastAttempt
-            ? `We'll automatically retry on <strong>${formattedRetryDate}</strong>. You have <strong>${remainingAttempts} more attempt${remainingAttempts > 1 ? "s" : ""}</strong> before your subscription is cancelled.`
+            ? `We'll automatically retry on <strong>${formattedRetryDate}</strong>. You have <strong>${remainingAttempts} more attempt${
+                remainingAttempts > 1 ? "s" : ""
+              }</strong> before your subscription is cancelled.`
             : `This is your final retry attempt. If this payment fails, your subscription will be cancelled.`
         }
       </p>
@@ -94,7 +96,15 @@ export function getSubscriptionRenewalFailedEmailContent(
 
   return {
     subject: `⚠ Your Loom subscription renewal payment failed`,
-    text: `Payment renewal failed: ${data.failureReason}. We'll retry on ${formattedRetryDate}. ${!isLastAttempt ? `You have ${remainingAttempts} more attempt${remainingAttempts > 1 ? "s" : ""} before cancellation.` : "This is your final attempt."}`,
+    text: `Payment renewal failed: ${
+      data.failureReason
+    }. We'll retry on ${formattedRetryDate}. ${
+      !isLastAttempt
+        ? `You have ${remainingAttempts} more attempt${
+            remainingAttempts > 1 ? "s" : ""
+          } before cancellation.`
+        : "This is your final attempt."
+    }`,
     html,
   };
 }

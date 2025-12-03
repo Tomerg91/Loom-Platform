@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { JSDOM } from "jsdom";
 import {
   formatAnalyticsToCSV,
@@ -126,17 +126,25 @@ describe("exportAnalytics", () => {
     it("should generate analytics filename with period", () => {
       const filename = generateCSVFilename("John Doe", "analytics", "30d");
 
-      expect(filename).toMatch(/somatic-analytics-john_doe-30d-\d{4}-\d{2}-\d{2}\.csv/);
+      expect(filename).toMatch(
+        /somatic-analytics-john_doe-30d-\d{4}-\d{2}-\d{2}\.csv/,
+      );
     });
 
     it("should generate sessions filename", () => {
       const filename = generateCSVFilename("Jane Smith", "sessions");
 
-      expect(filename).toMatch(/somatic-sessions-jane_smith-\d{4}-\d{2}-\d{2}\.csv/);
+      expect(filename).toMatch(
+        /somatic-sessions-jane_smith-\d{4}-\d{2}-\d{2}\.csv/,
+      );
     });
 
     it("should sanitize client names", () => {
-      const filename = generateCSVFilename("John O'Donnell-Smith", "analytics", "90d");
+      const filename = generateCSVFilename(
+        "John O'Donnell-Smith",
+        "analytics",
+        "90d",
+      );
 
       expect(filename).not.toContain("'");
       expect(filename).not.toContain("-Smith");

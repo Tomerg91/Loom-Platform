@@ -36,13 +36,17 @@ export function useRetryOperation(config: RetryConfig = {}) {
    * Calculate delay for next retry using exponential backoff
    * Formula: min(initialDelay * (multiplier ^ retryCount), maxDelay)
    */
-  const calculateDelay = useCallback((retryCount: number): number => {
-    const delay = Math.min(
-      finalConfig.initialDelayMs! * Math.pow(finalConfig.backoffMultiplier!, retryCount),
-      finalConfig.maxDelayMs!
-    );
-    return delay;
-  }, [finalConfig]);
+  const calculateDelay = useCallback(
+    (retryCount: number): number => {
+      const delay = Math.min(
+        finalConfig.initialDelayMs! *
+          Math.pow(finalConfig.backoffMultiplier!, retryCount),
+        finalConfig.maxDelayMs!,
+      );
+      return delay;
+    },
+    [finalConfig],
+  );
 
   /**
    * Execute operation with automatic retries on failure
@@ -51,7 +55,11 @@ export function useRetryOperation(config: RetryConfig = {}) {
   const executeWithRetry = useCallback(
     async <T>(
       operation: () => Promise<T>,
-      onRetry?: (attemptNumber: number, error: Error, nextRetryIn: number) => void
+      onRetry?: (
+        attemptNumber: number,
+        error: Error,
+        nextRetryIn: number,
+      ) => void,
     ): Promise<{ success: boolean; result?: T; error?: Error }> => {
       let lastError: Error | undefined;
       let currentRetryCount = 0;
@@ -102,7 +110,7 @@ export function useRetryOperation(config: RetryConfig = {}) {
 
       return { success: false, error: lastError };
     },
-    [finalConfig, calculateDelay]
+    [finalConfig, calculateDelay],
   );
 
   /**

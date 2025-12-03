@@ -43,7 +43,12 @@ export function SensationChart({ data }: SensationChartProps) {
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis type="number" />
-        <YAxis dataKey="sensation" type="category" width={90} tick={{ fontSize: 12 }} />
+        <YAxis
+          dataKey="sensation"
+          type="category"
+          width={90}
+          tick={{ fontSize: 12 }}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: "#ffffff",

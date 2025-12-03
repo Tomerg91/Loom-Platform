@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { acceptInvitation, useAction } from "wasp/client/operations";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { UserPlus } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
@@ -52,9 +56,15 @@ export default function AcceptInvitePage() {
         if (!value) {
           error = t("auth.validation.nameRequired", "Name is required");
         } else if (value.length < 2) {
-          error = t("auth.validation.nameTooShort", "Name must be at least 2 characters");
+          error = t(
+            "auth.validation.nameTooShort",
+            "Name must be at least 2 characters",
+          );
         } else if (value.length > 50) {
-          error = t("auth.validation.nameTooLong", "Name cannot exceed 50 characters");
+          error = t(
+            "auth.validation.nameTooLong",
+            "Name cannot exceed 50 characters",
+          );
         }
         break;
 
@@ -62,27 +72,39 @@ export default function AcceptInvitePage() {
         if (!value) {
           error = t("auth.validation.passwordRequired", "Password is required");
         } else if (value.length < 8) {
-          error = t("auth.validation.passwordTooShort", "Password must be at least 8 characters");
+          error = t(
+            "auth.validation.passwordTooShort",
+            "Password must be at least 8 characters",
+          );
         } else if (!/[A-Z]/.test(value)) {
           error = t(
             "auth.validation.passwordNeedsUppercase",
-            "Password must contain at least one uppercase letter"
+            "Password must contain at least one uppercase letter",
           );
         } else if (!/[a-z]/.test(value)) {
           error = t(
             "auth.validation.passwordNeedsLowercase",
-            "Password must contain at least one lowercase letter"
+            "Password must contain at least one lowercase letter",
           );
         } else if (!/[0-9]/.test(value)) {
-          error = t("auth.validation.passwordNeedsNumber", "Password must contain at least one number");
+          error = t(
+            "auth.validation.passwordNeedsNumber",
+            "Password must contain at least one number",
+          );
         }
         break;
 
       case "confirmPassword":
         if (!value) {
-          error = t("auth.validation.confirmPasswordRequired", "Please confirm your password");
+          error = t(
+            "auth.validation.confirmPasswordRequired",
+            "Please confirm your password",
+          );
         } else if (value !== password) {
-          error = t("auth.validation.passwordMismatch", "Passwords do not match");
+          error = t(
+            "auth.validation.passwordMismatch",
+            "Passwords do not match",
+          );
         }
         break;
     }
@@ -155,7 +177,12 @@ export default function AcceptInvitePage() {
     // Check if there are any errors
     const hasErrors = Object.values(newErrors).some((error) => error !== "");
     if (hasErrors) {
-      setErrorMessage(t("auth.validation.fixErrors", "Please fix validation errors before submitting"));
+      setErrorMessage(
+        t(
+          "auth.validation.fixErrors",
+          "Please fix validation errors before submitting",
+        ),
+      );
       return;
     }
 
@@ -205,8 +232,8 @@ export default function AcceptInvitePage() {
             Accept Your Invitation
           </CardTitle>
           <p className="text-muted-foreground text-sm mt-2">
-            You've been invited to join Loom Platform as a client. Set up your
-            account below.
+            You&apos;ve been invited to join Loom Platform as a client. Set up
+            your account below.
           </p>
         </CardHeader>
         <CardContent>
@@ -215,7 +242,9 @@ export default function AcceptInvitePage() {
               label="Your Name"
               error={errors.username}
               touched={touched.username}
-              success={touched.username && !errors.username && username.length > 0}
+              success={
+                touched.username && !errors.username && username.length > 0
+              }
               hint="2-50 characters"
               required={true}
             >
@@ -230,7 +259,9 @@ export default function AcceptInvitePage() {
                 className={`${
                   touched.username && errors.username ? "border-red-500" : ""
                 } ${
-                  touched.username && !errors.username && username ? "border-green-500" : ""
+                  touched.username && !errors.username && username
+                    ? "border-green-500"
+                    : ""
                 }`}
               />
             </FormFieldWithValidation>
@@ -239,7 +270,9 @@ export default function AcceptInvitePage() {
               label="Password"
               error={errors.password}
               touched={touched.password}
-              success={touched.password && !errors.password && password.length > 0}
+              success={
+                touched.password && !errors.password && password.length > 0
+              }
               hint="Minimum 8 characters with uppercase, lowercase, and number"
               required={true}
             >
@@ -254,7 +287,9 @@ export default function AcceptInvitePage() {
                 className={`${
                   touched.password && errors.password ? "border-red-500" : ""
                 } ${
-                  touched.password && !errors.password && password ? "border-green-500" : ""
+                  touched.password && !errors.password && password
+                    ? "border-green-500"
+                    : ""
                 }`}
               />
             </FormFieldWithValidation>
@@ -263,7 +298,11 @@ export default function AcceptInvitePage() {
               label="Confirm Password"
               error={errors.confirmPassword}
               touched={touched.confirmPassword}
-              success={touched.confirmPassword && !errors.confirmPassword && confirmPassword.length > 0}
+              success={
+                touched.confirmPassword &&
+                !errors.confirmPassword &&
+                confirmPassword.length > 0
+              }
               required={true}
             >
               <Input
@@ -271,13 +310,21 @@ export default function AcceptInvitePage() {
                 type="password"
                 placeholder="Re-enter your password"
                 value={confirmPassword}
-                onChange={(e) => handleFieldChange("confirmPassword", e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("confirmPassword", e.target.value)
+                }
                 onBlur={() => handleFieldBlur("confirmPassword")}
                 disabled={isSubmitting}
                 className={`${
-                  touched.confirmPassword && errors.confirmPassword ? "border-red-500" : ""
+                  touched.confirmPassword && errors.confirmPassword
+                    ? "border-red-500"
+                    : ""
                 } ${
-                  touched.confirmPassword && !errors.confirmPassword && confirmPassword ? "border-green-500" : ""
+                  touched.confirmPassword &&
+                  !errors.confirmPassword &&
+                  confirmPassword
+                    ? "border-green-500"
+                    : ""
                 }`}
               />
             </FormFieldWithValidation>

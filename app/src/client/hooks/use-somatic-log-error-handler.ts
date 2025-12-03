@@ -84,7 +84,8 @@ export function useSomaticLogErrorHandler() {
       errorCode = "SERVER_ERROR";
       isRetryable = true;
     } else {
-      userMessage = message || "An error occurred while logging your sensation.";
+      userMessage =
+        message || "An error occurred while logging your sensation.";
       errorCode = "UNKNOWN_ERROR";
       isRetryable = isNetworkError || isServerError;
     }

@@ -3,7 +3,7 @@ import type {
   FetchCustomerPortalUrlArgs,
   PaymentProcessor,
 } from "../paymentProcessor";
-import { prettyPaymentPlanName, parsePaymentPlanId, PaymentPlanId } from "../plans";
+import { prettyPaymentPlanName, parsePaymentPlanId } from "../plans";
 import {
   buildTranzillaCheckoutUrl,
   getTranzillaPlanPrice,
@@ -26,7 +26,6 @@ export const tranzillaPaymentProcessor: PaymentProcessor = {
     userId,
     userEmail,
     paymentPlan,
-    prismaUserDelegate,
   }: CreateCheckoutSessionArgs) => {
     // Get the price for this plan from environment variables
     const planIdString = paymentPlan.getPaymentProcessorPlanId();
@@ -69,10 +68,7 @@ export const tranzillaPaymentProcessor: PaymentProcessor = {
    * Users manage their subscription by contacting support or through
    * our own custom portal (if we build one).
    */
-  fetchCustomerPortalUrl: async ({
-    userId,
-    prismaUserDelegate,
-  }: FetchCustomerPortalUrlArgs) => {
+  fetchCustomerPortalUrl: async ({ userId }: FetchCustomerPortalUrlArgs) => {
     // Tranzilla doesn't have a customer portal
     // We could build our own custom portal in the future
     if (process.env.NODE_ENV === "development") {

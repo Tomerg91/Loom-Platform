@@ -33,7 +33,9 @@ interface FormFieldWithValidationProps {
  * @param children - The form control element
  * @param className - Additional CSS classes
  */
-export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = ({
+export const FormFieldWithValidation: React.FC<
+  FormFieldWithValidationProps
+> = ({
   label,
   error,
   touched = false,
@@ -90,9 +92,7 @@ export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = (
       )}
 
       {/* Hint Text */}
-      {hint && !hasError && (
-        <p className="text-sm text-gray-500">{hint}</p>
-      )}
+      {hint && !hasError && <p className="text-sm text-gray-500">{hint}</p>}
     </div>
   );
 };

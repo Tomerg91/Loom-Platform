@@ -22,11 +22,11 @@ type InviteClientInput = z.infer<typeof inviteClientSchema>;
 
 export const inviteClient: InviteClient<InviteClientInput, void> = async (
   rawArgs,
-  context
+  context,
 ) => {
   const { email } = ensureArgsSchemaOrThrowHttpError(
     inviteClientSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -55,23 +55,24 @@ export const inviteClient: InviteClient<InviteClientInput, void> = async (
   if (existingUser) {
     throw new HttpError(
       400,
-      "A user with this email already exists. Please use a different email."
+      "A user with this email already exists. Please use a different email.",
     );
   }
 
   // Check if invitation already exists and is pending
   // Note: CANCELED invitations can be re-invited, ACCEPTED cannot
-  const existingPendingInvitation = await context.entities.ClientInvitation.findFirst({
-    where: {
-      email,
-      status: "PENDING",
-    },
-  });
+  const existingPendingInvitation =
+    await context.entities.ClientInvitation.findFirst({
+      where: {
+        email,
+        status: "PENDING",
+      },
+    });
 
   if (existingPendingInvitation) {
     throw new HttpError(
       400,
-      "An invitation has already been sent to this email."
+      "An invitation has already been sent to this email.",
     );
   }
 
@@ -143,7 +144,7 @@ export const acceptInvitation: AcceptInvitation<
 > = async (rawArgs, context) => {
   const { token, password, username } = ensureArgsSchemaOrThrowHttpError(
     acceptInvitationSchema,
-    rawArgs
+    rawArgs,
   );
 
   // Find invitation
@@ -222,13 +223,13 @@ const cancelInvitationSchema = z.object({
 
 type CancelInvitationInput = z.infer<typeof cancelInvitationSchema>;
 
-export const cancelInvitation: CancelInvitation<CancelInvitationInput, void> = async (
-  rawArgs,
-  context
-) => {
+export const cancelInvitation: CancelInvitation<
+  CancelInvitationInput,
+  void
+> = async (rawArgs, context) => {
   const { invitationId } = ensureArgsSchemaOrThrowHttpError(
     cancelInvitationSchema,
-    rawArgs
+    rawArgs,
   );
 
   if (!context.user) {
@@ -262,7 +263,7 @@ export const cancelInvitation: CancelInvitation<CancelInvitationInput, void> = a
   if (invitation.status !== "PENDING") {
     throw new HttpError(
       400,
-      `Cannot cancel invitation with status ${invitation.status}`
+      `Cannot cancel invitation with status ${invitation.status}`,
     );
   }
 

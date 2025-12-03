@@ -20,14 +20,6 @@ interface BodyZoneChartProps {
   data: BodyZoneStats[];
 }
 
-const COLORS = [
-  "#3b82f6", // blue
-  "#6366f1", // indigo
-  "#8b5cf6", // violet
-  "#d946ef", // fuchsia
-  "#ec4899", // pink
-];
-
 export function BodyZoneChart({ data }: BodyZoneChartProps) {
   const getColor = (intensity: number): string => {
     // Color based on average intensity (1-10 scale)
@@ -51,7 +43,12 @@ export function BodyZoneChart({ data }: BodyZoneChartProps) {
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
         <XAxis type="number" />
-        <YAxis dataKey="zone" type="category" width={140} tick={{ fontSize: 12 }} />
+        <YAxis
+          dataKey="zone"
+          type="category"
+          width={140}
+          tick={{ fontSize: 12 }}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: "#ffffff",

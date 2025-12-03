@@ -1,5 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
-import type { ComputeSomaticAnalyticsJob } from "wasp/server/jobs";
+import type { Job } from "wasp/server/jobs";
 
 // ============================================
 // TYPE DEFINITIONS
@@ -68,7 +67,7 @@ function getWeekStart(date: Date): Date {
 export async function computeClientAnalytics(
   entities: any,
   clientId: string,
-  period: "30d" | "90d" | "365d"
+  period: "30d" | "90d" | "365d",
 ): Promise<ClientAnalyticsResult> {
   const { startDate, endDate } = getDateRange(period);
 
@@ -150,14 +149,12 @@ export async function computeClientAnalytics(
     .slice(0, 5); // Top 5
 
   const intensityTrendOverTime: IntensityTrendPoint[] = Array.from(
-    trendMap.entries()
+    trendMap.entries(),
   )
     .map(([weekStart, stats]) => ({
       weekStart,
       avgIntensity: parseFloat(
-        (
-          stats.intensities.reduce((a, b) => a + b, 0) / stats.count
-        ).toFixed(2)
+        (stats.intensities.reduce((a, b) => a + b, 0) / stats.count).toFixed(2),
       ),
     }))
     .sort((a, b) => a.weekStart.localeCompare(b.weekStart)); // Chronological order
@@ -173,7 +170,7 @@ export async function computeClientAnalytics(
 // ============================================
 // CRON JOB: Compute analytics for all active clients
 // ============================================
-export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
+export const computeAllClientAnalytics: Job<
   never,
   { success: boolean; message: string }
 > = async (_args, context) => {
@@ -184,7 +181,7 @@ export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const activeClients = await prisma.ClientProfile.findMany({
+    const activeClients = await entities.clientProfile.findMany({
       where: {
         lastActivityDate: {
           gte: sevenDaysAgo,
@@ -194,7 +191,7 @@ export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
     });
 
     console.log(
-      `[Analytics] Computing analytics for ${activeClients.length} active clients`
+      `[Analytics] Computing analytics for ${activeClients.length} active clients`,
     );
 
     let successCount = 0;
@@ -209,13 +206,13 @@ export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
           const analytics = await computeClientAnalytics(
             prisma,
             client.id,
-            period
+            period,
           );
 
           const { startDate, endDate } = getDateRange(period);
 
           // Upsert the analytics record
-          await prisma.SomaticLogAnalytics.upsert({
+          await entities.somaticLogAnalytics.upsert({
             where: {
               clientId_period: {
                 clientId: client.id,
@@ -248,7 +245,7 @@ export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
         } catch (error) {
           console.error(
             `[Analytics] Error computing analytics for client ${client.id}, period ${period}:`,
-            error
+            error,
           );
           errorCount += 1;
         }
@@ -266,7 +263,9 @@ export const computeAllClientAnalytics: ComputeSomaticAnalyticsJob<
     console.error("[Analytics] Cron job failed:", error);
     return {
       success: false,
-      message: `Cron job failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Cron job failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 };

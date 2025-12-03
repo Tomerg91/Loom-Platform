@@ -69,9 +69,8 @@ type Entities = {
   };
 };
 
-type CoachClientContext<TContext extends OperationContext> = AuthenticatedContext<
-  TContext & { entities: Entities }
->;
+type CoachClientContext<TContext extends OperationContext> =
+  AuthenticatedContext<TContext & { entities: Entities }>;
 
 export async function requireCoachOwnsClient<TContext extends OperationContext>(
   context: TContext & { entities: Entities },

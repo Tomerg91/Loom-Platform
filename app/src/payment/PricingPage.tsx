@@ -33,7 +33,9 @@ interface PaymentPlanCard {
   features: string[];
 }
 
-const getPricingPageCards = (t: (key: string) => string): Record<PaymentPlanId, PaymentPlanCard> => ({
+const getPricingPageCards = (
+  t: (key: string) => string,
+): Record<PaymentPlanId, PaymentPlanCard> => ({
   [PaymentPlanId.Hobby]: {
     name: prettyPaymentPlanName(PaymentPlanId.Hobby),
     price: "$9.99",
@@ -47,10 +49,7 @@ const getPricingPageCards = (t: (key: string) => string): Record<PaymentPlanId, 
     name: prettyPaymentPlanName(PaymentPlanId.Pro),
     price: "$19.99",
     description: t("pricing.pro.description"),
-    features: [
-      t("pricing.pro.features.0"),
-      t("pricing.pro.features.1"),
-    ],
+    features: [t("pricing.pro.features.0"), t("pricing.pro.features.1")],
   },
   [PaymentPlanId.Credits10]: {
     name: prettyPaymentPlanName(PaymentPlanId.Credits10),
@@ -207,10 +206,7 @@ const PricingPage = () => {
                       "/month"}
                   </span>
                 </p>
-                <ul
-                  role="list"
-                  className="text-muted-foreground mt-8 space-y-3 text-sm leading-6"
-                >
+                <ul className="text-muted-foreground mt-8 space-y-3 text-sm leading-6">
                   {pricingCards[planId].features.map((feature) => (
                     <li key={feature} className="flex gap-x-3">
                       <CheckCircle
@@ -245,7 +241,7 @@ const PricingPage = () => {
                     className="w-full"
                     disabled={isPaymentLoading}
                   >
-                    {!!user ? t("pricing.buyPlan") : t("pricing.loginToBuyPlan")}
+                    {user ? t("pricing.buyPlan") : t("pricing.loginToBuyPlan")}
                   </Button>
                 )}
               </CardFooter>

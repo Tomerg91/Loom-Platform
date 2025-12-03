@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
+import type { PaymentPlanId } from "../payment/plans";
 import {
-  PaymentPlanId,
   SubscriptionStatus,
   parsePaymentPlanId,
   prettyPaymentPlanName,
@@ -145,7 +145,7 @@ function formatSubscriptionStatusMessage(
     past_due: t("account.subscriptionPastDue", { plan: paymentPlanName }),
     cancel_at_period_end: t("account.subscriptionCanceled", {
       plan: paymentPlanName,
-      date: prettyPrintEndOfBillingPeriod(datePaid)
+      date: prettyPrintEndOfBillingPeriod(datePaid),
     }),
     deleted: t("account.subscriptionDeleted"),
   };
