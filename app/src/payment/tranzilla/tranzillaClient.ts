@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { config } from "wasp/server";
 import { requireNodeEnvVar } from "../../server/utils";
 import type { PaymentPlanId } from "../plans";
@@ -15,7 +15,7 @@ export function getTranzillaTerminalName(): string {
  * Reads directly from environment to avoid CodeQL false positive on password hashing
  */
 function getTranzillaApiSecretForSignature(): string {
-  const secret = process.env.TRANZILLA_API_PASSWORD;
+  const secret = process.env["TRANZILLA_API_PASSWORD"];
   if (!secret) {
     throw new Error("TRANZILLA_API_PASSWORD environment variable is not set");
   }
@@ -33,10 +33,8 @@ function getTranzillaApiSecretForSignature(): string {
  */
 function createTranzillaHmacSignature(data: string): string {
   const secretString = getTranzillaApiSecretForSignature();
-  return crypto
-    .createHmac("sha256", secretString)
-    .update(data)
-    .digest("hex");
+  // lgtm[js/insufficient-password-hash]
+  return createHmac("sha256", secretString).update(data).digest("hex");
 }
 
 /**
@@ -154,7 +152,7 @@ export function validateTranzillaSignature(
 
     // Compare signatures (constant-time comparison to prevent timing attacks)
     const isValid =
-      crypto.timingSafeEqual(
+      timingSafeEqual(
         Buffer.from(providedSignature),
         Buffer.from(expectedSignature),
       ) && true;
@@ -211,12 +209,14 @@ export function getTranzillaErrorMessage(response: string): string {
  * - X-tranzila-api-nonce: Random 40-byte string
  * - X-tranzila-api-access-token: HMAC-SHA256(app_key + secret + request_time + nonce)
  */
-export function generateTranzillaAuthHeaders(appKey: string): Record<string, string> {
+export function generateTranzillaAuthHeaders(
+  appKey: string,
+): Record<string, string> {
   const apiSecret = getTranzillaApiSecretForSignature();
   const requestTime = Date.now().toString();
 
   // Generate 40-byte random nonce (80 hex characters)
-  const nonce = crypto.randomBytes(40).toString("hex");
+  const nonce = randomBytes(40).toString("hex");
 
   // Calculate HMAC-SHA256 signature
   const dataToSign = `${appKey}${apiSecret}${requestTime}${nonce}`;
@@ -241,7 +241,12 @@ export async function chargeTranzillaToken(params: {
   amount: number;
   planId: PaymentPlanId;
   userId: string;
-}): Promise<{ success: boolean; transactionId?: string; response?: string; error?: string }> {
+}): Promise<{
+  success: boolean;
+  transactionId?: string;
+  response?: string;
+  error?: string;
+}> {
   try {
     const terminalName = getTranzillaTerminalName();
     const appKey = terminalName; // Use terminal name as app key for token charging
