@@ -1,0 +1,441 @@
+import type { CreateGroup, GetGroupFeed, CreateGroupPost, CreateGroupPostReply, GetGroupMembers } from "wasp/server/operations";
+import { HttpError } from "wasp/server";
+import * as z from "zod";
+import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";
+
+// ============================================
+// VALIDATION SCHEMAS
+// ============================================
+
+const createGroupSchema = z.object({
+  name: z.string().min(1, "Group name is required").max(255),
+  description: z.string().max(1000).optional(),
+});
+type CreateGroupInput = z.infer<typeof createGroupSchema>;
+
+const createGroupPostSchema = z.object({
+  groupId: z.string().uuid("Invalid group ID"),
+  content: z.string().min(1, "Post content is required").max(5000),
+  postType: z.enum(["STANDARD", "WIN", "BLIND_REFLECTION"]).default("STANDARD"),
+});
+type CreateGroupPostInput = z.infer<typeof createGroupPostSchema>;
+
+const createGroupPostReplySchema = z.object({
+  postId: z.string().uuid("Invalid post ID"),
+  content: z.string().min(1, "Reply content is required").max(5000),
+});
+type CreateGroupPostReplyInput = z.infer<typeof createGroupPostReplySchema>;
+
+const getGroupFeedSchema = z.object({
+  groupId: z.string().uuid("Invalid group ID"),
+  limit: z.number().min(1).max(100).default(20),
+  offset: z.number().min(0).default(0),
+});
+type GetGroupFeedInput = z.infer<typeof getGroupFeedSchema>;
+
+const getGroupMembersSchema = z.object({
+  groupId: z.string().uuid("Invalid group ID"),
+  status: z.enum(["ACTIVE", "PENDING", "DECLINED"]).optional(),
+});
+type GetGroupMembersInput = z.infer<typeof getGroupMembersSchema>;
+
+// ============================================
+// HELPER: Get Coach Profile
+// ============================================
+
+async function getCoachProfile(context: any) {
+  if (!context.user) {
+    throw new HttpError(401, "Unauthorized");
+  }
+
+  const coachProfile = await context.entities.CoachProfile.findUnique({
+    where: { userId: context.user.id, deletedAt: null },
+  });
+
+  if (!coachProfile) {
+    throw new HttpError(403, "Only coaches can access mentoring circles");
+  }
+
+  return coachProfile;
+}
+
+// ============================================
+// CREATE GROUP
+// ============================================
+
+export const createGroup: CreateGroup<CreateGroupInput, { id: string; name: string }> = async (
+  rawArgs,
+  context
+) => {
+  const args = ensureArgsSchemaOrThrowHttpError(createGroupSchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  if (!coachProfile.isMentor) {
+    throw new HttpError(403, "Only mentors can create groups");
+  }
+
+  const group = await context.entities.Group.create({
+    data: {
+      name: args.name,
+      description: args.description,
+      mentorId: coachProfile.id,
+    },
+  });
+
+  return {
+    id: group.id,
+    name: group.name,
+  };
+};
+
+// ============================================
+// GET GROUP FEED (CRITICAL: BLIND REFLECTION)
+// ============================================
+
+/**
+ * CRITICAL LOGIC FOR BLIND REFLECTION:
+ *
+ * If a post has postType = 'BLIND_REFLECTION':
+ *  1. Authorization checks:
+ *     - If user is the POST AUTHOR: Can see all replies
+ *     - If user is the GROUP MENTOR: Can see all replies
+ *     - Otherwise: Can only see their own replies
+ *  2. Data Protection:
+ *     - Never expose hidden reply data or author info
+ *     - Never expose total reply count (prevents participation inference)
+ *     - Return empty replies array if user has no replies
+ *  3. Information Leakage Prevention:
+ *     - Don't indicate whether replies exist
+ *     - Don't expose edited timestamps for hidden replies
+ *     - Clean response with no metadata about hidden content
+ */
+
+export const getGroupFeed: GetGroupFeed<
+  GetGroupFeedInput,
+  Array<{
+    id: string;
+    content: string;
+    createdAt: Date;
+    postType: string;
+    isPinned: boolean;
+    author: { id: string; user: { email: string } };
+    replies: Array<{
+      id: string;
+      content: string;
+      createdAt: Date;
+      author: { id: string; user: { email: string } };
+    }>;
+  }>
+> = async (rawArgs, context) => {
+  const args = ensureArgsSchemaOrThrowHttpError(getGroupFeedSchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Verify user is a member of this group
+  const isMember = await context.entities.GroupMember.findFirst({
+    where: {
+      groupId: args.groupId,
+      coachId: coachProfile.id,
+      deletedAt: null,
+      status: "ACTIVE", // Only active members can view feed
+    },
+  });
+
+  if (!isMember) {
+    throw new HttpError(403, "You are not a member of this group");
+  }
+
+  // Get the group (for mentor info)
+  const group = await context.entities.Group.findUnique({
+    where: { id: args.groupId, deletedAt: null },
+    include: {
+      mentor: {
+        include: { user: { select: { id: true, email: true } } },
+      },
+    },
+  });
+
+  if (!group) {
+    throw new HttpError(404, "Group not found");
+  }
+
+  // Fetch posts (pinned first, then by date) WITHOUT replies initially
+  const posts = await context.entities.GroupPost.findMany({
+    where: {
+      groupId: args.groupId,
+      deletedAt: null,
+    },
+    include: {
+      author: {
+        include: { user: { select: { id: true, email: true } } },
+      },
+    },
+    orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+    take: args.limit,
+    skip: args.offset,
+  });
+
+  // CRITICAL: Process each post with authorization-aware reply filtering
+  const processedPosts = await Promise.all(
+    posts.map(async (post) => {
+      const isCurrentUserAuthor = post.author.userId === context.user!.id;
+      const isCurrentUserMentor = group.mentor.userId === context.user!.id;
+      const isBlindReflection = post.postType === "BLIND_REFLECTION";
+
+      // Determine visibility permission
+      const userCanSeeAllReplies = isCurrentUserAuthor || isCurrentUserMentor;
+
+      // Fetch replies with authorization-aware filtering
+      let replies;
+      if (isBlindReflection && !userCanSeeAllReplies) {
+        // For blind posts, only fetch current user's replies
+        replies = await context.entities.GroupPostReply.findMany({
+          where: {
+            postId: post.id,
+            deletedAt: null,
+            author: { userId: context.user!.id }, // Only current user's replies
+          },
+          include: {
+            author: {
+              include: { user: { select: { id: true, email: true } } },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        });
+      } else {
+        // For standard posts or if user is author/mentor, fetch all replies
+        replies = await context.entities.GroupPostReply.findMany({
+          where: {
+            postId: post.id,
+            deletedAt: null,
+          },
+          include: {
+            author: {
+              include: { user: { select: { id: true, email: true } } },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        });
+      }
+
+      return {
+        id: post.id,
+        content: post.content,
+        createdAt: post.createdAt,
+        postType: post.postType,
+        isPinned: post.isPinned,
+        author: {
+          id: post.author.id,
+          user: { email: post.author.user.email },
+        },
+        // CRITICAL: Return filtered replies - no metadata that could leak info
+        replies: replies.map((reply) => ({
+          id: reply.id,
+          content: reply.content,
+          createdAt: reply.createdAt,
+          author: {
+            id: reply.author.id,
+            user: { email: reply.author.user.email },
+          },
+        })),
+      };
+    })
+  );
+
+  return processedPosts;
+};
+
+// ============================================
+// CREATE GROUP POST
+// ============================================
+
+export const createGroupPost: CreateGroupPost<
+  CreateGroupPostInput,
+  { id: string; content: string; postType: string }
+> = async (rawArgs, context) => {
+  const args = ensureArgsSchemaOrThrowHttpError(createGroupPostSchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Verify user is an active member of the group
+  const membership = await context.entities.GroupMember.findFirst({
+    where: {
+      groupId: args.groupId,
+      coachId: coachProfile.id,
+      deletedAt: null,
+      status: "ACTIVE",
+    },
+  });
+
+  if (!membership) {
+    throw new HttpError(403, "You are not an active member of this group");
+  }
+
+  const post = await context.entities.GroupPost.create({
+    data: {
+      content: args.content,
+      postType: args.postType,
+      groupId: args.groupId,
+      authorId: coachProfile.id,
+    },
+  });
+
+  // TODO: Trigger notification to all group members
+  // await createNotification({ ... })
+
+  return {
+    id: post.id,
+    content: post.content,
+    postType: post.postType,
+  };
+};
+
+// ============================================
+// CREATE POST REPLY
+// ============================================
+
+export const createGroupPostReply: CreateGroupPostReply<
+  CreateGroupPostReplyInput,
+  { id: string; content: string }
+> = async (rawArgs, context) => {
+  const args = ensureArgsSchemaOrThrowHttpError(createGroupPostReplySchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Verify post exists and get group info
+  const post = await context.entities.GroupPost.findUnique({
+    where: { id: args.postId, deletedAt: null },
+    include: { group: true },
+  });
+
+  if (!post) {
+    throw new HttpError(404, "Post not found");
+  }
+
+  // Verify user is an active member of the group
+  const membership = await context.entities.GroupMember.findFirst({
+    where: {
+      groupId: post.groupId,
+      coachId: coachProfile.id,
+      deletedAt: null,
+      status: "ACTIVE",
+    },
+  });
+
+  if (!membership) {
+    throw new HttpError(403, "You are not an active member of this group");
+  }
+
+  const reply = await context.entities.GroupPostReply.create({
+    data: {
+      content: args.content,
+      postId: args.postId,
+      authorId: coachProfile.id,
+    },
+  });
+
+  // TODO: Trigger notification to post author and group mentor about new reply
+
+  return {
+    id: reply.id,
+    content: reply.content,
+  };
+};
+
+// ============================================
+// GET GROUP MEMBERS
+// ============================================
+
+export const getGroupMembers: GetGroupMembers<
+  GetGroupMembersInput,
+  Array<{
+    id: string;
+    status: string;
+    coach: { id: string; user: { email: string } };
+    joinedAt: Date | null;
+  }>
+> = async (rawArgs, context) => {
+  const args = ensureArgsSchemaOrThrowHttpError(getGroupMembersSchema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Verify user is a member of this group
+  const isMember = await context.entities.GroupMember.findFirst({
+    where: {
+      groupId: args.groupId,
+      coachId: coachProfile.id,
+      deletedAt: null,
+    },
+  });
+
+  if (!isMember) {
+    throw new HttpError(403, "You are not a member of this group");
+  }
+
+  const members = await context.entities.GroupMember.findMany({
+    where: {
+      groupId: args.groupId,
+      deletedAt: null,
+      status: args.status,
+    },
+    include: {
+      coach: {
+        include: { user: { select: { id: true, email: true } } },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return members.map((member) => ({
+    id: member.id,
+    status: member.status,
+    coach: {
+      id: member.coach.id,
+      user: { email: member.coach.user.email },
+    },
+    joinedAt: member.joinedAt,
+  }));
+};
+
+// ============================================
+// DELETE GROUP POST (Soft Delete)
+// ============================================
+
+export const deleteGroupPost: any = async (rawArgs: any, context: any) => {
+  const schema = z.object({
+    postId: z.string().uuid("Invalid post ID"),
+  });
+  const args = ensureArgsSchemaOrThrowHttpError(schema, rawArgs);
+
+  const coachProfile = await getCoachProfile(context);
+
+  // Get post to verify authorization
+  const post = await context.entities.GroupPost.findUnique({
+    where: { id: args.postId, deletedAt: null },
+  });
+
+  if (!post) {
+    throw new HttpError(404, "Post not found");
+  }
+
+  // Only post author or group mentor can delete
+  const group = await context.entities.Group.findUnique({
+    where: { id: post.groupId },
+  });
+
+  const isAuthor = post.authorId === coachProfile.id;
+  const isMentor = group?.mentorId === coachProfile.id;
+
+  if (!isAuthor && !isMentor) {
+    throw new HttpError(403, "You cannot delete this post");
+  }
+
+  // Soft delete
+  await context.entities.GroupPost.update({
+    where: { id: args.postId },
+    data: { deletedAt: new Date() },
+  });
+
+  return { success: true };
+};
