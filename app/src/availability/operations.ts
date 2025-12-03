@@ -110,7 +110,6 @@ export const createAvailabilitySlot: OperationType<
     where: {
       coachId: coachProfile.id,
       deletedAt: null,
-      status: "OPEN",
       AND: [{ startTime: { lt: end } }, { endTime: { gt: start } }],
     },
   });
@@ -254,7 +253,6 @@ export const updateAvailabilitySlot: OperationType<
         id: { not: args.id },
         coachId: coachProfile.id,
         deletedAt: null,
-        status: "OPEN",
         AND: [{ startTime: { lt: end } }, { endTime: { gt: start } }],
       },
     });
@@ -356,10 +354,6 @@ export const bookAvailabilitySlot: OperationType<
     throw new HttpError(404, "Availability slot not found");
   }
 
-  if (slot.status !== "OPEN") {
-    throw new HttpError(400, "Slot is not available for booking");
-  }
-
   // Get client profile
   const clientProfile = await context.entities.ClientProfile.findUnique({
     where: { userId: context.user.id },
@@ -372,6 +366,14 @@ export const bookAvailabilitySlot: OperationType<
   // Verify client can only book slots from their coach
   if (clientProfile.coachId !== slot.coachId) {
     throw new HttpError(403, "You can only book slots from your coach");
+  }
+
+  // Slot must be open or held by this client
+  if (
+    slot.status !== "OPEN" &&
+    !(slot.status === "HELD" && slot.clientId === clientProfile.id)
+  ) {
+    throw new HttpError(400, "Slot is not available for booking");
   }
 
   // Get coach before transaction
@@ -394,7 +396,18 @@ export const bookAvailabilitySlot: OperationType<
         });
 
         // Double-check slot is still available
-        if (!currentSlot || currentSlot.status !== "OPEN") {
+        if (
+          !currentSlot ||
+          (currentSlot.status === "HELD" &&
+            currentSlot.clientId !== clientProfile.id)
+        ) {
+          throw new HttpError(400, "Slot is no longer available for booking");
+        }
+
+        if (
+          currentSlot.status !== "OPEN" &&
+          !(currentSlot.status === "HELD" && currentSlot.clientId === clientProfile.id)
+        ) {
           throw new HttpError(400, "Slot is no longer available for booking");
         }
 
