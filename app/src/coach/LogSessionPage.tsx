@@ -26,15 +26,6 @@ import { AlertCircle, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
 
-type LogSessionFormState = {
-  sessionDate: string;
-  topic: string;
-  privateNotes: string;
-  sharedSummary: string;
-  somaticAnchor: BodyZone | "";
-  resourceIds: string[];
-};
-
 function LogSessionPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam?.trim();
@@ -79,20 +70,13 @@ function MissingLogSessionClient() {
   );
 }
 
-function LogSessionForm({
-  user: _user,
-  clientId,
-}: {
-  user: User;
-  clientId: string;
-}) {
-  void _user;
+function LogSessionForm({ user, clientId }: { user: User; clientId: string }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const sessionNumberParam = searchParams.get("sessionNumber");
 
-  const [formData, setFormData] = useState<LogSessionFormState>({
+  const [formData, setFormData] = useState({
     sessionDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     topic: "",
     privateNotes: "",
@@ -187,14 +171,13 @@ function LogSessionForm({
   });
 
   // Fetch previous session context (last session)
-  const { data: previousSessions, isLoading: isContextLoading } = useQuery(
-    getRecentSessionsForClient,
-    {
-      clientId: clientId || "",
-    },
-  );
-
-  const previousSession = previousSessions?.[0] ?? null;
+  const {
+    data: previousSessions,
+    isLoading: isContextLoading,
+    error: contextError,
+  } = useQuery(getRecentSessionsForClient, {
+    clientId: clientId || "",
+  });
 
   // Get the logSession action
   const logSessionFn = useAction(logSession);
@@ -282,7 +265,7 @@ function LogSessionForm({
         topic: formData.topic || null,
         privateNotes: formData.privateNotes || null,
         sharedSummary: formData.sharedSummary || null,
-        somaticAnchor: formData.somaticAnchor || null,
+        somaticAnchor: (formData.somaticAnchor || null) as any,
         resourceIds: formData.resourceIds,
       });
 
@@ -307,10 +290,8 @@ function LogSessionForm({
       setTimeout(() => {
         navigate(`/coach/client/${clientId}`);
       }, 2000);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to log session";
-      setErrorMessage(message);
+    } catch (error: any) {
+      setErrorMessage(error.message || "Failed to log session");
     } finally {
       setIsSubmitting(false);
     }
@@ -325,6 +306,11 @@ function LogSessionForm({
         {sessionNumber && (
           <p className="text-muted-foreground mt-2">Session #{sessionNumber}</p>
         )}
+        {(user.username || (user as any).email) && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Coach: {user.username || (user as any).email}
+          </p>
+        )}
       </div>
 
       {/* Two-Column Layout: Desktop 2 cols, Mobile 1 col */}
@@ -338,7 +324,11 @@ function LogSessionForm({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isContextLoading ? (
+              {contextError ? (
+                <p className="text-sm text-destructive">
+                  Failed to load previous sessions.
+                </p>
+              ) : isContextLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
                   <p className="text-sm text-muted-foreground">
@@ -361,14 +351,16 @@ function LogSessionForm({
                   </div>
 
                   {/* Somatic Anchor */}
-                  {previousSession?.somaticAnchor && (
+                  {(previousSession as any).somaticAnchor && (
                     <div>
                       <p className="text-xs text-muted-foreground font-semibold">
                         {t("session.bodyZoneDiscussed")}
                       </p>
                       <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full mt-1">
                         {t(
-                          `somatic.bodyZones.${previousSession.somaticAnchor}`,
+                          `somatic.bodyZones.${
+                            (previousSession as any).somaticAnchor
+                          }`,
                         )}
                       </span>
                     </div>

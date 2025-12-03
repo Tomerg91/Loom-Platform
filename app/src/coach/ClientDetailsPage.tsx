@@ -28,13 +28,16 @@ import {
   DialogDescription,
 } from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
 import { Input } from "../components/ui/input";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import BodyMapSelector from "../client/components/BodyMapSelector";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ClientAnalyticsDashboard } from "./components/ClientAnalyticsDashboard";
+import {
+  RichTextEditor,
+  renderSanitizedHtml,
+} from "./components/RichTextEditor";
 import {
   ArrowLeft,
   Calendar,
@@ -70,8 +73,7 @@ type ZoneHighlight = {
   intensity: number;
 };
 
-function ClientDetailsPageContent({ user: _user }: { user: User }) {
-  void _user;
+function ClientDetailsPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam?.trim();
 
@@ -79,7 +81,7 @@ function ClientDetailsPageContent({ user: _user }: { user: User }) {
     return <MissingClientNotice />;
   }
 
-  return <ClientDetailsPageView clientId={clientId} />;
+  return <ClientDetailsPageView user={user} clientId={clientId} />;
 }
 
 function MissingClientNotice() {
@@ -115,7 +117,13 @@ function MissingClientNotice() {
   );
 }
 
-function ClientDetailsPageView({ clientId }: { clientId: string }) {
+function ClientDetailsPageView({
+  user,
+  clientId,
+}: {
+  user: User;
+  clientId: string;
+}) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -174,9 +182,6 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
       limit: itemsPerPage,
     },
   );
-  const coachSessions = sessionsResponse?.sessions as
-    | SessionResponse[]
-    | undefined;
 
   const createSessionFn = useAction(createSession);
   const updateSessionFn = useAction(updateSession);
@@ -283,10 +288,8 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
         handleCloseSessionDialog();
         refetchSessions();
       }, 1000);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save session";
-      setSessionError(message);
+    } catch (error: any) {
+      setSessionError(error.message || "Failed to save session");
     } finally {
       setIsSubmittingSession(false);
     }
@@ -301,10 +304,8 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
       setTimeout(() => {
         refetchSessions();
       }, 500);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete session";
-      setSessionError(message);
+    } catch (error: any) {
+      setSessionError(error.message || "Failed to delete session");
     }
   };
 
@@ -457,6 +458,11 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
             {!clientProfile?.lastActivityDate && (
               <p className="text-muted-foreground text-xs mt-1">
                 No activity yet
+              </p>
+            )}
+            {user?.username && (
+              <p className="text-muted-foreground text-xs mt-2">
+                Coach: {user.username}
               </p>
             )}
           </div>
@@ -718,9 +724,9 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!coachSessions || coachSessions.length === 0 ? (
+          {!sessionsResponse || sessionsResponse.sessions.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No sessions logged yet. Click &quot;Log Session&quot; to create
+              No sessions logged yet. Click &ldquo;Log Session&rdquo; to create
               one.
             </p>
           ) : (
@@ -737,7 +743,7 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {coachSessions.map((session) => (
+                    {sessionsResponse.sessions.map((session: any) => (
                       <tr key={session.id} className="text-sm">
                         <td className="py-3">
                           <div>
@@ -751,9 +757,12 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                         </td>
                         <td className="py-3 max-w-xs">
                           {session.privateNotes ? (
-                            <p className="text-xs text-muted-foreground italic truncate">
-                              {session.privateNotes}
-                            </p>
+                            <p
+                              className="text-xs text-muted-foreground italic truncate"
+                              dangerouslySetInnerHTML={renderSanitizedHtml(
+                                session.privateNotes,
+                              )}
+                            />
                           ) : (
                             <span className="text-xs text-muted-foreground">
                               —
@@ -762,9 +771,12 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                         </td>
                         <td className="py-3 max-w-xs">
                           {session.sharedSummary ? (
-                            <p className="text-xs text-muted-foreground italic truncate">
-                              {session.sharedSummary}
-                            </p>
+                            <p
+                              className="text-xs text-muted-foreground italic truncate"
+                              dangerouslySetInnerHTML={renderSanitizedHtml(
+                                session.sharedSummary,
+                              )}
+                            />
                           ) : (
                             <span className="text-xs text-muted-foreground">
                               —
@@ -802,7 +814,7 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
 
               {/* Mobile Card Layout */}
               <div className="block md:hidden space-y-3">
-                {coachSessions.map((session) => (
+                {sessionsResponse.sessions.map((session: any) => (
                   <div
                     key={session.id}
                     className="border rounded-lg p-4 space-y-3 bg-card"
@@ -844,9 +856,12 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           Private Notes:
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {session.privateNotes}
-                        </p>
+                        <div
+                          className="text-xs text-muted-foreground prose prose-sm"
+                          dangerouslySetInnerHTML={renderSanitizedHtml(
+                            session.privateNotes,
+                          )}
+                        />
                       </div>
                     )}
 
@@ -855,9 +870,12 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           Shared Summary:
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {session.sharedSummary}
-                        </p>
+                        <div
+                          className="text-xs text-muted-foreground prose prose-sm"
+                          dangerouslySetInnerHTML={renderSanitizedHtml(
+                            session.sharedSummary,
+                          )}
+                        />
                       </div>
                     )}
                   </div>
@@ -949,50 +967,28 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
             </div>
 
             {/* Private Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="private-notes">Private Notes (Coach Only)</Label>
-              <Textarea
-                id="private-notes"
-                placeholder="Your private observations and thoughts about this session..."
-                value={sessionForm.privateNotes}
-                onChange={(e) =>
-                  setSessionForm({
-                    ...sessionForm,
-                    privateNotes: e.target.value,
-                  })
-                }
-                disabled={isSubmittingSession}
-                rows={3}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                Only you can see these notes.
-              </p>
-            </div>
+            <RichTextEditor
+              label={t("session.privateNotesLabel")}
+              description={t("session.privateNotesDescription")}
+              value={sessionForm.privateNotes}
+              onChange={(value) =>
+                setSessionForm({ ...sessionForm, privateNotes: value })
+              }
+              storageKey={`session-${clientId}-privateNotes`}
+              placeholder={t("session.privateNotesPlaceholder")}
+            />
 
             {/* Shared Summary */}
-            <div className="space-y-2">
-              <Label htmlFor="shared-summary">
-                Shared Summary (Visible to Client)
-              </Label>
-              <Textarea
-                id="shared-summary"
-                placeholder="A summary of the session to share with your client..."
-                value={sessionForm.sharedSummary}
-                onChange={(e) =>
-                  setSessionForm({
-                    ...sessionForm,
-                    sharedSummary: e.target.value,
-                  })
-                }
-                disabled={isSubmittingSession}
-                rows={3}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                The client will see this recap.
-              </p>
-            </div>
+            <RichTextEditor
+              label={t("session.sharedSummaryLabel")}
+              description={t("session.sharedSummaryDescription")}
+              value={sessionForm.sharedSummary}
+              onChange={(value) =>
+                setSessionForm({ ...sessionForm, sharedSummary: value })
+              }
+              storageKey={`session-${clientId}-sharedSummary`}
+              placeholder={t("session.sharedSummaryPlaceholder")}
+            />
 
             {/* Error Message */}
             {sessionError && (
@@ -1168,7 +1164,7 @@ function ClientDetailsPageView({ clientId }: { clientId: string }) {
                 <option value="Asia/Kolkata">Asia/Kolkata</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Client&apos;s timezone for scheduling
+                Client&rsquo;s timezone for scheduling
               </p>
             </div>
 

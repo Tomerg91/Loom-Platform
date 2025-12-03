@@ -202,6 +202,15 @@ const resources = {
         sessionTip:
           "Review past sessions to spot patterns in your somatic responses and track your progress over time.",
       },
+      clientGoals: {
+        overviewTitle: "Goals & Progress",
+        noGoals: "You don't have any active goals yet.",
+        activeCount: "{{count}} active goal(s)",
+        averageProgress: "Average progress",
+        goalType: "Type: {{type}}",
+        awaitingCoach: "Waiting on coach feedback",
+        lastUpdated: "Updated {{date}}",
+      },
       insights: {
         title: "Client Insights",
         viewInsights: "View Insights",
@@ -413,6 +422,8 @@ const resources = {
       session: {
         logSession: "Log Session",
         sessionHistory: "Session History",
+        clearDraft: "Clear",
+        autosaveNotice: "Drafts are autosaved locally to protect your notes.",
         previousSession: "Previous Session",
         noPreviousSessions: "No previous sessions yet",
         recentSomaticActivity: "Recent Somatic Activity (Last 14 Days)",
@@ -426,15 +437,23 @@ const resources = {
         sessionDetails: "Session Details",
         sessionDate: "Session Date & Time",
         sessionDateHelp: "Date and time when the session took place",
+        privateNotesLabel: "Private Notes (Coach Only)",
+        privateNotesDescription:
+          "Keep your personal observations and insights safe.",
+        privateNotesPlaceholder:
+          "Your private observations and thoughts about this session...",
         topic: "Topic (Optional)",
         topicPlaceholder: "e.g., Work Stress, Anxiety Management",
         topicHelp: "Main topic or focus of this session",
         bodyZoneDiscussed: "Body Zone Discussed (Optional)",
         noAnchor: "-- No anchor --",
         bodyZoneHelp: "Which body zone was the focus of this session?",
-        sharedSummary: "Session Summary (Visible to Client)",
+        sharedSummaryLabel: "Shared Summary (Visible to Client)",
+        sharedSummaryDescription:
+          "What you'd like the client to remember from this session.",
         sharedSummaryPlaceholder:
-          "What happened in this session? What key insights did we explore?",
+          "A summary of the session to share with your client...",
+        sharedSummary: "Session Summary (Visible to Client)",
         sharedSummaryHelp: "This will be visible to your client",
         privateNotes: "Private Notes (Coach Only)",
         privateNotesPlaceholder:
@@ -762,6 +781,15 @@ const resources = {
         sessionTip:
           "בדוק פגישות קודמות כדי לזהות דפוסים בתגובות הסומטיות שלך וללמוד על התקדמותך לאורך זמן.",
       },
+      clientGoals: {
+        overviewTitle: "מטרות והתקדמות",
+        noGoals: "אין לך מטרות פעילות כרגע.",
+        activeCount: "{{count}} מטרות פעילות",
+        averageProgress: "התקדמות ממוצעת",
+        goalType: "סוג: {{type}}",
+        awaitingCoach: "ממתין למשוב מהמאמן",
+        lastUpdated: "עודכן {{date}}",
+      },
       insights: {
         title: "תובנות הלקוח",
         viewInsights: "צפה בתובנות",
@@ -966,6 +994,8 @@ const resources = {
       session: {
         logSession: "רישום הפעלה",
         sessionHistory: "היסטוריית הפעלות",
+        clearDraft: "נקה",
+        autosaveNotice: "טיוטות נשמרות אוטומטית מקומית כדי להגן על ההערות שלך.",
         previousSession: "הפעלה קודמת",
         noPreviousSessions: "אין הפעלות קודמות עדיין",
         recentSomaticActivity: "פעילות סומטית אחרונה (14 ימים אחרונים)",
@@ -978,14 +1008,19 @@ const resources = {
         sessionDetails: "פרטי ההפעלה",
         sessionDate: "תאריך ושעת ההפעלה",
         sessionDateHelp: "התאריך והשעה בהם התקיימה ההפעלה",
+        privateNotesLabel: "הערות פרטיות (למאמן בלבד)",
+        privateNotesDescription: "שמור את התצפיות והתובנות האישיות שלך בבטחה.",
+        privateNotesPlaceholder: "התצפיות והמחשבות האישיות שלך על ההפעלה...",
         topic: "נושא (אופציונלי)",
         topicPlaceholder: "למשל, לחץ בעבודה, ניהול חרדה",
         topicHelp: "הנושא או ההתמקדות הראשיים של ההפעלה",
         bodyZoneDiscussed: "אזור גוף שנדון (אופציונלי)",
         noAnchor: "-- ללא עוגן --",
         bodyZoneHelp: "איזה אזור גוף היה מוקד ההפעלה?",
+        sharedSummaryLabel: "סיכום משותף (גלוי ללקוח)",
+        sharedSummaryDescription: "מה תרצה שהלקוח יזכור מהפגישה.",
+        sharedSummaryPlaceholder: "סיכום ההפעלה לשיתוף עם הלקוח...",
         sharedSummary: "סיכום ההפעלה (גלוי ללקוח)",
-        sharedSummaryPlaceholder: "מה קרה בהפעלה? אילו תובנות עיקריות חקרנו?",
         sharedSummaryHelp: "זה יהיה גלוי ללקוח שלך",
         privateNotes: "הערות פרטיות (למאמן בלבד)",
         privateNotesPlaceholder: "תצפיות אישיות, שלבים הבאים, פריטי מעקב...",

@@ -7,12 +7,7 @@ import {
   useQuery,
   useAction,
 } from "wasp/client/operations";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import {
   ChevronDown,

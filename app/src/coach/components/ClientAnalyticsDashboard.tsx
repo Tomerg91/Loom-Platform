@@ -13,12 +13,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Alert, AlertDescription } from "../../components/ui/alert";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
 import { Skeleton } from "../../components/ui/skeleton";
 import { AlertTriangle, Download, FileText } from "lucide-react";
@@ -28,9 +23,7 @@ import { SensationChart } from "./charts/SensationChart";
 import { IntensityTrendChart } from "./charts/IntensityTrendChart";
 import {
   exportAnalyticsAsCSV,
-  exportSessionsAsCSV,
   type ClientAnalyticsResult,
-  type SessionData,
 } from "@src/utils/csv/exportAnalytics";
 
 interface ClientAnalyticsDashboardProps {

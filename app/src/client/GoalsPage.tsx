@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import {
   createGoal,
-  updateGoal,
   deleteGoal,
   getGoals,
   toggleMilestone,
@@ -28,7 +26,6 @@ export default function ClientGoalsPage({ user }: { user: User }) {
   });
 
   const createGoalFn = useAction(createGoal);
-  const updateGoalFn = useAction(updateGoal);
   const deleteGoalFn = useAction(deleteGoal);
   const toggleMilestoneFn = useAction(toggleMilestone);
 
@@ -68,16 +65,6 @@ export default function ClientGoalsPage({ user }: { user: User }) {
     }
   };
 
-  const handleUpdateGoal = async (data: any) => {
-    try {
-      await updateGoalFn(data);
-      await refetch();
-    } catch (error) {
-      console.error("Failed to update goal:", error);
-      throw error;
-    }
-  };
-
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await deleteGoalFn({ goalId });
@@ -110,7 +97,6 @@ export default function ClientGoalsPage({ user }: { user: User }) {
           isCoach={false}
           isLoading={isLoading}
           onCreateGoal={handleCreateGoal}
-          onUpdateGoal={handleUpdateGoal}
           onDeleteGoal={handleDeleteGoal}
           onToggleMilestone={handleToggleMilestone}
         />

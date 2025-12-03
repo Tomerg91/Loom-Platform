@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { User, Resource } from "wasp/entities";
 import {
   getCoachResources,
   getResourceDownloadUrl,
@@ -23,7 +22,7 @@ import {
 import { toast } from "../hooks/use-toast";
 import { formatRelativeTime } from "@src/shared/date";
 
-export default function ClientResourcesPage({ user }: { user: User }) {
+export default function ClientResourcesPage() {
   const { t } = useTranslation();
   const [downloadingResourceId, setDownloadingResourceId] = useState<
     string | null

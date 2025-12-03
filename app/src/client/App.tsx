@@ -8,7 +8,6 @@ import "./Main.css";
 import i18nInstance from "./i18n";
 import NavBar from "./components/NavBar/NavBar";
 import {
-  demoNavigationitems,
   marketingNavigationItems,
   getNavigationItemsForUser,
 } from "./components/NavBar/constants";

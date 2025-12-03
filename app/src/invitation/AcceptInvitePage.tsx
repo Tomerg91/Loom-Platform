@@ -10,7 +10,6 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { UserPlus } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
@@ -233,8 +232,8 @@ export default function AcceptInvitePage() {
             Accept Your Invitation
           </CardTitle>
           <p className="text-muted-foreground text-sm mt-2">
-            You've been invited to join Loom Platform as a client. Set up your
-            account below.
+            You&apos;ve been invited to join Loom Platform as a client. Set up
+            your account below.
           </p>
         </CardHeader>
         <CardContent>

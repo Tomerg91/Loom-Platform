@@ -16,6 +16,11 @@ import {
   NotificationEventType,
 } from "../notifications/eventEmitter";
 import { GoogleCalendarService } from "@src/google-calendar/service";
+import { requireCoachOwnsClient } from "../server/rbac";
+import {
+  sanitizeSensitiveTextInput,
+  sanitizeSensitiveTextOutput,
+} from "../server/security/encryption";
 
 // ============================================
 // GOOGLE CALENDAR SYNC HELPER
@@ -155,6 +160,19 @@ function calculateNextSessionDate(
 }
 
 // ============================================
+// TEXT SANITIZATION HELPERS
+// ============================================
+const normalizeSensitiveFields = <
+  T extends { privateNotes?: string | null; sharedSummary?: string | null },
+>(
+  session: T,
+) => ({
+  ...session,
+  privateNotes: sanitizeSensitiveTextOutput(session.privateNotes ?? null),
+  sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary ?? null),
+});
+
+// ============================================
 // CREATE SESSION
 // ============================================
 const createSessionSchema = z.object({
@@ -173,39 +191,17 @@ export const createSession: CreateSession<
   const { clientId, sessionDate, privateNotes, sharedSummary } =
     ensureArgsSchemaOrThrowHttpError(createSessionSchema, rawArgs);
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to create sessions");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can create sessions");
-  }
-
-  // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const { coachProfile } = await requireCoachOwnsClient(context, clientId, {
+    unauthenticatedMessage: "You must be logged in to create sessions",
+    unauthorizedMessage: "Only coaches can create sessions",
   });
-
-  if (!coachProfile) {
-    throw new HttpError(404, "Coach profile not found");
-  }
-
-  // Verify that the client belongs to this coach
-  const clientProfile = await context.entities.ClientProfile.findUnique({
-    where: { id: clientId },
-  });
-
-  if (!clientProfile || clientProfile.coachId !== coachProfile.id) {
-    throw new HttpError(403, "You do not have access to this client");
-  }
 
   // Create the session
   const session = await context.entities.CoachSession.create({
     data: {
       sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
-      privateNotes: privateNotes || null,
-      sharedSummary: sharedSummary || null,
+      privateNotes: sanitizeSensitiveTextInput(privateNotes) ?? null,
+      sharedSummary: sanitizeSensitiveTextInput(sharedSummary) ?? null,
       coachId: coachProfile.id,
       clientId: clientId,
     },
@@ -224,8 +220,8 @@ export const createSession: CreateSession<
     id: session.id,
     createdAt: session.createdAt,
     sessionDate: session.sessionDate,
-    privateNotes: session.privateNotes,
-    sharedSummary: session.sharedSummary,
+    privateNotes: sanitizeSensitiveTextOutput(session.privateNotes),
+    sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
   };
 };
 
@@ -248,30 +244,25 @@ export const updateSession: UpdateSession<
   const { sessionId, sessionDate, privateNotes, sharedSummary } =
     ensureArgsSchemaOrThrowHttpError(updateSessionSchema, rawArgs);
 
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to update sessions");
-  }
-
-  // Ensure user is a COACH
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can update sessions");
-  }
-
-  // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
-  });
-
-  if (!coachProfile) {
-    throw new HttpError(404, "Coach profile not found");
-  }
-
   // Get the session and verify ownership
   const session = await context.entities.CoachSession.findUnique({
     where: { id: sessionId },
   });
 
-  if (!session || session.coachId !== coachProfile.id) {
+  if (!session) {
+    throw new HttpError(404, "Session not found");
+  }
+
+  const { coachProfile } = await requireCoachOwnsClient(
+    context,
+    session.clientId,
+    {
+      unauthenticatedMessage: "You must be logged in to update sessions",
+      unauthorizedMessage: "Only coaches can update sessions",
+    },
+  );
+
+  if (session.coachId !== coachProfile.id) {
     throw new HttpError(403, "You do not have access to this session");
   }
 
@@ -280,8 +271,12 @@ export const updateSession: UpdateSession<
     where: { id: sessionId },
     data: {
       ...(sessionDate && { sessionDate: new Date(sessionDate) }),
-      ...(privateNotes !== undefined && { privateNotes }),
-      ...(sharedSummary !== undefined && { sharedSummary }),
+      ...(privateNotes !== undefined && {
+        privateNotes: sanitizeSensitiveTextInput(privateNotes),
+      }),
+      ...(sharedSummary !== undefined && {
+        sharedSummary: sanitizeSensitiveTextInput(sharedSummary),
+      }),
     },
   });
 
@@ -289,8 +284,8 @@ export const updateSession: UpdateSession<
     id: updatedSession.id,
     createdAt: updatedSession.createdAt,
     sessionDate: updatedSession.sessionDate,
-    privateNotes: updatedSession.privateNotes,
-    sharedSummary: updatedSession.sharedSummary,
+    privateNotes: sanitizeSensitiveTextOutput(updatedSession.privateNotes),
+    sharedSummary: sanitizeSensitiveTextOutput(updatedSession.sharedSummary),
   };
 };
 
@@ -425,7 +420,7 @@ export const getSessionsForClient: GetSessionsForClient<
     const publicSessions: SessionResponsePublic[] = sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
-      sharedSummary: session.sharedSummary,
+      sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
       somaticAnchor: session.somaticAnchor,
       resources: session.resources.map((r) => ({
         id: r.id,
@@ -485,8 +480,7 @@ export const getSessionsForClient: GetSessionsForClient<
       id: session.id,
       createdAt: session.createdAt,
       sessionDate: session.sessionDate,
-      privateNotes: session.privateNotes,
-      sharedSummary: session.sharedSummary,
+      ...normalizeSensitiveFields(session),
     }));
 
     const totalPages = Math.ceil(total / limit);
@@ -556,7 +550,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     return sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
-      sharedSummary: session.sharedSummary,
+      sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
       somaticAnchor: session.somaticAnchor,
       resources: session.resources.map((r) => ({
         id: r.id,
@@ -607,7 +601,7 @@ export const getRecentSessionsForClient: GetRecentSessionsForClient<
     return sessions.map((session) => ({
       id: session.id,
       sessionDate: session.sessionDate,
-      sharedSummary: session.sharedSummary,
+      sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
       somaticAnchor: session.somaticAnchor,
       resources: session.resources.map((r) => ({
         id: r.id,
@@ -677,33 +671,10 @@ export const logSession: LogSession<
   // ============================================
   // AUTHENTICATION & AUTHORIZATION
   // ============================================
-  if (!context.user) {
-    throw new HttpError(401, "You must be logged in to log sessions");
-  }
-
-  if (context.user.role !== "COACH") {
-    throw new HttpError(403, "Only coaches can log sessions");
-  }
-
-  // Get the coach profile
-  const coachProfile = await context.entities.CoachProfile.findUnique({
-    where: { userId: context.user.id },
+  const { coachProfile } = await requireCoachOwnsClient(context, clientId, {
+    unauthenticatedMessage: "You must be logged in to log sessions",
+    unauthorizedMessage: "Only coaches can log sessions",
   });
-
-  if (!coachProfile) {
-    throw new HttpError(404, "Coach profile not found");
-  }
-
-  // ============================================
-  // VALIDATE CLIENT OWNERSHIP
-  // ============================================
-  const clientProfile = await context.entities.ClientProfile.findUnique({
-    where: { id: clientId },
-  });
-
-  if (!clientProfile || clientProfile.coachId !== coachProfile.id) {
-    throw new HttpError(403, "You do not have access to this client");
-  }
 
   // ============================================
   // VALIDATE RESOURCES (if provided)
@@ -743,8 +714,8 @@ export const logSession: LogSession<
       sessionDate: sessionDate ? new Date(sessionDate) : new Date(),
       sessionNumber: sessionNumber,
       topic: topic || null,
-      privateNotes: privateNotes || null,
-      sharedSummary: sharedSummary || null,
+      privateNotes: sanitizeSensitiveTextInput(privateNotes) ?? null,
+      sharedSummary: sanitizeSensitiveTextInput(sharedSummary) ?? null,
       somaticAnchor: somaticAnchor || null,
       coachId: coachProfile.id,
       clientId: clientId,
@@ -791,8 +762,8 @@ export const logSession: LogSession<
     sessionNumber: session.sessionNumber,
     sessionDate: session.sessionDate,
     topic: session.topic,
-    privateNotes: session.privateNotes,
-    sharedSummary: session.sharedSummary,
+    privateNotes: sanitizeSensitiveTextOutput(session.privateNotes),
+    sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
     somaticAnchor: session.somaticAnchor,
   };
 };

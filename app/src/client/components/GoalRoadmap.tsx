@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Target,
   Calendar,
@@ -10,18 +10,10 @@ import {
   ChevronUp,
   Plus,
   Trash2,
-  AlertCircle,
   TrendingUp,
   Zap,
 } from "lucide-react";
-import {
-  format,
-  isPast,
-  isToday,
-  isTomorrow,
-  isWithinInterval,
-  addDays,
-} from "date-fns";
+import { format, isPast, isToday, isTomorrow } from "date-fns";
 import {
   Card,
   CardContent,
@@ -78,7 +70,6 @@ interface GoalRoadmapProps {
   clientId: string;
   isCoach?: boolean;
   onCreateGoal?: (data: any) => Promise<void>;
-  onUpdateGoal?: (data: any) => Promise<void>;
   onDeleteGoal?: (goalId: string) => Promise<void>;
   onToggleMilestone?: (
     milestoneId: string,
@@ -219,7 +210,6 @@ export default function GoalRoadmap({
   clientId,
   isCoach = false,
   onCreateGoal,
-  onUpdateGoal,
   onDeleteGoal,
   onToggleMilestone,
   isLoading = false,
@@ -315,6 +305,18 @@ export default function GoalRoadmap({
     return format(dateObj, "MMM d, yyyy");
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-48 items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading goals&hellip;</p>
+      </div>
+    );
+  }
+
+  const headerSubtitle = isCoach
+    ? "Monitor and support your client goals with clear milestones"
+    : "Co-create and track your goals with clear milestones";
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 space-y-8">
       <Celebration show={celebrationGoalId !== null} />
@@ -324,9 +326,7 @@ export default function GoalRoadmap({
         <h1 className="text-4xl font-bold text-gray-900">
           Goal & Milestone Roadmap
         </h1>
-        <p className="text-gray-600">
-          Co-create and track your goals with clear milestones
-        </p>
+        <p className="text-gray-600">{headerSubtitle}</p>
       </div>
 
       {/* DASHBOARD OVERVIEW */}
@@ -390,10 +390,14 @@ export default function GoalRoadmap({
             <div className="space-y-6">
               {/* Goal Title */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="goal-title-input"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Goal Title
                 </label>
                 <Input
+                  id="goal-title-input"
                   placeholder="e.g., Complete project X by end of quarter"
                   value={newGoalData.title}
                   onChange={(e) =>
@@ -405,7 +409,10 @@ export default function GoalRoadmap({
 
               {/* Goal Type */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="goal-type-select"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Goal Type
                 </label>
                 <Select
@@ -414,7 +421,7 @@ export default function GoalRoadmap({
                     setNewGoalData({ ...newGoalData, type: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="goal-type-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -429,11 +436,15 @@ export default function GoalRoadmap({
 
               {/* Due Date */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="goal-due-date"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Due Date
                 </label>
                 <Input
                   type="date"
+                  id="goal-due-date"
                   value={newGoalData.dueDate}
                   onChange={(e) =>
                     setNewGoalData({ ...newGoalData, dueDate: e.target.value })
@@ -443,9 +454,9 @@ export default function GoalRoadmap({
 
               {/* Milestones */}
               <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-gray-700">
                   Milestones (optional)
-                </label>
+                </p>
                 {newGoalData.milestones.map((milestone, index) => (
                   <Input
                     key={index}

@@ -59,23 +59,28 @@ const addFileToDbInputSchema = z.object({
 type AddFileToDbInput = z.infer<typeof addFileToDbInputSchema>;
 
 export const addFileToDb: AddFileToDb<AddFileToDbInput, File> = async (
-  args,
+  rawArgs,
   context,
 ) => {
   if (!context.user) {
     throw new HttpError(401);
   }
 
-  const fileExists = await checkFileExistsInS3({ s3Key: args.s3Key });
+  const { s3Key, fileType, fileName } = ensureArgsSchemaOrThrowHttpError(
+    addFileToDbInputSchema,
+    rawArgs,
+  );
+
+  const fileExists = await checkFileExistsInS3({ s3Key });
   if (!fileExists) {
     throw new HttpError(404, "File not found in S3.");
   }
 
   return context.entities.File.create({
     data: {
-      name: args.fileName,
-      s3Key: args.s3Key,
-      type: args.fileType,
+      name: fileName,
+      s3Key,
+      type: fileType,
       user: { connect: { id: context.user.id } },
     },
   });
@@ -150,16 +155,21 @@ const deleteFileInputSchema = z.object({
 type DeleteFileInput = z.infer<typeof deleteFileInputSchema>;
 
 export const deleteFile: DeleteFile<DeleteFileInput, File> = async (
-  args,
+  rawArgs,
   context,
 ) => {
   if (!context.user) {
     throw new HttpError(401);
   }
 
+  const { id } = ensureArgsSchemaOrThrowHttpError(
+    deleteFileInputSchema,
+    rawArgs,
+  );
+
   const deletedFile = await context.entities.File.update({
     where: {
-      id: args.id,
+      id,
       user: {
         id: context.user.id,
       },

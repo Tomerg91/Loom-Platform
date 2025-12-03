@@ -1,4 +1,3 @@
-import type { HttpError } from "wasp/server";
 import { HttpError as WaspHttpError } from "wasp/server";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "@src/server/validation";

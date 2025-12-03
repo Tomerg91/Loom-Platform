@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { User } from "wasp/entities";
 import { getClientInsights, useQuery } from "wasp/client/operations";
@@ -20,8 +20,18 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-// TODO: Install recharts package to fix this import
-// import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  type TooltipProps,
+} from "recharts";
 
 type BodyZone =
   | "HEAD"
@@ -36,8 +46,16 @@ type BodyZone =
 
 type TimeRange = "30days" | "3months" | "allTime";
 
-function ClientInsightsPageContent({ user: _user }: { user: User }) {
-  void _user;
+const chartColors = [
+  "#2563eb",
+  "#22c55e",
+  "#a855f7",
+  "#f59e0b",
+  "#f97316",
+  "#0ea5e9",
+];
+
+function ClientInsightsPageContent({ user }: { user: User }) {
   const { clientId: clientIdParam } = useParams<{ clientId: string }>();
   const clientId = clientIdParam?.trim();
 
@@ -45,7 +63,7 @@ function ClientInsightsPageContent({ user: _user }: { user: User }) {
     return <MissingClientInsightsNotice />;
   }
 
-  return <ClientInsightsView clientId={clientId} />;
+  return <ClientInsightsView user={user} clientId={clientId} />;
 }
 
 function MissingClientInsightsNotice() {
@@ -81,7 +99,13 @@ function MissingClientInsightsNotice() {
   );
 }
 
-function ClientInsightsView({ clientId }: { clientId: string }) {
+function ClientInsightsView({
+  user,
+  clientId,
+}: {
+  user: User;
+  clientId: string;
+}) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("30days");
@@ -97,13 +121,10 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
   });
 
   // Get body zone labels
-  const getBodyZoneLabel = useCallback(
-    (zone: BodyZone): string => {
-      const zoneKey = `somatic.bodyZones.${zone}`;
-      return t(zoneKey, zone);
-    },
-    [t],
-  );
+  const getBodyZoneLabel = (zone: BodyZone): string => {
+    const zoneKey = `somatic.bodyZones.${zone}`;
+    return t(zoneKey, zone);
+  };
 
   // Prepare data for charts
   const sensationChartData = useMemo(() => {
@@ -121,13 +142,15 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
     if (!insightsData || insightsData.hasInsufficientData) {
       return [];
     }
-    return insightsData.bodyZoneActivity.map((item) => ({
-      zone: getBodyZoneLabel(item.bodyZone),
-      count: item.count,
-      percentage: item.percentage,
-      bodyZone: item.bodyZone,
-    }));
-  }, [getBodyZoneLabel, insightsData]);
+    return insightsData.bodyZoneActivity
+      .map((item) => ({
+        zone: getBodyZoneLabel(item.bodyZone),
+        count: item.count,
+        percentage: item.percentage,
+        bodyZone: item.bodyZone,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [insightsData, t]);
 
   // Time range label mapping
   const timeRangeLabels: Record<TimeRange, string> = {
@@ -136,8 +159,10 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
     allTime: t("insights.timeRange.allTime", "All Time"),
   };
 
+  const isInitialLoading = isLoading && !insightsData;
+
   // Loading state
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <div className="mt-10 px-6 pb-12">
         <div className="max-w-4xl mx-auto space-y-4">
@@ -305,6 +330,11 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
             <p className="text-sm text-gray-500 mt-1">
               {timeRangeLabels[timeRange]} • {insightsData.totalLogs} logs
             </p>
+            {(user.username || (user as any).email) && (
+              <p className="text-xs text-gray-500">
+                Coach: {user.username || (user as any).email}
+              </p>
+            )}
           </div>
         </div>
 
@@ -380,40 +410,15 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {sensationChartData.length > 0 ? (
-                <div className="space-y-3">
-                  {sensationChartData.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm text-gray-900">
-                            {item.sensation}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {item.count} {t("insights.sensations.logs", "logs")}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${item.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className="text-xs font-semibold text-gray-700 ml-3 whitespace-nowrap">
-                        {item.percentage}%
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">
-                  {t("insights.noData", "No sensation data available")}
-                </p>
-              )}
+              <TopSensationsChart
+                data={sensationChartData}
+                isLoading={isLoading}
+                logsLabel={t("insights.sensations.logs", "logs")}
+                noDataMessage={t(
+                  "insights.noData",
+                  "No sensation data available",
+                )}
+              />
             </CardContent>
           </Card>
 
@@ -425,48 +430,177 @@ function ClientInsightsView({ clientId }: { clientId: string }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {bodyZoneChartData.length > 0 ? (
-                <div className="space-y-3">
-                  {bodyZoneChartData
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 5)
-                    .map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm text-gray-900">
-                              {item.zone}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {item.count}{" "}
-                              {t("insights.sensations.logs", "logs")}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-emerald-600 h-2 rounded-full"
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-700 ml-3 whitespace-nowrap">
-                          {item.percentage}%
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">
-                  {t("insights.noData", "No body zone data available")}
-                </p>
-              )}
+              <BodyZoneActivityChart
+                data={bodyZoneChartData}
+                isLoading={isLoading}
+                logsLabel={t("insights.sensations.logs", "logs")}
+                noDataMessage={t(
+                  "insights.noData",
+                  "No body zone data available",
+                )}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ChartLoadingPlaceholder() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-6 w-32" />
+      <Skeleton className="h-64 w-full" />
+    </div>
+  );
+}
+
+function InsightsTooltip({
+  active,
+  payload,
+  label,
+  logsLabel,
+}: TooltipProps<number, string> & { logsLabel: string }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const value = payload[0]?.value;
+  if (typeof value !== "number") {
+    return null;
+  }
+
+  const percentage = payload[0]?.payload?.percentage;
+
+  return (
+    <div className="rounded-md border bg-white px-3 py-2 shadow-sm">
+      <div className="text-sm font-semibold text-gray-900">{label}</div>
+      <div className="text-sm text-gray-700">
+        {value} {logsLabel}
+        {typeof percentage === "number" ? ` • ${percentage}%` : null}
+      </div>
+    </div>
+  );
+}
+
+function TopSensationsChart({
+  data,
+  isLoading,
+  logsLabel,
+  noDataMessage,
+}: {
+  data: { sensation: string; count: number; percentage: number }[];
+  isLoading: boolean;
+  logsLabel: string;
+  noDataMessage: string;
+}) {
+  if (isLoading) {
+    return <ChartLoadingPlaceholder />;
+  }
+
+  if (!data.length) {
+    return <p className="text-gray-500 text-center py-4">{noDataMessage}</p>;
+  }
+
+  return (
+    <div className="h-80">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{ top: 10, right: 16, left: 0, bottom: 40 }}
+          barSize={32}
+        >
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="sensation"
+            height={60}
+            interval={0}
+            angle={-20}
+            textAnchor="end"
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+          <Tooltip
+            content={(props) => (
+              <InsightsTooltip {...props} logsLabel={logsLabel} />
+            )}
+          />
+          <Legend />
+          <Bar dataKey="count" name={logsLabel} radius={[6, 6, 0, 0]}>
+            {data.map((entry, index) => (
+              <Cell
+                key={entry.sensation}
+                fill={chartColors[index % chartColors.length]}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function BodyZoneActivityChart({
+  data,
+  isLoading,
+  logsLabel,
+  noDataMessage,
+}: {
+  data: {
+    zone: string;
+    count: number;
+    percentage: number;
+    bodyZone: BodyZone;
+  }[];
+  isLoading: boolean;
+  logsLabel: string;
+  noDataMessage: string;
+}) {
+  const chartData = data.slice(0, 8);
+
+  if (isLoading) {
+    return <ChartLoadingPlaceholder />;
+  }
+
+  if (!chartData.length) {
+    return <p className="text-gray-500 text-center py-4">{noDataMessage}</p>;
+  }
+
+  return (
+    <div className="h-80">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          margin={{ top: 10, right: 16, left: 0, bottom: 40 }}
+          barSize={32}
+        >
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="zone"
+            height={60}
+            interval={0}
+            angle={-15}
+            textAnchor="end"
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+          <Tooltip
+            content={(props) => (
+              <InsightsTooltip {...props} logsLabel={logsLabel} />
+            )}
+          />
+          <Legend />
+          <Bar dataKey="count" name={logsLabel} radius={[6, 6, 0, 0]}>
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`${entry.bodyZone}-${index}`}
+                fill={chartColors[index % chartColors.length]}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

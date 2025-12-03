@@ -1,4 +1,5 @@
 import type { CookieConsentConfig } from "vanilla-cookieconsent";
+import { LEGAL_LINKS } from "../../../shared/legalLinks";
 
 declare global {
   interface Window {
@@ -65,9 +66,9 @@ const getConfig = () => {
                   return;
                 }
                 window.dataLayer = window.dataLayer || [];
-                function gtag(..._args: unknown[]) {
-                  (window.dataLayer as Array<any>).push(arguments);
-                }
+                const gtag = (...args: unknown[]) => {
+                  (window.dataLayer as Array<unknown>).push(args);
+                };
                 gtag("js", new Date());
                 gtag("config", GA_ANALYTICS_ID);
 
@@ -97,10 +98,9 @@ const getConfig = () => {
             acceptAllBtn: "Accept all",
             acceptNecessaryBtn: "Reject all",
             // showPreferencesBtn: 'Manage Individual preferences', // (OPTIONAL) Activates the preferences modal
-            // TODO: Add your own privacy policy and terms and conditions links below.
             footer: `
-            <a href="<your-url-here>" target="_blank">Privacy Policy</a>
-            <a href="<your-url-here>" target="_blank">Terms and Conditions</a>
+            <a href="${LEGAL_LINKS.privacyPolicyUrl}" target="_blank">Privacy Policy</a>
+            <a href="${LEGAL_LINKS.termsOfServiceUrl}" target="_blank">Terms and Conditions</a>
                     `,
           },
           // The showPreferencesBtn activates this modal to manage individual preferences https://cookieconsent.orestbida.com/reference/configuration-reference.html#translation-preferencesmodal

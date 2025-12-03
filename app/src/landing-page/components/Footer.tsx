@@ -30,7 +30,7 @@ export default function Footer({
             <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
               {t("landing.footer.app")}
             </h3>
-            <ul role="list" className="mt-6 space-y-4">
+            <ul className="mt-6 space-y-4">
               {footerNavigation.app.map((item) => (
                 <li key={item.nameKey || item.name}>
                   <a
@@ -47,7 +47,7 @@ export default function Footer({
             <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-white">
               {t("landing.footer.company")}
             </h3>
-            <ul role="list" className="mt-6 space-y-4">
+            <ul className="mt-6 space-y-4">
               {footerNavigation.company.map((item) => (
                 <li key={item.nameKey || item.name}>
                   <a
