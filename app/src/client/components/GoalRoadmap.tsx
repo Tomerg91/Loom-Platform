@@ -78,6 +78,27 @@ interface GoalRoadmapProps {
   isLoading?: boolean;
 }
 
+const CELEBRATION_POSITIONS = [
+  "celebration-left-5",
+  "celebration-left-15",
+  "celebration-left-25",
+  "celebration-left-35",
+  "celebration-left-45",
+  "celebration-left-55",
+  "celebration-left-65",
+  "celebration-left-75",
+  "celebration-left-85",
+  "celebration-left-95",
+];
+
+const CELEBRATION_DURATIONS = [
+  "celebration-duration-2",
+  "celebration-duration-2-5",
+  "celebration-duration-3",
+];
+
+const CELEBRATION_SYMBOLS = ["🎉", "✨", "🌟", "⭐"];
+
 // ============================================
 // CELEBRATION COMPONENT
 // ============================================
@@ -85,29 +106,23 @@ interface GoalRoadmapProps {
 const Celebration: React.FC<{ show: boolean }> = ({ show }) => {
   if (!show) return null;
 
+  const celebrationPieces = Array.from({ length: 12 }, (_, index) => ({
+    positionClass:
+      CELEBRATION_POSITIONS[index % CELEBRATION_POSITIONS.length],
+    durationClass: CELEBRATION_DURATIONS[index % CELEBRATION_DURATIONS.length],
+    symbol: CELEBRATION_SYMBOLS[index % CELEBRATION_SYMBOLS.length],
+  }));
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {[...Array(12)].map((_, i) => (
+      {celebrationPieces.map((piece, i) => (
         <div
           key={i}
-          className="absolute animate-bounce"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: "-20px",
-            animation: `celebration ${2 + Math.random()}s ease-in forwards`,
-          }}
+          className={`celebration-piece ${piece.positionClass} ${piece.durationClass}`}
         >
-          <span className="text-2xl">
-            {["🎉", "✨", "🌟", "⭐"][Math.floor(Math.random() * 4)]}
-          </span>
+          <span className="text-2xl">{piece.symbol}</span>
         </div>
       ))}
-      <style>{`
-        @keyframes celebration {
-          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };

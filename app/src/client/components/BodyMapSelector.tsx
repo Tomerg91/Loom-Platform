@@ -252,24 +252,15 @@ export default function BodyMapSelector({
         ) : (
           <div className="flex items-center justify-center gap-4 text-xs">
             <div className="flex items-center gap-1">
-              <div
-                className="w-3 h-3 rounded"
-                style={{ backgroundColor: "#10b981" }}
-              ></div>
+              <div className="w-3 h-3 rounded bg-emerald-500"></div>
               <span>{t("somatic.intensityLow")}</span>
             </div>
             <div className="flex items-center gap-1">
-              <div
-                className="w-3 h-3 rounded"
-                style={{ backgroundColor: "#f59e0b" }}
-              ></div>
+              <div className="w-3 h-3 rounded bg-amber-500"></div>
               <span>{t("somatic.intensityMedium")}</span>
             </div>
             <div className="flex items-center gap-1">
-              <div
-                className="w-3 h-3 rounded"
-                style={{ backgroundColor: "#ef4444" }}
-              ></div>
+              <div className="w-3 h-3 rounded bg-red-500"></div>
               <span>{t("somatic.intensityHigh")}</span>
             </div>
           </div>
