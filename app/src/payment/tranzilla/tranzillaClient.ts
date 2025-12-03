@@ -33,10 +33,7 @@ function getTranzillaApiSecretForSignature(): string {
  */
 function createTranzillaHmacSignature(data: string): string {
   const secretString = getTranzillaApiSecretForSignature();
-  return crypto
-    .createHmac("sha256", secretString)
-    .update(data)
-    .digest("hex");
+  return crypto.createHmac("sha256", secretString).update(data).digest("hex");
 }
 
 /**
@@ -72,7 +69,7 @@ export function buildTranzillaCheckoutUrl(params: {
   const terminalName = getTranzillaTerminalName();
   const baseUrl = `https://direct.tranzilla.com/${terminalName}/iframe.php`;
 
-  const apiUrl = `${config.frontendUrl.replace(/\/$/, '')}/api`;
+  const apiUrl = `${config.frontendUrl.replace(/\/$/, "")}/api`;
   const queryParams = new URLSearchParams({
     sum: params.amount.toString(),
     currency: "1", // ILS
@@ -211,7 +208,9 @@ export function getTranzillaErrorMessage(response: string): string {
  * - X-tranzila-api-nonce: Random 40-byte string
  * - X-tranzila-api-access-token: HMAC-SHA256(app_key + secret + request_time + nonce)
  */
-export function generateTranzillaAuthHeaders(appKey: string): Record<string, string> {
+export function generateTranzillaAuthHeaders(
+  appKey: string,
+): Record<string, string> {
   const apiSecret = getTranzillaApiSecretForSignature();
   const requestTime = Date.now().toString();
 
@@ -241,7 +240,12 @@ export async function chargeTranzillaToken(params: {
   amount: number;
   planId: PaymentPlanId;
   userId: string;
-}): Promise<{ success: boolean; transactionId?: string; response?: string; error?: string }> {
+}): Promise<{
+  success: boolean;
+  transactionId?: string;
+  response?: string;
+  error?: string;
+}> {
   try {
     const terminalName = getTranzillaTerminalName();
     const appKey = terminalName; // Use terminal name as app key for token charging

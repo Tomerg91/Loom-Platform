@@ -1,7 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@src/components/ui/card";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  addMonths,
+  subMonths,
+} from "date-fns";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@src/components/ui/card";
 import { Button } from "@src/components/ui/button";
 import { Badge } from "@src/components/ui/badge";
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
@@ -40,7 +54,9 @@ export function AvailabilityCalendar({
   // Get slots for a specific date
   const getSlotsByDate = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
-    return slots.filter((slot) => format(new Date(slot.startTime), "yyyy-MM-dd") === dateStr);
+    return slots.filter(
+      (slot) => format(new Date(slot.startTime), "yyyy-MM-dd") === dateStr,
+    );
   };
 
   // Build calendar grid
@@ -59,7 +75,10 @@ export function AvailabilityCalendar({
   }
 
   const selectedDateSlots = selectedDate
-    ? slots.filter((slot) => format(new Date(slot.startTime), "yyyy-MM-dd") === selectedDate)
+    ? slots.filter(
+        (slot) =>
+          format(new Date(slot.startTime), "yyyy-MM-dd") === selectedDate,
+      )
     : [];
 
   return (
@@ -70,18 +89,10 @@ export function AvailabilityCalendar({
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle>{format(currentDate, "MMMM yyyy")}</CardTitle>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={previousMonth}
-              >
+              <Button variant="outline" size="sm" onClick={previousMonth}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={nextMonth}
-              >
+              <Button variant="outline" size="sm" onClick={nextMonth}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -90,7 +101,10 @@ export function AvailabilityCalendar({
             {/* Weekday Headers */}
             <div className="grid grid-cols-7 gap-2 mb-4">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
+                <div
+                  key={day}
+                  className="text-center text-sm font-semibold text-gray-600 py-2"
+                >
                   {day}
                 </div>
               ))}
@@ -103,7 +117,8 @@ export function AvailabilityCalendar({
                   {week.map((day) => {
                     const dateStr = format(day, "yyyy-MM-dd");
                     const daySlots = getSlotsByDate(day);
-                    const isCurrentMonth = format(day, "yyyy-MM") === format(currentDate, "yyyy-MM");
+                    const isCurrentMonth =
+                      format(day, "yyyy-MM") === format(currentDate, "yyyy-MM");
                     const isSelected = selectedDate === dateStr;
 
                     return (
@@ -116,11 +131,13 @@ export function AvailabilityCalendar({
                           isCurrentMonth && "hover:border-blue-300",
                           isSelected && "border-blue-500 bg-blue-50",
                           !isSelected && "border-gray-200",
-                          daySlots.length > 0 && "font-medium"
+                          daySlots.length > 0 && "font-medium",
                         )}
                       >
                         <div className="text-center">
-                          <div className="font-semibold">{format(day, "d")}</div>
+                          <div className="font-semibold">
+                            {format(day, "d")}
+                          </div>
                           {daySlots.length > 0 && (
                             <div className="text-xs mt-1">
                               <Badge variant="secondary" className="text-xs">
@@ -144,12 +161,16 @@ export function AvailabilityCalendar({
         <Card className="sticky top-4">
           <CardHeader>
             <CardTitle className="text-lg">
-              {selectedDate ? format(new Date(selectedDate), "EEEE, MMM d") : t("availability.selectDate")}
+              {selectedDate
+                ? format(new Date(selectedDate), "EEEE, MMM d")
+                : t("availability.selectDate")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {selectedDate && selectedDateSlots.length === 0 ? (
-              <p className="text-sm text-gray-600">{t("availability.noSlots")}</p>
+              <p className="text-sm text-gray-600">
+                {t("availability.noSlots")}
+              </p>
             ) : (
               selectedDateSlots.map((slot) => (
                 <div
@@ -158,7 +179,7 @@ export function AvailabilityCalendar({
                     "p-3 rounded-lg border-2 space-y-2",
                     slot.status === "OPEN" && "border-green-200 bg-green-50",
                     slot.status === "HELD" && "border-yellow-200 bg-yellow-50",
-                    slot.status === "BOOKED" && "border-blue-200 bg-blue-50"
+                    slot.status === "BOOKED" && "border-blue-200 bg-blue-50",
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -183,8 +204,8 @@ export function AvailabilityCalendar({
                       slot.status === "OPEN"
                         ? "default"
                         : slot.status === "HELD"
-                        ? "secondary"
-                        : "outline"
+                          ? "secondary"
+                          : "outline"
                     }
                     className="text-xs"
                   >
