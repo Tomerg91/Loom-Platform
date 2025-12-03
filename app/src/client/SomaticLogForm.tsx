@@ -64,8 +64,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
     maxRetries: 3,
     initialDelayMs: 1000,
   });
-  const { parseError, getRecoveryAction, shouldShowRetryButton } =
-    useSomaticLogErrorHandler();
+  const { parseError, shouldShowRetryButton } = useSomaticLogErrorHandler();
 
   // ============================================
   // VALIDATION STATE

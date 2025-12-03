@@ -3,7 +3,6 @@ import { emailSender } from "wasp/server/email";
 import {
   chargeTranzillaToken,
   getTranzillaPlanPrice,
-  getTranzillaErrorMessage,
 } from "./tranzilla/tranzillaClient";
 import { getSubscriptionRenewalSuccessEmailContent } from "@src/notifications/templates/subscriptionRenewalSuccess";
 import { getSubscriptionRenewalFailedEmailContent } from "@src/notifications/templates/subscriptionRenewalFailed";
