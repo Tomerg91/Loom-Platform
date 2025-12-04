@@ -41,8 +41,9 @@ function createTranzillaHmacSignature(data: string): string {
  */
 export function getTranzillaPlanPrice(planId: PaymentPlanId): number {
   const envVarMap: Record<PaymentPlanId, string> = {
-    hobby: "PAYMENTS_TRANZILLA_HOBBY_PRICE",
+    starter: "PAYMENTS_TRANZILLA_STARTER_PRICE",
     pro: "PAYMENTS_TRANZILLA_PRO_PRICE",
+    clinic: "PAYMENTS_TRANZILLA_CLINIC_PRICE",
     credits10: "PAYMENTS_TRANZILLA_CREDITS_PRICE",
   };
 

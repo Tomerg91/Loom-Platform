@@ -177,6 +177,10 @@ type SomaticLogResponse = {
   sharedWithCoach: boolean;
 };
 
+import { getHistoryRetentionDays } from "../auth/permissions";
+
+// ... (existing imports)
+
 export const getSomaticLogs: GetSomaticLogs<
   GetSomaticLogsInput,
   SomaticLogResponse[]
@@ -191,14 +195,37 @@ export const getSomaticLogs: GetSomaticLogs<
       "You must be logged in to view somatic logs",
     );
 
+    // Calculate retention limit
+    const retentionDays = getHistoryRetentionDays(authenticatedContext.user);
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - retentionDays);
+
     // Build filter conditions with type safety
     const whereConditions: any = {};
-    if (args.startDate) {
+
+    // Apply retention limit if not infinite
+    if (retentionDays !== Infinity) {
       whereConditions.createdAt = {
-        ...whereConditions.createdAt,
-        gte: args.startDate,
+        gte: retentionDate,
       };
     }
+
+    if (args.startDate) {
+      // If user requested a start date, ensure it's within retention period
+      if (retentionDays !== Infinity && args.startDate < retentionDate) {
+        // If requested start date is older than retention, clamp to retention date
+        whereConditions.createdAt = {
+          ...whereConditions.createdAt,
+          gte: retentionDate,
+        };
+      } else {
+        whereConditions.createdAt = {
+          ...whereConditions.createdAt,
+          gte: args.startDate,
+        };
+      }
+    }
+
     if (args.endDate) {
       whereConditions.createdAt = {
         ...whereConditions.createdAt,

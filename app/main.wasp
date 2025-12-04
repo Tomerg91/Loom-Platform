@@ -223,7 +223,7 @@ action updateOnboardingStatus {
 //#region Invitations
 action inviteClient {
   fn: import { inviteClient } from "@src/invitation/operations",
-  entities: [User, CoachProfile, ClientInvitation]
+  entities: [User, CoachProfile, ClientInvitation, ClientProfile]
 }
 
 action acceptInvitation {

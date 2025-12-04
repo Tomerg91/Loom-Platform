@@ -123,7 +123,8 @@ async function handleInvoicePaid(
       );
       break;
     case PaymentPlanId.Pro:
-    case PaymentPlanId.Hobby:
+    case PaymentPlanId.Starter:
+    case PaymentPlanId.Clinic:
       await updateUserSubscriptionDetails(
         {
           customerId,

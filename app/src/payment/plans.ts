@@ -8,8 +8,9 @@ export enum SubscriptionStatus {
 }
 
 export enum PaymentPlanId {
-  Hobby = "hobby",
+  Starter = "starter",
   Pro = "pro",
+  Clinic = "clinic",
   Credits10 = "credits10",
 }
 
@@ -28,16 +29,12 @@ export type PaymentPlanEffect =
   | { kind: "credits"; amount: number };
 
 export const paymentPlans = {
-  [PaymentPlanId.Hobby]: {
+  [PaymentPlanId.Starter]: {
     getPaymentProcessorPlanId: () => {
-      // Check which payment processor is active
-      // For Tranzilla, return the plan ID (which is used to lookup price)
-      // For Stripe/LemonSqueezy, return their specific plan ID
       try {
-        return requireNodeEnvVar("PAYMENTS_HOBBY_SUBSCRIPTION_PLAN_ID");
+        return requireNodeEnvVar("PAYMENTS_STARTER_SUBSCRIPTION_PLAN_ID");
       } catch {
-        // If Stripe/LS env var not set, assume Tranzilla
-        return PaymentPlanId.Hobby;
+        return PaymentPlanId.Starter;
       }
     },
     effect: { kind: "subscription" },
@@ -47,8 +44,17 @@ export const paymentPlans = {
       try {
         return requireNodeEnvVar("PAYMENTS_PRO_SUBSCRIPTION_PLAN_ID");
       } catch {
-        // If Stripe/LS env var not set, assume Tranzilla
         return PaymentPlanId.Pro;
+      }
+    },
+    effect: { kind: "subscription" },
+  },
+  [PaymentPlanId.Clinic]: {
+    getPaymentProcessorPlanId: () => {
+      try {
+        return requireNodeEnvVar("PAYMENTS_CLINIC_SUBSCRIPTION_PLAN_ID");
+      } catch {
+        return PaymentPlanId.Clinic;
       }
     },
     effect: { kind: "subscription" },
@@ -58,7 +64,6 @@ export const paymentPlans = {
       try {
         return requireNodeEnvVar("PAYMENTS_CREDITS_10_PLAN_ID");
       } catch {
-        // If Stripe/LS env var not set, assume Tranzilla
         return PaymentPlanId.Credits10;
       }
     },
@@ -68,8 +73,9 @@ export const paymentPlans = {
 
 export function prettyPaymentPlanName(planId: PaymentPlanId): string {
   const planToName: Record<PaymentPlanId, string> = {
-    [PaymentPlanId.Hobby]: "Hobby",
+    [PaymentPlanId.Starter]: "Starter",
     [PaymentPlanId.Pro]: "Pro",
+    [PaymentPlanId.Clinic]: "Clinic",
     [PaymentPlanId.Credits10]: "10 Credits",
   };
   return planToName[planId];

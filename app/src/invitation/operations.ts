@@ -20,6 +20,10 @@ const inviteClientSchema = z.object({
 
 type InviteClientInput = z.infer<typeof inviteClientSchema>;
 
+import { getMaxClients } from "../auth/permissions";
+
+// ... (existing imports)
+
 export const inviteClient: InviteClient<InviteClientInput, void> = async (
   rawArgs,
   context,
@@ -45,6 +49,29 @@ export const inviteClient: InviteClient<InviteClientInput, void> = async (
 
   if (!coachProfile) {
     throw new HttpError(404, "Coach profile not found");
+  }
+
+  // Check client limit
+  // We count both existing clients AND pending invitations towards the limit
+  const currentClientCount = await context.entities.ClientProfile.count({
+    where: { coachId: coachProfile.id },
+  });
+
+  const pendingInvitationCount = await context.entities.ClientInvitation.count({
+    where: {
+      coachId: coachProfile.id,
+      status: "PENDING",
+    },
+  });
+
+  const totalCount = currentClientCount + pendingInvitationCount;
+  const maxClients = getMaxClients(context.user);
+
+  if (totalCount >= maxClients) {
+    throw new HttpError(
+      403,
+      `You have reached the maximum number of clients (${maxClients}) for your current plan. Please upgrade to invite more clients.`,
+    );
   }
 
   // Check if user already exists
