@@ -138,7 +138,7 @@ function ClientDetailsPageView({
     null,
   );
   const [sessionForm, setSessionForm] = useState({
-    sessionDate: new Date().toISOString().split("T")[0],
+    sessionDate: new Date().toISOString().split("T")[0]!,
     sessionTime: new Date().toTimeString().slice(0, 5),
     privateNotes: "",
     sharedSummary: "",
@@ -246,7 +246,7 @@ function ClientDetailsPageView({
     } else {
       setEditingSession(null);
       setSessionForm({
-        sessionDate: new Date().toISOString().split("T")[0],
+        sessionDate: new Date().toISOString().split("T")[0]!,
         sessionTime: new Date().toTimeString().slice(0, 5),
         privateNotes: "",
         sharedSummary: "",

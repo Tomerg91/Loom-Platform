@@ -253,6 +253,6 @@ export function generatePdfFilename(
   period: string,
 ): string {
   const sanitizedName = clientName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-  const timestamp = new Date().toISOString().split("T")[0];
+  const timestamp = new Date().toISOString().split("T")[0]!;
   return `somatic-report-${sanitizedName}-${period}-${timestamp}.pdf`;
 }

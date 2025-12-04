@@ -1,7 +1,7 @@
 import { defineUserSignupFields } from "wasp/auth/providers/types";
 import { z } from "zod";
 
-const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+const adminEmails = process.env['ADMIN_EMAILS']?.split(",") || [];
 
 // ============================================
 // EMAIL SIGNUP
@@ -125,7 +125,11 @@ export const getGitHubUserFields = defineUserSignupFields({
 });
 
 function getGithubEmailInfo(githubData: z.infer<typeof githubDataSchema>) {
-  return githubData.profile.emails[0];
+  const emailInfo = githubData.profile.emails[0];
+  if (!emailInfo) {
+    throw new Error("No email information available from GitHub");
+  }
+  return emailInfo;
 }
 
 export function getGitHubAuthConfig() {

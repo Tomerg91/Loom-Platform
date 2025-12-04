@@ -92,7 +92,7 @@ export const inviteClient: InviteClient<InviteClientInput, void> = async (
   });
 
   // Send invitation email
-  const invitationLink = `${process.env.WASP_WEB_CLIENT_URL}/accept-invite?token=${token}`;
+  const invitationLink = `${process.env['WASP_WEB_CLIENT_URL']}/accept-invite?token=${token}`;
 
   try {
     await emailSender.send({

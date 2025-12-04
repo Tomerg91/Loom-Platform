@@ -1,6 +1,6 @@
-const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY!;
-const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID!;
-const PLAUSIBLE_BASE_URL = process.env.PLAUSIBLE_BASE_URL;
+const PLAUSIBLE_API_KEY = process.env["PLAUSIBLE_API_KEY"]!;
+const PLAUSIBLE_SITE_ID = process.env["PLAUSIBLE_SITE_ID"]!;
+const PLAUSIBLE_BASE_URL = process.env["PLAUSIBLE_BASE_URL"]!;
 
 const headers = {
   "Content-Type": "application/json",
@@ -50,7 +50,7 @@ async function getTotalPageViews() {
   }
   const json = (await response.json()) as PageViewsResult;
 
-  return json.results.pageviews.value;
+  return json.results["pageviews"]?.value ?? 0;
 }
 
 async function getPrevDayViewsChangePercent() {
@@ -58,12 +58,12 @@ async function getPrevDayViewsChangePercent() {
   const today = new Date();
   const yesterday = new Date(today.setDate(today.getDate() - 1))
     .toISOString()
-    .split("T")[0];
+    .split("T")[0]!;
   const dayBeforeYesterday = new Date(
     new Date().setDate(new Date().getDate() - 2),
   )
     .toISOString()
-    .split("T")[0];
+    .split("T")[0]!;
 
   // Fetch page views for yesterday and the day before yesterday
   const pageViewsYesterday = await getPageviewsForDate(yesterday);
@@ -99,7 +99,7 @@ async function getPageviewsForDate(date: string) {
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
   const data = (await response.json()) as PageViewsResult;
-  return data.results.pageviews.value;
+  return data.results["pageviews"]?.value ?? 0;
 }
 
 export async function getSources() {

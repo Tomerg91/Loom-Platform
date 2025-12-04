@@ -22,7 +22,7 @@ export async function seedMockUsers(prismaClient: PrismaClient) {
         data: {
           ...data,
           // Auto-create CoachProfile for COACH users
-          coachProfile: data.role === "COACH" ? { create: {} } : undefined,
+          ...(data.role === "COACH" && { coachProfile: { create: {} } }),
         },
       }),
     ),
@@ -193,8 +193,8 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
     await prismaClient.somaticLog.create({
       data: {
         clientId: client1.clientProfile!.id,
-        bodyZone: bodyZones[i % bodyZones.length],
-        sensation: sensations[Math.floor(Math.random() * sensations.length)],
+        bodyZone: bodyZones[i % bodyZones.length]!,
+        sensation: sensations[Math.floor(Math.random() * sensations.length)]!,
         intensity: Math.floor(Math.random() * 10) + 1,
         note: `Test somatic log ${i + 1}`,
         createdAt: new Date(now.getTime() - (10 - i) * 24 * 60 * 60 * 1000),
@@ -215,7 +215,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
         topic: `Session ${i} - Focus Topic`,
         privateNotes: `Private coach notes for session ${i}. Client showing good progress.`,
         sharedSummary: `Session ${i} summary. Key takeaways and action items for next week.`,
-        somaticAnchor: bodyZones[i % bodyZones.length],
+        somaticAnchor: bodyZones[i % bodyZones.length]!,
         createdAt: new Date(now.getTime() - (5 - i) * 14 * 24 * 60 * 60 * 1000),
       },
     });
@@ -451,8 +451,8 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
     await prismaClient.somaticLog.create({
       data: {
         clientId: client3.clientProfile!.id,
-        bodyZone: bodyZones[i % bodyZones.length],
-        sensation: sensations[Math.floor(Math.random() * sensations.length)],
+        bodyZone: bodyZones[i % bodyZones.length]!,
+        sensation: sensations[Math.floor(Math.random() * sensations.length)]!,
         intensity: Math.floor(Math.random() * 10) + 1,
         note: `Somatic observation ${i + 1}`,
         createdAt: new Date(now.getTime() - (5 - i) * 7 * 24 * 60 * 60 * 1000),
@@ -473,7 +473,7 @@ export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
         topic: `Session ${i} Focus`,
         privateNotes: `Coach notes from session ${i}.`,
         sharedSummary: `Session ${i} recap and insights.`,
-        somaticAnchor: bodyZones[(i + 2) % bodyZones.length],
+        somaticAnchor: bodyZones[(i + 2) % bodyZones.length]!,
         createdAt: new Date(now.getTime() - (3 - i) * 14 * 24 * 60 * 60 * 1000),
       },
     });

@@ -4,7 +4,7 @@ const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12; // Recommended length for GCM
 
 function getKey(): Buffer {
-  const secret = process.env.DATA_ENCRYPTION_KEY;
+  const secret = process.env['DATA_ENCRYPTION_KEY'];
 
   if (!secret) {
     throw new Error(

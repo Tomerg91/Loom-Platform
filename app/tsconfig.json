@@ -16,7 +16,7 @@
     "moduleResolution": "bundler",
     "jsx": "preserve",
     "strict": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,

@@ -1,15 +1,15 @@
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
-const CLIENT_EMAIL = process.env.GOOGLE_ANALYTICS_CLIENT_EMAIL;
+const CLIENT_EMAIL = process.env['GOOGLE_ANALYTICS_CLIENT_EMAIL'];
 const PRIVATE_KEY = Buffer.from(
-  process.env.GOOGLE_ANALYTICS_PRIVATE_KEY!,
+  process.env['GOOGLE_ANALYTICS_PRIVATE_KEY']!,
   "base64",
 ).toString("utf-8");
-const PROPERTY_ID = process.env.GOOGLE_ANALYTICS_PROPERTY_ID;
+const PROPERTY_ID = process.env['GOOGLE_ANALYTICS_PROPERTY_ID'];
 
 const analyticsDataClient = new BetaAnalyticsDataClient({
   credentials: {
-    client_email: CLIENT_EMAIL,
+    client_email: CLIENT_EMAIL!,
     private_key: PRIVATE_KEY,
   },
 });
@@ -39,13 +39,14 @@ export async function getSources() {
   let activeUsersPerReferrer: any[] = [];
   if (response?.rows) {
     activeUsersPerReferrer = response.rows.map((row) => {
-      if (row.dimensionValues && row.metricValues) {
+      if (row.dimensionValues?.[0] && row.metricValues?.[0]) {
         return {
           source: row.dimensionValues[0].value,
           visitors: row.metricValues[0].value,
         };
       }
-    });
+      return undefined;
+    }).filter((item): item is NonNullable<typeof item> => item !== undefined);
   } else {
     throw new Error("No response from Google Analytics");
   }
@@ -79,16 +80,16 @@ async function getTotalPageViews() {
     ],
   });
   let totalViews = 0;
-  if (response?.rows) {
-    // @ts-expect-error - GA SDK returns metricValues as strings
-    totalViews = parseInt(response.rows[0].metricValues[0].value);
+  if (response?.rows && response.rows[0]?.metricValues?.[0]) {
+    // GA SDK returns metricValues as strings
+    totalViews = parseInt(response.rows[0].metricValues[0].value as string);
   } else {
     throw new Error("No response from Google Analytics");
   }
   return totalViews;
 }
 
-async function getPrevDayViewsChangePercent() {
+async function getPrevDayViewsChangePercent(): Promise<string> {
   const [response] = await analyticsDataClient.runReport({
     property: `properties/${PROPERTY_ID}`,
 
@@ -122,26 +123,25 @@ async function getPrevDayViewsChangePercent() {
   let viewsFromDayBeforeYesterday;
 
   if (response?.rows && response.rows.length === 2) {
-    // @ts-expect-error - GA SDK returns metricValues as strings
-    viewsFromYesterday = response.rows[0].metricValues[0].value;
-    // @ts-expect-error - GA SDK returns metricValues as strings
-    viewsFromDayBeforeYesterday = response.rows[1].metricValues[0].value;
+    // GA SDK returns metricValues as strings
+    viewsFromYesterday = response.rows[0]?.metricValues?.[0]?.value as string | undefined;
+    viewsFromDayBeforeYesterday = response.rows[1]?.metricValues?.[0]?.value as string | undefined;
 
     if (viewsFromYesterday && viewsFromDayBeforeYesterday) {
-      viewsFromYesterday = parseInt(viewsFromYesterday);
-      viewsFromDayBeforeYesterday = parseInt(viewsFromDayBeforeYesterday);
-      if (viewsFromYesterday === 0 || viewsFromDayBeforeYesterday === 0) {
+      const viewsYesterday = parseInt(viewsFromYesterday);
+      const viewsDayBefore = parseInt(viewsFromDayBeforeYesterday);
+      if (viewsYesterday === 0 || viewsDayBefore === 0) {
         return "0";
       }
-      console.table({ viewsFromYesterday, viewsFromDayBeforeYesterday });
+      console.table({ viewsFromYesterday: viewsYesterday, viewsFromDayBeforeYesterday: viewsDayBefore });
 
       const change =
-        ((viewsFromYesterday - viewsFromDayBeforeYesterday) /
-          viewsFromDayBeforeYesterday) *
+        ((viewsYesterday - viewsDayBefore) /
+          viewsDayBefore) *
         100;
       return change.toFixed(0);
     }
-  } else {
-    return "0";
   }
+  
+  return "0";
 }

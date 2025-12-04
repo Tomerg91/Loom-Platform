@@ -120,7 +120,7 @@ export async function computeClientAnalytics(
 
     // Accumulate weekly trend
     const weekStart = getWeekStart(log.createdAt);
-    const weekKey = weekStart.toISOString().split("T")[0];
+    const weekKey = weekStart.toISOString().split("T")[0]!;
     if (!trendMap.has(weekKey)) {
       trendMap.set(weekKey, { intensities: [], count: 0 });
     }

@@ -44,7 +44,7 @@ export const tranzillaPaymentProcessor: PaymentProcessor = {
     });
 
     // Log for debugging in development
-    if (process.env.NODE_ENV === "development") {
+    if (process.env['NODE_ENV'] === "development") {
       console.log("🔗 Tranzilla checkout URL generated:", checkoutUrl);
       console.log("   User:", userEmail);
       console.log("   Plan:", planDescription);
@@ -71,7 +71,7 @@ export const tranzillaPaymentProcessor: PaymentProcessor = {
   fetchCustomerPortalUrl: async ({ userId }: FetchCustomerPortalUrlArgs) => {
     // Tranzilla doesn't have a customer portal
     // We could build our own custom portal in the future
-    if (process.env.NODE_ENV === "development") {
+    if (process.env['NODE_ENV'] === "development") {
       console.log(
         "ℹ️  Tranzilla does not provide a customer portal. User:",
         userId,

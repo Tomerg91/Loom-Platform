@@ -11,23 +11,26 @@ const TotalRevenueCard = ({
   isLoading,
 }: DailyStatsProps) => {
   const isDeltaPositive = useMemo(() => {
-    if (!weeklyStats) return false;
-    return weeklyStats[0].totalRevenue - weeklyStats[1]?.totalRevenue > 0;
+    if (!weeklyStats || weeklyStats.length < 2) return false;
+    const current = weeklyStats[0];
+    const previous = weeklyStats[1];
+    if (!current || !previous) return false;
+    return current.totalRevenue - previous.totalRevenue > 0;
   }, [weeklyStats]);
 
   const deltaPercentage = useMemo(() => {
     if (!weeklyStats || weeklyStats.length < 2 || isLoading) return;
-    if (
-      weeklyStats[1]?.totalRevenue === 0 ||
-      weeklyStats[0]?.totalRevenue === 0
-    )
+    const current = weeklyStats[0];
+    const previous = weeklyStats[1];
+    if (!current || !previous) return;
+    if (previous.totalRevenue === 0 || current.totalRevenue === 0)
       return 0;
 
     weeklyStats.sort((a, b) => b.id - a.id);
 
     const percentage =
-      ((weeklyStats[0].totalRevenue - weeklyStats[1]?.totalRevenue) /
-        weeklyStats[1]?.totalRevenue) *
+      ((current.totalRevenue - previous.totalRevenue) /
+        previous.totalRevenue) *
       100;
     return Math.floor(percentage);
   }, [weeklyStats]);

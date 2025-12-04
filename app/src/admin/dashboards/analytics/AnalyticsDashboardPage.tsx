@@ -43,23 +43,23 @@ const Dashboard = ({ user }: { user: AuthUser }) => {
               }
             />
             <TotalRevenueCard
-              dailyStats={stats?.dailyStats}
-              weeklyStats={stats?.weeklyStats}
+              {...(stats?.dailyStats && { dailyStats: stats.dailyStats })}
+              {...(stats?.weeklyStats && { weeklyStats: stats.weeklyStats })}
               isLoading={isLoading}
             />
             <TotalPayingUsersCard
-              dailyStats={stats?.dailyStats}
+              {...(stats?.dailyStats && { dailyStats: stats.dailyStats })}
               isLoading={isLoading}
             />
             <TotalSignupsCard
-              dailyStats={stats?.dailyStats}
+              {...(stats?.dailyStats && { dailyStats: stats.dailyStats })}
               isLoading={isLoading}
             />
           </div>
 
           <div className="2xl:mt-7.5 2xl:gap-7.5 mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6">
             <RevenueAndProfitChart
-              weeklyStats={stats?.weeklyStats}
+              {...(stats?.weeklyStats && { weeklyStats: stats.weeklyStats })}
               isLoading={isLoading}
             />
 
@@ -68,19 +68,6 @@ const Dashboard = ({ user }: { user: AuthUser }) => {
             </div>
           </div>
         </div>
-
-        {!stats && (
-          <div className="bg-background/50 absolute inset-0 flex items-start justify-center">
-            <div className="bg-card rounded-lg p-8 shadow-lg">
-              <p className="text-foreground text-2xl font-bold">
-                No daily stats generated yet
-              </p>
-              <p className="text-muted-foreground mt-2 text-sm">
-                Stats will appear here once the daily stats job has run
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </DefaultLayout>
   );

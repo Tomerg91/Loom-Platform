@@ -102,7 +102,7 @@ export class EmailNotificationHandler {
           coachName,
           sessionDate: payload.sessionDate,
           time: timeString,
-          appUrl: `${process.env.WASP_WEB_CLIENT_URL}/client/sessions`,
+          appUrl: `${process.env['WASP_WEB_CLIENT_URL']}/client/sessions`,
         });
 
         await emailSender.send({
@@ -118,7 +118,7 @@ export class EmailNotificationHandler {
       } catch (error) {
         console.error("Error sending session reminder email:", error);
         // Log fallback for development
-        if (process.env.NODE_ENV === "development") {
+        if (process.env['NODE_ENV'] === "development") {
           console.log(
             `Session reminder would be sent for client ${payload.clientId} on ${payload.sessionDate}`,
           );
@@ -180,7 +180,7 @@ export class EmailNotificationHandler {
           sessionDate: session.sessionDate,
           topic: payload.topic,
           summary: payload.sharedSummary,
-          appUrl: `${process.env.WASP_WEB_CLIENT_URL}/client/sessions`,
+          appUrl: `${process.env['WASP_WEB_CLIENT_URL']}/client/sessions`,
         });
 
         await emailSender.send({
@@ -195,7 +195,7 @@ export class EmailNotificationHandler {
         );
       } catch (error) {
         console.error("Error sending session summary email:", error);
-        if (process.env.NODE_ENV === "development") {
+        if (process.env['NODE_ENV'] === "development") {
           console.log(
             `Session summary would be sent for client ${payload.clientId}`,
           );
@@ -249,7 +249,7 @@ export class EmailNotificationHandler {
           coachName,
           resourceName: resource?.name || payload.resourceName,
           resourceDescription: resource?.description || undefined,
-          appUrl: `${process.env.WASP_WEB_CLIENT_URL}/client/resources`,
+          appUrl: `${process.env['WASP_WEB_CLIENT_URL']}/client/resources`,
         });
 
         await emailSender.send({
@@ -264,7 +264,7 @@ export class EmailNotificationHandler {
         );
       } catch (error) {
         console.error("Error sending resource shared email:", error);
-        if (process.env.NODE_ENV === "development") {
+        if (process.env['NODE_ENV'] === "development") {
           console.log(
             `Resource shared would be sent for client ${payload.clientId}`,
           );

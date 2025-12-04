@@ -29,7 +29,7 @@ export function formatAnalyticsToCSV(
   period: string,
 ): string {
   const rows: string[][] = [];
-  const timestamp = new Date().toISOString().split("T")[0];
+  const timestamp = new Date().toISOString().split("T")[0]!;
 
   // Header
   rows.push([`Analytics Report - ${clientName}`]);
@@ -80,7 +80,7 @@ export function formatSessionsToCSV(
   clientName: string,
 ): string {
   const rows: string[][] = [];
-  const timestamp = new Date().toISOString().split("T")[0];
+  const timestamp = new Date().toISOString().split("T")[0]!;
 
   // Header
   rows.push([`Session History - ${clientName}`]);
@@ -111,7 +111,7 @@ export function generateCSVFilename(
   period?: string,
 ): string {
   const sanitizedName = clientName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-  const timestamp = new Date().toISOString().split("T")[0];
+  const timestamp = new Date().toISOString().split("T")[0]!;
 
   if (dataType === "analytics" && period) {
     return `somatic-analytics-${sanitizedName}-${period}-${timestamp}.csv`;
