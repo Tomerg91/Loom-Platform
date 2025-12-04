@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "migrations:dry-run-staging": "scripts/migrations/dry-run-staging.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.523.0",

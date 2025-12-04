@@ -1,0 +1,89 @@
+name: Database Maintenance
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      run-backup:
+        type: boolean
+        default: true
+        description: Run production backup job
+      run-migration-check:
+        type: boolean
+        default: true
+        description: Run staging rollout dry-run check
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backup:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run-backup == 'true')
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+      AWS_S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Install backup tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client awscli
+      - name: Create backup artifact
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "PROD_DATABASE_URL secret is not configured; cannot create backup."
+            exit 1
+          fi
+          TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+          pg_dump --format=custom --file="loom-backup-$TIMESTAMP.dump" "$DATABASE_URL"
+          tar -czf "loom-backup-$TIMESTAMP.tar.gz" "loom-backup-$TIMESTAMP.dump"
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: loom-backup-*.tar.gz
+      - name: Ship backup to S3
+        if: env.AWS_S3_BUCKET != '' && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != ''
+        run: |
+          aws s3 cp loom-backup-*.tar.gz "s3://${AWS_S3_BUCKET}/backups/" --region "${AWS_REGION:-us-east-1}"
+
+  migration-rollout-check:
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run-migration-check == 'true')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    env:
+      STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate staging rollout plan (dry-run)
+        run: |
+          if [ -z "$STAGING_DATABASE_URL" ]; then
+            echo "STAGING_DATABASE_URL secret not set; skipping dry-run migration check."
+            exit 0
+          fi
+          npx prisma migrate diff --from-url "$STAGING_DATABASE_URL" --to-migrations ./migrations --script > rollout-plan.sql
+
+      - name: Upload rollout plan
+        if: env.STAGING_DATABASE_URL != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-rollout-plan
+          path: app/rollout-plan.sql

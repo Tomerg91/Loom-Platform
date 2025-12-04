@@ -1,0 +1,20 @@
+{
+  "name": "Loom - The Somatic Coaching Platform",
+  "short_name": "Loom",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32 48x48 64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/public-banner.webp",
+      "sizes": "800x400",
+      "type": "image/webp"
+    }
+  ]
+}

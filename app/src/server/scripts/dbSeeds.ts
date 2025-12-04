@@ -6,16 +6,30 @@ import {
   SubscriptionStatus,
 } from "../../payment/plans";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+function ensureDevSeedAllowed(seedName: string) {
+  const allowProdSeeds = process.env.ALLOW_PRODUCTION_SEEDS === "true";
+
+  if (isProduction && !allowProdSeeds) {
+    throw new Error(
+      `${seedName} is disabled in production. Set ALLOW_PRODUCTION_SEEDS=true to override for a one-off run.`,
+    );
+  }
+}
+
 type MockUserData = Omit<User, "id" | "onboardingSteps" | "deletedAt"> & {
   deletedAt?: null;
 };
 
 /**
  * This function, which we've imported in `app.db.seeds` in the `main.wasp` file,
- * seeds the database with mock users via the `wasp db seed` command.
- * For more info see: https://wasp.sh/docs/data-model/backends#seeding-the-database
- */
+  * seeds the database with mock users via the `wasp db seed` command.
+  * For more info see: https://wasp.sh/docs/data-model/backends#seeding-the-database
+  */
 export async function seedMockUsers(prismaClient: PrismaClient) {
+  ensureDevSeedAllowed("seedMockUsers");
+
   await Promise.all(
     generateMockUsersData(50).map((data) =>
       prismaClient.user.create({
@@ -83,10 +97,12 @@ function generateMockUserData(): MockUserData {
  * with realistic data for development and testing.
  *
  * To use in development, signup with:
- * - Coach: coach@test.com (then invite clients)
- * - Or use existing clients if they were seeded
- */
+  * - Coach: coach@test.com (then invite clients)
+  * - Or use existing clients if they were seeded
+  */
 export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
+  ensureDevSeedAllowed("seedTestCoachWithClients");
+
   const now = new Date();
   const bodyZones: BodyZone[] = [
     "HEAD",

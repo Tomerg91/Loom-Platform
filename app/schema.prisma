@@ -110,6 +110,9 @@ model User {
   workspaceFilesUploaded WorkspaceFile[]
   actionItemsAssigned    ActionItem[]
 
+  // Mentor request reviews (admin only)
+  mentorRequestsReviewed MentorRequest[]
+
   // Google Calendar integration
   calendarConnection UserCalendarConnection?
 }
@@ -122,6 +125,14 @@ model CoachProfile {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String    @unique
   deletedAt DateTime?
+
+  // MENTORING CIRCLES
+  isMentor              Boolean       @default(false) // Can create and manage groups
+  mentorGroups          Group[]       @relation("MentorGroups")
+  groupMemberships      GroupMember[] @relation("CoachGroupMemberships")
+  authoredPosts         GroupPost[]   @relation("AuthoredPosts")
+  repliedToPosts        GroupPostReply[] @relation("RepliedToPosts")
+  mentorRequests        MentorRequest[] // Requests to become mentor
 
   // A Coach manages many Clients
   clients     ClientProfile[]
@@ -625,4 +636,129 @@ model GoogleCalendarEvent {
   // Track sync status
   syncedAt  DateTime @default(now())
   createdAt DateTime @default(now())
+}
+
+// ============================================
+// MENTOR REQUEST (Admin Approval Required)
+// ============================================
+model MentorRequest {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Coach requesting mentor status
+  coachProfile  CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId       String
+
+  // Request status and reasons
+  status            String    @default("PENDING") // 'PENDING', 'APPROVED', 'REJECTED'
+  requestReason     String?   @db.Text  // Why coach wants mentor status
+  rejectionNote     String?   @db.Text  // Why admin rejected (only if status=REJECTED)
+
+  // Admin who approved/rejected
+  reviewedBy        User?     @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+
+  @@unique([coachId, status], where: "status = 'PENDING'") // Prevent duplicate PENDING requests
+  @@index([coachId, status])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// MENTORING CIRCLES (Phase 2)
+// ============================================
+model Group {
+  id        String   @id @default(uuid())
+  name      String
+  description String? @db.Text
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  // Mentor who created this group
+  mentor      CoachProfile @relation("MentorGroups", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentorId    String
+
+  // Group members (coaches only)
+  members GroupMember[]
+
+  // Posts in this group
+  posts GroupPost[]
+
+  @@index([mentorId])
+  @@index([deletedAt])
+}
+
+model GroupMember {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  // Invitation tracking (follows ClientInvitation pattern)
+  status   String   @default("ACTIVE") // 'PENDING', 'ACTIVE', 'DECLINED'
+  joinedAt DateTime? // When member accepted invitation
+
+  // Which group
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  // Which coach
+  coach      CoachProfile @relation("CoachGroupMemberships", fields: [coachId], references: [id], onDelete: Cascade)
+  coachId    String
+
+  @@unique([groupId, coachId])
+  @@index([groupId])
+  @@index([coachId])
+  @@index([groupId, status]) // For filtering active/pending members
+}
+
+model GroupPost {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Post metadata
+  postType   String  @default("STANDARD") // 'STANDARD', 'WIN', 'BLIND_REFLECTION' - single source of truth
+  isPinned   Boolean @default(false) // Mentors can pin important posts
+  editedAt   DateTime? // Track post edits for transparency
+
+  // Which group
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  // Author (coach who posted)
+  author      CoachProfile @relation("AuthoredPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+
+  // Replies to this post
+  replies GroupPostReply[]
+
+  @@index([groupId, createdAt])
+  @@index([groupId, postType]) // Filter by post type
+  @@index([groupId, isPinned, createdAt]) // Fetch pinned posts first
+  @@index([deletedAt])
+}
+
+model GroupPostReply {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  // Which post
+  post   GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  // Author (coach who replied)
+  author      CoachProfile @relation("RepliedToPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String
+
+  @@index([postId, createdAt])
+  @@index([postId, deletedAt]) // Composite index for common WHERE clause (postId + soft delete filtering)
+  @@index([authorId])
+  @@index([deletedAt])
 }

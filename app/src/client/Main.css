@@ -372,6 +372,82 @@
   }
 }
 
+/* CSP-safe animation utilities */
+.celebration-piece {
+  position: absolute;
+  top: -20px;
+  animation-name: celebration-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.celebration-left-5 {
+  left: 5%;
+}
+
+.celebration-left-15 {
+  left: 15%;
+}
+
+.celebration-left-25 {
+  left: 25%;
+}
+
+.celebration-left-35 {
+  left: 35%;
+}
+
+.celebration-left-45 {
+  left: 45%;
+}
+
+.celebration-left-55 {
+  left: 55%;
+}
+
+.celebration-left-65 {
+  left: 65%;
+}
+
+.celebration-left-75 {
+  left: 75%;
+}
+
+.celebration-left-85 {
+  left: 85%;
+}
+
+.celebration-left-95 {
+  left: 95%;
+}
+
+.celebration-duration-2 {
+  animation-duration: 2s;
+}
+
+.celebration-duration-2-5 {
+  animation-duration: 2.5s;
+}
+
+.celebration-duration-3 {
+  animation-duration: 3s;
+}
+
+@keyframes celebration-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.somatic-body-map-surface {
+  background: radial-gradient(circle at 50% 40%, #ffffff 0%, #fdfbf7 100%);
+}
+
 @layer base {
   * {
     @apply border-border;

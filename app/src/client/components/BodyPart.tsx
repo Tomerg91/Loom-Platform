@@ -109,7 +109,6 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
             animate={isSelected ? "active" : isHovered ? "hover" : "idle"}
             variants={orbVariants}
             transition={isSelected ? pulseTransition : undefined}
-            style={{ transformOrigin: `${center.x}px ${center.y}px` }}
           />
 
           {/* Secondary "Core" for extra depth when active */}
