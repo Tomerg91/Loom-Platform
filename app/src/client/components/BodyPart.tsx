@@ -67,32 +67,32 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         filter: "blur(10px)",
       },
       hover: {
-        opacity: 0.6,
-        scale: 1.1,
-        filter: "blur(20px)", // Bloom effect
-        transition: { duration: 0.4, ease: "easeOut" as const },
+        opacity: 0.5,
+        scale: 1.05,
+        filter: "blur(15px)",
+        transition: { duration: 0.4, ease: "easeOut" },
       },
       active: {
-        opacity: 0.9,
-        scale: 1.2,
-        filter: "blur(15px)",
-        transition: { duration: 0.5, ease: "easeOut" as const },
+        opacity: 0.85,
+        scale: 1.15,
+        filter: "blur(12px)",
+        transition: { duration: 0.5, ease: "easeOut" },
       },
     };
 
-    // Pulse animation for active state
+    // Organic "Breathing" Pulse for active state
     const pulseTransition = {
       opacity: {
-        duration: 2.5,
-        repeat: Infinity,
-        repeatType: "reverse" as const,
-        ease: "easeInOut" as const,
-      },
-      scale: {
         duration: 3,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut" as const,
+        ease: "easeInOut",
+      },
+      scale: {
+        duration: 4,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut",
       },
     };
 
@@ -116,19 +116,25 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
             <motion.circle
               cx={center.x}
               cy={center.y}
-              r={center.r * 0.6}
+              r={center.r * 0.5}
               fill="white"
-              opacity={0.3}
-              filter="blur(10px)"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1, opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              opacity={0.2}
+              filter="blur(8px)"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [0.8, 1.1, 0.8],
+                opacity: [0.1, 0.3, 0.1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             />
           )}
         </g>
 
-        {/* 2. INTERACTION LAYER (Invisible Path) */}
-        {/* We also use this to draw a subtle rim light when active/hovered */}
+        {/* 2. INTERACTION LAYER & RIM LIGHT */}
         <motion.path
           ref={ref}
           d={path}
@@ -137,10 +143,16 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
           aria-label={zoneLabels[zone]}
           className="cursor-pointer focus-visible:outline-none"
           fill="transparent"
-          stroke={isSelected || isHovered ? "white" : "transparent"}
-          strokeOpacity={isSelected ? 0.5 : 0.2}
-          strokeWidth={isSelected ? 2 : 1}
+          // Rim light effect
+          stroke={isSelected ? "white" : isHovered ? "rgba(255,255,255,0.5)" : "transparent"}
+          strokeOpacity={isSelected ? 0.6 : isHovered ? 0.4 : 0}
+          strokeWidth={isSelected ? 1.5 : 1}
           vectorEffect="non-scaling-stroke"
+          initial={false}
+          animate={{
+            strokeOpacity: isSelected ? 0.6 : isHovered ? 0.4 : 0,
+          }}
+          transition={{ duration: 0.3 }}
           onClick={onClick}
           onMouseEnter={onHoverStart}
           onMouseLeave={onHoverEnd}
@@ -150,7 +162,7 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
               onClick();
             }
           }}
-          whileTap={{ scale: 0.99 }} // Subtle tactile feedback
+          whileTap={{ scale: 0.98 }} // Subtle tactile feedback
         />
       </g>
     );

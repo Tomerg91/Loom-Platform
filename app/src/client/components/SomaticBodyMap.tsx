@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import BodyPart from "./BodyPart";
 import SensationPanel from "./SensationPanel";
 
@@ -23,16 +23,17 @@ interface BodyPathData {
 /**
  * Zone-to-Gradient Configuration
  * Maps each body zone to its thermal/energy gradient for the heatmap aesthetic
+ * Updated for a more "somatic" and deep feel.
  */
 const zoneGradientMap: Record<BodyZone, string> = {
-  HEAD: "warm-glow",
-  THROAT: "yellow-light",
-  CHEST: "heart-heat",
-  SOLAR_PLEXUS: "cool-blue",
-  BELLY: "cool-blue",
-  PELVIS: "cool-blue",
-  ARMS: "warm-glow",
-  LEGS: "ground-green",
+  HEAD: "ether-violet",
+  THROAT: "clarity-blue",
+  CHEST: "heart-rose",
+  SOLAR_PLEXUS: "power-gold",
+  BELLY: "gut-orange",
+  PELVIS: "root-red",
+  ARMS: "action-amber",
+  LEGS: "ground-earth",
 };
 
 /**
@@ -138,9 +139,22 @@ export default function SomaticBodyMap() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row gap-8 items-stretch">
+    <div className="w-full h-full flex flex-col lg:flex-row gap-8 items-stretch relative">
+      {/* Background Pulse Animation */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-teal-50/50 via-transparent to-purple-50/50 dark:from-teal-900/20 dark:to-purple-900/20 pointer-events-none"
+        animate={{
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
       {/* SVG Body Map Container */}
-      <div className="flex-1 flex flex-col justify-center items-center min-h-96 gap-4">
+      <div className="flex-1 flex flex-col justify-center items-center min-h-96 gap-4 z-10">
         <svg
           width="300"
           height="650"
@@ -151,7 +165,7 @@ export default function SomaticBodyMap() {
           <defs>
             {/* 1. FILTERS for Volumetric Effect */}
 
-            {/* Soft Glow Filter */}
+            {/* Soft Glow Filter - Enhanced for "Energy" feel */}
             <filter
               id="glow-filter"
               x="-50%"
@@ -159,24 +173,24 @@ export default function SomaticBodyMap() {
               width="200%"
               height="200%"
             >
-              <feGaussianBlur stdDeviation="15" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="12" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
 
-            {/* Inner Body Shadow for 2.5D effect */}
+            {/* Inner Body Shadow for 2.5D effect - Softer */}
             <filter id="inner-body-shadow">
-              <feOffset dx="0" dy="4" />
-              <feGaussianBlur stdDeviation="4" result="offset-blur" />
+              <feOffset dx="0" dy="2" />
+              <feGaussianBlur stdDeviation="3" result="offset-blur" />
               <feComposite
                 operator="out"
                 in="SourceGraphic"
                 in2="offset-blur"
                 result="inverse"
               />
-              <feFlood floodColor="black" floodOpacity="0.1" result="color" />
+              <feFlood floodColor="black" floodOpacity="0.15" result="color" />
               <feComposite
                 operator="in"
                 in="color"
@@ -186,70 +200,61 @@ export default function SomaticBodyMap() {
               <feComposite operator="over" in="shadow" in2="SourceGraphic" />
             </filter>
 
-            {/* 2. GRADIENTS (Refined) */}
-            <radialGradient
-              id="warm-glow"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.9} />
-              <stop offset="70%" stopColor="#F59E0B" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
+            {/* 2. GRADIENTS (Refined - Organic & Deep) */}
+            {/* Head: Violet/Ether */}
+            <radialGradient id="ether-violet" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#A78BFA" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
             </radialGradient>
 
-            <radialGradient
-              id="heart-heat"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <stop offset="0%" stopColor="#EF4444" stopOpacity={0.9} />
-              <stop offset="70%" stopColor="#EF4444" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
-            </radialGradient>
-
-            <radialGradient
-              id="cool-blue"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.9} />
-              <stop offset="70%" stopColor="#3B82F6" stopOpacity={0.4} />
+            {/* Throat: Blue/Clarity */}
+            <radialGradient id="clarity-blue" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#60A5FA" stopOpacity={0.3} />
               <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
             </radialGradient>
 
-            <radialGradient
-              id="ground-green"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <stop offset="0%" stopColor="#10B981" stopOpacity={0.9} />
-              <stop offset="70%" stopColor="#10B981" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+            {/* Chest: Rose/Heart */}
+            <radialGradient id="heart-rose" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#EC4899" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#F472B6" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#EC4899" stopOpacity={0} />
             </radialGradient>
 
-            <radialGradient
-              id="yellow-light"
-              cx="50%"
-              cy="50%"
-              r="50%"
-              fx="50%"
-              fy="50%"
-            >
-              <stop offset="0%" stopColor="#FCD34D" stopOpacity={0.9} />
-              <stop offset="70%" stopColor="#FCD34D" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#FCD34D" stopOpacity={0} />
+            {/* Solar Plexus: Gold/Power */}
+            <radialGradient id="power-gold" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#FBBF24" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Belly: Orange/Gut */}
+            <radialGradient id="gut-orange" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#F97316" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#FB923C" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#F97316" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Pelvis: Red/Root */}
+            <radialGradient id="root-red" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
+              <stop offset="60%" stopColor="#F87171" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Arms: Amber/Action */}
+            <radialGradient id="action-amber" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#D97706" stopOpacity={0.7} />
+              <stop offset="60%" stopColor="#F59E0B" stopOpacity={0.2} />
+              <stop offset="100%" stopColor="#D97706" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Legs: Green/Ground */}
+            <radialGradient id="ground-earth" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#10B981" stopOpacity={0.7} />
+              <stop offset="60%" stopColor="#34D399" stopOpacity={0.2} />
+              <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
             </radialGradient>
 
             {/* 3. MASKS */}
@@ -264,10 +269,10 @@ export default function SomaticBodyMap() {
           <g filter="url(#inner-body-shadow)">
             <path
               d={fullBodyPath}
-              fill="#F3F4F6"
-              stroke="#E5E7EB"
-              strokeWidth="1"
-              className="opacity-50"
+              fill="#F8FAFC"
+              stroke="#E2E8F0"
+              strokeWidth="1.5"
+              className="opacity-80 dark:fill-slate-800 dark:stroke-slate-700"
             />
           </g>
 
@@ -288,27 +293,16 @@ export default function SomaticBodyMap() {
           ))}
         </svg>
 
-        {/* Legend Card */}
-        <div className="mt-4 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full shadow-sm bg-emerald-500"></div>
-              <span className="text-gray-600 font-medium">Low (Calm)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full shadow-sm bg-amber-300"></div>
-              <span className="text-gray-600 font-medium">Medium (Active)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full shadow-sm bg-red-500"></div>
-              <span className="text-gray-600 font-medium">High (Intense)</span>
-            </div>
-          </div>
+        {/* Legend Card - Simplified */}
+        <div className="mt-4 px-6 py-3 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-sm border border-white/20 dark:border-slate-700/30">
+          <span className="text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">
+            Select a body area to explore sensations
+          </span>
         </div>
       </div>
 
       {/* Sensation Panel */}
-      <div className="flex-1 min-h-96 flex items-center lg:items-stretch">
+      <div className="flex-1 min-h-96 flex items-center lg:items-stretch z-20">
         <AnimatePresence mode="wait">
           {isPanelOpen && selectedZone && (
             <SensationPanel
