@@ -253,8 +253,8 @@ function AdminMessages({ user }: { user: AuthUser }) {
   const updateStatus = useAction(updateContactFormMessageStatus);
 
   useEffect(() => {
-    if (messages?.length && !selectedId) {
-      setSelectedId(messages[0].id);
+    if (messages && messages.length > 0 && !selectedId) {
+      setSelectedId(messages[0]!.id);
     }
     if (
       selectedId &&

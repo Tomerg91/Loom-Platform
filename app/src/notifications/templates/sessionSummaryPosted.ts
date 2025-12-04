@@ -84,7 +84,8 @@ export function getSessionSummaryPostedEmailContent(
   };
 }
 
-function escapeHtml(text: string): string {
+function escapeHtml(text: string | undefined): string {
+  if (!text) return "";
   const map: Record<string, string> = {
     "&": "&amp;",
     "<": "&lt;",

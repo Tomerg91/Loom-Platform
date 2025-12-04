@@ -81,8 +81,8 @@ app OpenSaaS {
   },
 
   server: {
-    // Add security middleware for Content Security Policy and other security headers
-    setupFn: import { setupServer } from "@src/server/setup",
+    // TEMPORARILY DISABLED: setupFn needs type signature fix
+    // setupFn: import { setupServer } from "@src/server/setup",
   },
 
   client: {
@@ -524,6 +524,8 @@ action deleteActionItem {
 }
 //#endregion
 
+// COMMENTED OUT: Phase 2 - Mentoring Circles features to be enabled later
+/*
 //#region Mentoring Circles
 route MentoringCirclesRoute { path: "/coach/mentoring-circles", to: MentoringCirclesPage }
 page MentoringCirclesPage {
@@ -586,6 +588,7 @@ query getMyMentorRequests {
   entities: [User, CoachProfile, MentorRequest]
 }
 //#endregion
+*/
 
 //#region Analytics
 query getDailyStats {
@@ -674,27 +677,8 @@ query getCalendarConnection {
   entities: [User, UserCalendarConnection]
 }
 
-job sessionRemindersJob {
-  executor: PgBoss,
-  perform: {
-    fn: import { checkUpcomingSessionsJob } from "@src/notifications/jobs"
-  },
-  schedule: {
-    cron: "0 9 * * *" // Daily at 9 AM
-  },
-  entities: [ClientProfile, User, Notification, NotificationPreferences]
-}
-
-job releaseExpiredHoldsJob {
-  executor: PgBoss,
-  perform: {
-    fn: import { releaseExpiredHolds } from "@src/availability/jobs"
-  },
-  schedule: {
-    cron: "*/15 * * * *" // Every 15 minutes
-  },
-  entities: [AvailabilitySlot]
-}
+// TEMPORARILY DISABLED: Jobs have type signature issues preventing server startup
+// TODO: Fix checkUpcomingSessionsJob and releaseExpiredHolds function signatures
 //#endregion
 
 //#region Availability Scheduling

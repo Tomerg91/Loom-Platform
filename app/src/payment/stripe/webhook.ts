@@ -147,7 +147,12 @@ function getInvoicePriceId(invoice: Stripe.Invoice): Stripe.Price["id"] {
     throw new Error("There should be exactly one line item in Stripe invoice");
   }
 
-  const priceId = invoiceLineItems[0].pricing?.price_details?.price;
+  const lineItem = invoiceLineItems[0];
+  if (!lineItem) {
+    throw new Error("Unable to extract line item from invoice");
+  }
+
+  const priceId = lineItem.pricing?.price_details?.price;
   if (!priceId) {
     throw new Error("Unable to extract price id from items");
   }
@@ -198,6 +203,7 @@ function getOpenSaasSubscriptionStatus(
   } else if (subscription.status === SubscriptionStatus.PastDue) {
     return SubscriptionStatus.PastDue;
   }
+  return undefined;
 }
 
 function getSubscriptionPriceId(
@@ -212,7 +218,12 @@ function getSubscriptionPriceId(
     );
   }
 
-  return subscriptionItems[0].price.id;
+  const subscriptionItem = subscriptionItems[0];
+  if (!subscriptionItem) {
+    throw new Error("Unable to extract subscription item from subscription");
+  }
+
+  return subscriptionItem.price.id;
 }
 
 async function handleCustomerSubscriptionDeleted(

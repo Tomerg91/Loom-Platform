@@ -22,20 +22,30 @@ export const updateUserLemonSqueezyPaymentDetails = async (
   },
   prismaUserDelegate: PrismaClient["user"],
 ) => {
+  const data: Record<string, any> = {
+    paymentProcessorUserId: lemonSqueezyId,
+  };
+
+  if (lemonSqueezyCustomerPortalUrl !== undefined) {
+    data["lemonSqueezyCustomerPortalUrl"] = lemonSqueezyCustomerPortalUrl;
+  }
+  if (subscriptionPlan !== undefined) {
+    data["subscriptionPlan"] = subscriptionPlan;
+  }
+  if (subscriptionStatus !== undefined) {
+    data["subscriptionStatus"] = subscriptionStatus;
+  }
+  if (datePaid !== undefined) {
+    data["datePaid"] = datePaid;
+  }
+  if (numOfCreditsPurchased !== undefined) {
+    data["credits"] = { increment: numOfCreditsPurchased };
+  }
+
   return prismaUserDelegate.update({
     where: {
       id: userId,
     },
-    data: {
-      paymentProcessorUserId: lemonSqueezyId,
-      lemonSqueezyCustomerPortalUrl,
-      subscriptionPlan,
-      subscriptionStatus,
-      datePaid,
-      credits:
-        numOfCreditsPurchased !== undefined
-          ? { increment: numOfCreditsPurchased }
-          : undefined,
-    },
+    data,
   });
 };

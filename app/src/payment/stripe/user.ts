@@ -80,14 +80,21 @@ export function updateUserSubscriptionDetails(
   }: UpdateUserSubscriptionDetailsArgs,
   userDelegate: PrismaClient["user"],
 ): Promise<User> {
+  const data: Record<string, any> = {
+    subscriptionStatus,
+  };
+
+  if (paymentPlanId !== undefined) {
+    data["subscriptionPlan"] = paymentPlanId;
+  }
+  if (datePaid !== undefined) {
+    data["datePaid"] = datePaid;
+  }
+
   return userDelegate.update({
     where: {
       paymentProcessorUserId: customerId,
     },
-    data: {
-      subscriptionPlan: paymentPlanId,
-      subscriptionStatus,
-      datePaid,
-    },
+    data,
   });
 }

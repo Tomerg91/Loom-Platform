@@ -12,7 +12,7 @@ import * as path from "path";
 import { MAX_FILE_SIZE_BYTES } from "./validation";
 
 export const s3Client = new S3Client({
-  region: process.env["AWS_S3_REGION"],
+  ...(process.env["AWS_S3_REGION"] && { region: process.env["AWS_S3_REGION"] }),
   credentials: {
     accessKeyId: process.env["AWS_S3_IAM_ACCESS_KEY"]!,
     secretAccessKey: process.env["AWS_S3_IAM_SECRET_KEY"]!,
