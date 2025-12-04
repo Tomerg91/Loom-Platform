@@ -140,194 +140,199 @@ export default function SessionHistoryPage({ user }: { user: User }) {
         </p>
       </div>
 
-      <Tabs defaultValue="sessions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="sessions">
-            {t("session.sessionHistory")}
-          </TabsTrigger>
-          <TabsTrigger value="files">{t("workspace.files")}</TabsTrigger>
-          <TabsTrigger value="actions">
-            {t("workspace.actionItems")}
-          </TabsTrigger>
-        </TabsList>
+      <div className="w-full">
+        <Tabs defaultValue="sessions">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="sessions">
+              {t("session.sessionHistory")}
+            </TabsTrigger>
+            <TabsTrigger value="files">{t("workspace.files")}</TabsTrigger>
+            <TabsTrigger value="actions">
+              {t("workspace.actionItems")}
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Sessions Tab */}
-        <TabsContent value="sessions" className="space-y-4">
-          {sessions.length > 0 ? (
-            <div className="space-y-4">
-              {sessions.map((session, index) => (
-                <Card
-                  key={session.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() =>
-                    setExpandedSessionId(
-                      expandedSessionId === session.id ? null : session.id,
-                    )
-                  }
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0">
-                          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
-                            <span className="text-sm font-semibold text-blue-700">
-                              #{index + 1}
+          {/* Sessions Tab */}
+          <TabsContent value="sessions" className="space-y-4">
+            {sessions.length > 0 ? (
+              <div className="space-y-4">
+                {sessions.map((session, index) => (
+                  <Card
+                    key={session.id}
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() =>
+                      setExpandedSessionId(
+                        expandedSessionId === session.id ? null : session.id,
+                      )
+                    }
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100">
+                              <span className="text-sm font-semibold text-blue-700">
+                                #{index + 1}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                {format(
+                                  new Date(session.sessionDate),
+                                  "MMM d, yyyy",
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                {format(
+                                  new Date(session.sessionDate),
+                                  "h:mm a",
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-muted-foreground">
+                          {expandedSessionId === session.id ? (
+                            <ChevronUp className="h-5 w-5" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5" />
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    {expandedSessionId === session.id && (
+                      <CardContent className="space-y-4 border-t pt-4">
+                        {/* Somatic Anchor Badge */}
+                        {(session as any).somaticAnchor && (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                              🎯{" "}
+                              {t("session.anchor", {
+                                zone: getBodyZoneLabel(
+                                  (session as any).somaticAnchor,
+                                ),
+                              })}
                             </span>
                           </div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              {format(
-                                new Date(session.sessionDate),
-                                "MMM d, yyyy",
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              {format(new Date(session.sessionDate), "h:mm a")}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-muted-foreground">
-                        {expandedSessionId === session.id ? (
-                          <ChevronUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5" />
                         )}
-                      </div>
-                    </div>
-                  </CardHeader>
 
-                  {expandedSessionId === session.id && (
-                    <CardContent className="space-y-4 border-t pt-4">
-                      {/* Somatic Anchor Badge */}
-                      {(session as any).somaticAnchor && (
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                            🎯{" "}
-                            {t("session.anchor", {
-                              zone: getBodyZoneLabel(
-                                (session as any).somaticAnchor,
-                              ),
-                            })}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Session Summary */}
-                      {session.sharedSummary ? (
-                        <div>
-                          <h3 className="font-semibold text-foreground mb-2">
-                            {t("session.sessionSummary")}
-                          </h3>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {session.sharedSummary}
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-sm text-muted-foreground italic">
-                            {t("session.noSummary")}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Attached Resources (Homework) */}
-                      {(session as any).resources &&
-                        (session as any).resources.length > 0 && (
+                        {/* Session Summary */}
+                        {session.sharedSummary ? (
                           <div>
-                            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              {t("session.homework")}
+                            <h3 className="font-semibold text-foreground mb-2">
+                              {t("session.sessionSummary")}
                             </h3>
-                            <div className="space-y-2">
-                              {(session as any).resources.map(
-                                (resource: {
-                                  id: string;
-                                  name: string;
-                                  type: string;
-                                }) => (
-                                  <button
-                                    key={resource.id}
-                                    onClick={() =>
-                                      handleDownloadResource(
-                                        resource.id,
-                                        resource.name,
-                                      )
-                                    }
-                                    disabled={
-                                      downloadingResourceId === resource.id
-                                    }
-                                    className="w-full flex items-center gap-2 p-2 text-left bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors disabled:opacity-50"
-                                  >
-                                    {downloadingResourceId === resource.id ? (
-                                      <>
-                                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                                        <span className="text-sm text-gray-700">
-                                          {t("session.downloading")}
-                                        </span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                                        <span className="text-sm text-blue-600 underline">
-                                          📄 {resource.name}
-                                        </span>
-                                      </>
-                                    )}
-                                  </button>
-                                ),
-                              )}
-                            </div>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                              {session.sharedSummary}
+                            </p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-sm text-muted-foreground italic">
+                              {t("session.noSummary")}
+                            </p>
                           </div>
                         )}
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12">
-                <div className="text-center">
-                  <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {t("session.noSessionsYet")}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {t("session.noSessionsDescription")}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+
+                        {/* Attached Resources (Homework) */}
+                        {(session as any).resources &&
+                          (session as any).resources.length > 0 && (
+                            <div>
+                              <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                {t("session.homework")}
+                              </h3>
+                              <div className="space-y-2">
+                                {(session as any).resources.map(
+                                  (resource: {
+                                    id: string;
+                                    name: string;
+                                    type: string;
+                                  }) => (
+                                    <button
+                                      key={resource.id}
+                                      onClick={() =>
+                                        handleDownloadResource(
+                                          resource.id,
+                                          resource.name,
+                                        )
+                                      }
+                                      disabled={
+                                        downloadingResourceId === resource.id
+                                      }
+                                      className="w-full flex items-center gap-2 p-2 text-left bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 transition-colors disabled:opacity-50"
+                                    >
+                                      {downloadingResourceId === resource.id ? (
+                                        <>
+                                          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                          <span className="text-sm text-gray-700">
+                                            {t("session.downloading")}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                          <span className="text-sm text-blue-600 underline">
+                                            📄 {resource.name}
+                                          </span>
+                                        </>
+                                      )}
+                                    </button>
+                                  ),
+                                )}
+                              </div>
+                            </div>
+                          )}
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center">
+                    <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      {t("session.noSessionsYet")}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {t("session.noSessionsDescription")}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Workspace Files Tab */}
+          {clientId && coachId && (
+            <TabsContent value="files">
+              <WorkspaceFileList
+                coachId={coachId}
+                clientId={clientId}
+                isCoachView={false}
+              />
+            </TabsContent>
           )}
-        </TabsContent>
 
-        {/* Workspace Files Tab */}
-        {clientId && coachId && (
-          <TabsContent value="files">
-            <WorkspaceFileList
-              coachId={coachId}
-              clientId={clientId}
-              isCoachView={false}
-            />
-          </TabsContent>
-        )}
-
-        {/* Action Items Tab */}
-        {clientId && coachId && (
-          <TabsContent value="actions">
-            <ActionItemList
-              coachId={coachId}
-              clientId={clientId}
-              isCoachView={false}
-            />
-          </TabsContent>
-        )}
-      </Tabs>
+          {/* Action Items Tab */}
+          {clientId && coachId && (
+            <TabsContent value="actions">
+              <ActionItemList
+                coachId={coachId}
+                clientId={clientId}
+                isCoachView={false}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
     </div>
   );
 }

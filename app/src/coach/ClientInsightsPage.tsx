@@ -471,11 +471,13 @@ function InsightsTooltip({
     return null;
   }
 
-  const percentage = payload[0]?.payload?.percentage;
+  const percentage = payload[0]?.payload?.percentage as number | undefined;
 
   return (
     <div className="rounded-md border bg-white px-3 py-2 shadow-sm">
-      <div className="text-sm font-semibold text-gray-900">{label}</div>
+      <div className="text-sm font-semibold text-gray-900">
+        {label as string}
+      </div>
       <div className="text-sm text-gray-700">
         {value} {logsLabel}
         {typeof percentage === "number" ? ` • ${percentage}%` : null}
@@ -523,7 +525,10 @@ function TopSensationsChart({
           <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
           <Tooltip
             content={(props) => (
-              <InsightsTooltip {...props} logsLabel={logsLabel} />
+              <InsightsTooltip
+                {...(props as TooltipProps<number, string>)}
+                logsLabel={logsLabel}
+              />
             )}
           />
           <Legend />
@@ -587,7 +592,10 @@ function BodyZoneActivityChart({
           <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
           <Tooltip
             content={(props) => (
-              <InsightsTooltip {...props} logsLabel={logsLabel} />
+              <InsightsTooltip
+                {...(props as TooltipProps<number, string>)}
+                logsLabel={logsLabel}
+              />
             )}
           />
           <Legend />

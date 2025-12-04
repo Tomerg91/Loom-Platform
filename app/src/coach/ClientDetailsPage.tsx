@@ -12,6 +12,7 @@ import {
   deleteSession,
   getClientProfile,
 } from "wasp/client/operations";
+import type { GetClientProfileResponse } from "../coach/operations";
 import ActionItemList from "../workspace/components/ActionItemList";
 import WorkspaceFileList from "../workspace/components/WorkspaceFileList";
 import WorkspaceFileUpload from "../workspace/components/WorkspaceFileUpload";
@@ -170,7 +171,7 @@ function ClientDetailsPageView({
   // Fetch client profile (for offline client details)
   const { data: clientProfile } = useQuery(getClientProfile, {
     clientId,
-  });
+  }) as { data: GetClientProfileResponse | undefined };
 
   // Fetch somatic logs for this client
   const {
@@ -550,7 +551,9 @@ function ClientDetailsPageView({
                       Most Recent Entry
                     </p>
                     <p className="text-lg font-medium">
-                      {formatRelativeTime(somaticLogs[0].createdAt)}
+                      {formatRelativeTime(
+                        somaticLogs[0]?.createdAt ?? new Date(),
+                      )}
                     </p>
                   </div>
                   <div>
@@ -941,7 +944,7 @@ function ClientDetailsPageView({
               {t("workspace.files")}
             </h3>
             <WorkspaceFileList
-              coachId={clientProfile?.coachId || ""}
+              coachId={clientProfile?.coachId ?? ""}
               clientId={clientId}
               isCoachView={true}
               onUploadClick={() => setIsFileUploadOpen(true)}
@@ -959,7 +962,7 @@ function ClientDetailsPageView({
               {t("workspace.actionItems")}
             </h3>
             <ActionItemList
-              coachId={clientProfile?.coachId || ""}
+              coachId={clientProfile?.coachId ?? ""}
               clientId={clientId}
               isCoachView={true}
               key={workspaceRefreshKey}
@@ -1263,7 +1266,7 @@ function ClientDetailsPageView({
 
       {/* Workspace File Upload Dialog */}
       <WorkspaceFileUpload
-        coachId={clientProfile?.coachId || ""}
+        coachId={clientProfile?.coachId ?? ""}
         clientId={clientId}
         isOpen={isFileUploadOpen}
         onOpenChange={setIsFileUploadOpen}

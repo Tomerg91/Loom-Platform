@@ -108,7 +108,7 @@ export const generateClientExportPdf: GenerateClientExportPdf<
 
     // ========== GENERATE PDF ==========
     const pdfBuffer = await generateAnalyticsPdf(
-      { name: clientName, email: clientProfile.user?.email },
+      { name: clientName, email: clientProfile.user?.email || undefined },
       analytics,
       sessions,
       period,

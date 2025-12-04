@@ -22,7 +22,7 @@ import SomaticLogFilters, {
   type SomaticLogFiltersState,
 } from "./components/SomaticLogFilters";
 import OnboardingModal from "../components/OnboardingModal";
-import { startOfToday, startOfWeek, startOfMonth } from "date-fns";
+import { format, startOfToday, startOfWeek, startOfMonth } from "date-fns";
 import {
   formatClockTime,
   formatDate,

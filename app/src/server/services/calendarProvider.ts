@@ -1,4 +1,4 @@
-import { zonedTimeToUtc } from "date-fns-tz";
+import { fromZonedTime } from "date-fns-tz";
 
 export type CalendarEvent = {
   id?: string;
@@ -104,8 +104,8 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 
   private normalizeEvent(event: CalendarEvent) {
-    const startUtc = zonedTimeToUtc(event.start, event.timezone).toISOString();
-    const endUtc = zonedTimeToUtc(event.end, event.timezone).toISOString();
+    const startUtc = fromZonedTime(event.start, event.timezone).toISOString();
+    const endUtc = fromZonedTime(event.end, event.timezone).toISOString();
 
     return {
       summary: event.title,

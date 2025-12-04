@@ -70,6 +70,7 @@ interface GoalRoadmapProps {
   clientId: string;
   isCoach?: boolean;
   onCreateGoal?: (data: any) => Promise<void>;
+  onUpdateGoal?: (data: any) => Promise<void>;
   onDeleteGoal?: (goalId: string) => Promise<void>;
   onToggleMilestone?: (
     milestoneId: string,

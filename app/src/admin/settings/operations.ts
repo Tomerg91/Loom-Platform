@@ -40,10 +40,10 @@ const avatarUploadSchema = z.object({
 type AvatarUploadInput = z.infer<typeof avatarUploadSchema>;
 
 type AdminOperationContext = {
-  user: User | null | undefined;
+  user: User;
   entities: {
     AdminSettings: {
-      upsert: Prisma.AdminSettingsDelegate<unknown>["upsert"];
+      upsert: Prisma.AdminSettingsDelegate<any>["upsert"];
     };
   };
 };
@@ -113,7 +113,7 @@ export const getAdminSettings: GetAdminSettings<
   void,
   SettingsWithAvatarUrl
 > = async (_args, rawContext) => {
-  const context = ensureAdmin(rawContext, {
+  const context = ensureAdmin(rawContext as any, {
     unauthenticated: "You must be logged in to view admin settings.",
     unauthorized: "Only admins can view admin settings.",
   });
@@ -126,7 +126,7 @@ export const updateAdminSettings: UpdateAdminSettings<
   AdminSettingsInput,
   SettingsWithAvatarUrl
 > = async (rawArgs, rawContext) => {
-  const context = ensureAdmin(rawContext, {
+  const context = ensureAdmin(rawContext as any, {
     unauthenticated: "You must be logged in to update admin settings.",
     unauthorized: "Only admins can update admin settings.",
   });
@@ -174,13 +174,11 @@ export const getPublicLegalSettings: GetPublicLegalSettings<
   void,
   { privacyPolicyUrl: string; termsOfServiceUrl: string }
 > = async (_args, rawContext) => {
-  const context = rawContext as AdminOperationContext & {
-    user: User | null | undefined;
-  };
+  const context = rawContext as any;
   const settings = await context.entities.AdminSettings.upsert({
     where: { id: SETTINGS_ID },
     update: {},
-    create: buildDefaultSettings(context.user),
+    create: buildDefaultSettings(context.user || null),
   });
 
   return {
@@ -193,7 +191,7 @@ export const getAdminAvatarUploadUrl: GetAdminAvatarUploadUrl<
   AvatarUploadInput,
   { uploadUrl: string; uploadFields: Record<string, string>; s3Key: string }
 > = async (rawArgs, rawContext) => {
-  const context = ensureAdmin(rawContext, {
+  const context = ensureAdmin(rawContext as any, {
     unauthenticated: "You must be logged in to upload an avatar.",
     unauthorized: "Only admins can upload this avatar.",
   });

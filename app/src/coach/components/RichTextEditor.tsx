@@ -157,7 +157,7 @@ export function RichTextEditor({
           contentEditable
           onInput={handleInput}
           dangerouslySetInnerHTML={{ __html: sanitizedValue }}
-          placeholder={placeholder}
+          data-placeholder={placeholder}
           suppressContentEditableWarning
         />
       </div>

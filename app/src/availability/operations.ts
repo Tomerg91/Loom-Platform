@@ -1,4 +1,12 @@
-import type { OperationType } from "wasp/server/operations";
+import type {
+  CreateAvailabilitySlot,
+  UpdateAvailabilitySlot,
+  DeleteAvailabilitySlot,
+  GetCoachAvailability,
+  BookAvailabilitySlot,
+  HoldAvailabilitySlot,
+  ReleaseHeldSlot,
+} from "wasp/server/operations";
 import { HttpError } from "wasp/server";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
@@ -66,7 +74,7 @@ type ReleaseHeldSlotInput = z.infer<typeof releaseHeldSlotSchema>;
  * Only coaches can create slots
  * Status defaults to OPEN
  */
-export const createAvailabilitySlot: OperationType<
+export const createAvailabilitySlot: CreateAvailabilitySlot<
   CreateAvailabilitySlotInput,
   any
 > = async (rawArgs: any, context: any) => {
@@ -136,7 +144,7 @@ export const createAvailabilitySlot: OperationType<
  * Coaches see all their slots (any status)
  * Clients only see OPEN slots for their coach
  */
-export const getCoachAvailability: OperationType<
+export const getCoachAvailability: GetCoachAvailability<
   GetCoachAvailabilityInput,
   any[]
 > = async (rawArgs: any, context: any) => {
@@ -196,7 +204,7 @@ export const getCoachAvailability: OperationType<
  * Updates an availability slot
  * Only coaches can update, and only OPEN slots can be modified
  */
-export const updateAvailabilitySlot: OperationType<
+export const updateAvailabilitySlot: UpdateAvailabilitySlot<
   UpdateAvailabilitySlotInput,
   any
 > = async (rawArgs: any, context: any) => {
@@ -278,7 +286,7 @@ export const updateAvailabilitySlot: OperationType<
  * Soft deletes an availability slot
  * Only coaches can delete, and only OPEN slots
  */
-export const deleteAvailabilitySlot: OperationType<
+export const deleteAvailabilitySlot: DeleteAvailabilitySlot<
   DeleteAvailabilitySlotInput,
   any
 > = async (rawArgs: any, context: any) => {
@@ -330,7 +338,7 @@ export const deleteAvailabilitySlot: OperationType<
  * Only clients can book
  * Auto-creates a CoachSession
  */
-export const bookAvailabilitySlot: OperationType<
+export const bookAvailabilitySlot: BookAvailabilitySlot<
   BookAvailabilitySlotInput,
   any
 > = async (rawArgs: any, context: any) => {
@@ -443,7 +451,7 @@ export const bookAvailabilitySlot: OperationType<
  * Temporary reservation for 15 minutes
  * Only clients can hold
  */
-export const holdAvailabilitySlot: OperationType<
+export const holdAvailabilitySlot: HoldAvailabilitySlot<
   HoldAvailabilitySlotInput,
   any
 > = async (rawArgs: any, context: any) => {
@@ -501,10 +509,10 @@ export const holdAvailabilitySlot: OperationType<
  * Releases a held availability slot (HELD → OPEN)
  * Can be triggered by client or by cron job for expired holds
  */
-export const releaseHeldSlot: OperationType<ReleaseHeldSlotInput, any> = async (
-  rawArgs: any,
-  context: any,
-) => {
+export const releaseHeldSlot: ReleaseHeldSlot<
+  ReleaseHeldSlotInput,
+  any
+> = async (rawArgs: any, context: any) => {
   const args = ensureArgsSchemaOrThrowHttpError(releaseHeldSlotSchema, rawArgs);
 
   if (!context.user) {

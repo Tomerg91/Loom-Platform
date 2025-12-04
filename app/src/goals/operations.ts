@@ -68,7 +68,7 @@ type GoalWithMilestones = Prisma.GoalGetPayload<{
 
 type MilestoneQueryContext = {
   Milestone: {
-    findMany: Prisma.MilestoneDelegate<undefined>["findMany"];
+    findMany: Prisma.MilestoneDelegate<any>["findMany"];
   };
 };
 
@@ -263,7 +263,11 @@ export const getGoals: GetGoals<GetGoalsInput, GoalWithMilestones[]> = async (
 
   // If clientId is provided, coach can view client's goals
   // Otherwise, client sees their own goals
-  const { clientId } = ensureArgsSchemaOrThrowHttpError(GetGoalsSchema, args);
+  const validatedArgs = ensureArgsSchemaOrThrowHttpError(
+    GetGoalsSchema,
+    args || {},
+  );
+  const { clientId } = validatedArgs;
 
   let targetClientId: string;
 

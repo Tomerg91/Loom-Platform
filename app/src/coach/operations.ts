@@ -235,8 +235,9 @@ export const deleteOfflineClient: DeleteOfflineClient<
 // ============================================
 // GET CLIENT PROFILE (for ClientDetailsPage)
 // ============================================
-type GetClientProfileResponse = {
+export type GetClientProfileResponse = {
   id: string;
+  coachId: string | null;
   clientType: string;
   displayName: string | null;
   contactEmail: string | null;
@@ -287,6 +288,7 @@ export const getClientProfile: GetClientProfile<
 
   return {
     id: clientProfile.id,
+    coachId: clientProfile.coachId,
     clientType: clientProfile.clientType,
     displayName: clientProfile.displayName,
     contactEmail: clientProfile.contactEmail,

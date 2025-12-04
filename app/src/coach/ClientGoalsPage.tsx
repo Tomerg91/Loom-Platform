@@ -17,7 +17,7 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function CoachClientGoalsPage({ user }: { user: User }) {
   const params = useParams();
-  const clientId = params.clientId as string;
+  const clientId = (params["clientId"] ?? "") as string;
 
   // Get all clients to verify this coach owns the client
   const { data: allClients = [] } = useQuery(getClientsForCoach);

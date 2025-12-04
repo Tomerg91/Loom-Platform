@@ -5,7 +5,6 @@ import type {
   DeleteSession,
   GetSessionsForClient,
   GetRecentSessionsForClient,
-  LogSession,
 } from "wasp/server/operations";
 import * as z from "zod";
 import { ensureArgsSchemaOrThrowHttpError } from "../server/validation";
@@ -224,7 +223,7 @@ export const updateSession: UpdateSession<
   }
 
   const { coachProfile } = await requireCoachOwnsClient(
-    context,
+    context as any,
     session.clientId,
     {
       unauthenticatedMessage: "You must be logged in to update sessions",
@@ -237,17 +236,20 @@ export const updateSession: UpdateSession<
   }
 
   // Update the session
+  const updateData: any = {};
+  if (sessionDate) {
+    updateData.sessionDate = new Date(sessionDate);
+  }
+  if (privateNotes !== undefined) {
+    updateData.privateNotes = sanitizeSensitiveTextInput(privateNotes);
+  }
+  if (sharedSummary !== undefined) {
+    updateData.sharedSummary = sanitizeSensitiveTextInput(sharedSummary);
+  }
+
   const updatedSession = await context.entities.CoachSession.update({
     where: { id: sessionId },
-    data: {
-      ...(sessionDate && { sessionDate: new Date(sessionDate) }),
-      ...(privateNotes !== undefined && {
-        privateNotes: sanitizeSensitiveTextInput(privateNotes),
-      }),
-      ...(sharedSummary !== undefined && {
-        sharedSummary: sanitizeSensitiveTextInput(sharedSummary),
-      }),
-    },
+    data: updateData,
   });
 
   return {
@@ -446,12 +448,9 @@ export const getSessionsForClient: GetSessionsForClient<
       }),
     ]);
 
-    const fullSessions: SessionResponse[] = sessions.map((session) => ({
-      id: session.id,
-      createdAt: session.createdAt,
-      sessionDate: session.sessionDate,
-      ...normalizeSensitiveFields(session),
-    }));
+    const fullSessions: SessionResponse[] = sessions.map((session) =>
+      normalizeSensitiveFields(session),
+    );
 
     const totalPages = Math.ceil(total / limit);
     return { sessions: fullSessions, total, page, limit, totalPages };
@@ -611,8 +610,6 @@ const logSessionSchema = z.object({
   resourceIds: z.array(z.string()).optional().default([]),
 });
 
-type LogSessionInput = z.infer<typeof logSessionSchema>;
-
 export type LogSessionResponse = {
   id: string;
   sessionNumber: number | null;
@@ -623,10 +620,10 @@ export type LogSessionResponse = {
   somaticAnchor: string | null;
 };
 
-export const logSession: LogSession<
-  LogSessionInput,
-  LogSessionResponse
-> = async (rawArgs, context) => {
+export const logSession = async (
+  rawArgs: any,
+  context: any,
+): Promise<LogSessionResponse> => {
   const args = ensureArgsSchemaOrThrowHttpError(logSessionSchema, rawArgs);
   const {
     clientId,
@@ -712,14 +709,18 @@ export const logSession: LogSession<
   // ============================================
   if (sharedSummary) {
     try {
+      const eventData: any = {
+        clientId: clientId,
+        sessionId: session.id,
+        sharedSummary: sharedSummary,
+      };
+      if (topic) {
+        eventData.topic = topic;
+      }
+
       await notificationEmitter.emit(
         NotificationEventType.SESSION_SUMMARY_POSTED,
-        {
-          clientId: clientId,
-          sessionId: session.id,
-          topic: topic || undefined,
-          sharedSummary: sharedSummary,
-        },
+        eventData,
       );
     } catch (error) {
       console.error("Error emitting session summary notification:", error);
@@ -732,8 +733,8 @@ export const logSession: LogSession<
     sessionNumber: session.sessionNumber,
     sessionDate: session.sessionDate,
     topic: session.topic,
-    privateNotes: sanitizeSensitiveTextOutput(session.privateNotes),
-    sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary),
+    privateNotes: sanitizeSensitiveTextOutput(session.privateNotes) ?? null,
+    sharedSummary: sanitizeSensitiveTextOutput(session.sharedSummary) ?? null,
     somaticAnchor: session.somaticAnchor,
   };
 };

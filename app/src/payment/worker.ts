@@ -41,7 +41,7 @@ interface SubscriptionRenewalResult {
  */
 export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
   never,
-  SubscriptionRenewalResult
+  void
 > = async (_args, context) => {
   console.log("🔄 Starting subscription renewal check...");
 
@@ -85,7 +85,7 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
 
     if (expiredUsers.length === 0) {
       console.log("✅ No subscriptions require renewal at this time.");
-      return result;
+      return;
     }
 
     console.log(
@@ -122,6 +122,19 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
         console.log(
           `💳 Charging user ${user.id} (${user.email}): ₪${planPrice}`,
         );
+
+        // Check if user has a token
+        if (!user.tranzillaToken) {
+          console.error(`❌ User ${user.id} has no Tranzilla token`);
+          result.failureCount++;
+          result.details.push({
+            userId: user.id,
+            email: user.email,
+            status: "failure",
+            reason: "No payment token found",
+          });
+          continue;
+        }
 
         // Attempt to charge the stored token
         const chargeResult = await chargeTranzillaToken({
@@ -317,18 +330,9 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
     console.log(`   ✅ Successful: ${result.successCount}`);
     console.log(`   ⚠️  Failed: ${result.failureCount}`);
     console.log(`   ❌ Cancelled: ${result.cancelledCount}`);
-
-    return result;
   } catch (error) {
     console.error("💥 Error in subscription renewal worker:", error);
-    return {
-      success: false,
-      successCount: 0,
-      failureCount: 0,
-      cancelledCount: 0,
-      details: [],
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    // Log the error but don't return anything (job must return void)
   }
 };
 

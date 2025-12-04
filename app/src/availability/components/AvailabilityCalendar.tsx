@@ -60,7 +60,7 @@ export function AvailabilityCalendar({
   };
 
   // Build calendar grid
-  const calendarDays = [];
+  const calendarDays: Date[] = [];
   let day = new Date(startDate);
 
   while (day <= endDate) {
@@ -69,12 +69,12 @@ export function AvailabilityCalendar({
   }
 
   // Group by weeks
-  const weeks = [];
+  const weeks: Date[][] = [];
   for (let i = 0; i < calendarDays.length; i += 7) {
     weeks.push(calendarDays.slice(i, i + 7));
   }
 
-  const selectedDateSlots = selectedDate
+  const selectedDateSlots: AvailabilitySlot[] = selectedDate
     ? slots.filter(
         (slot) =>
           format(new Date(slot.startTime), "yyyy-MM-dd") === selectedDate,

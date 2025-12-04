@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 interface PageErrorBoundaryProps {
   children: ReactNode;
   pageName?: string;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: unknown) => void;
 }
 
 /**
@@ -25,7 +25,7 @@ export function PageErrorBoundary({
   pageName = "Page",
   onError,
 }: PageErrorBoundaryProps) {
-  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
+  const handleError = (error: Error, errorInfo: unknown) => {
     console.error(`Error in ${pageName}:`, error, errorInfo);
     onError?.(error, errorInfo);
   };
