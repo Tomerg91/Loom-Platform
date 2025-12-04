@@ -1,11 +1,11 @@
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
 
-const CLIENT_EMAIL = process.env['GOOGLE_ANALYTICS_CLIENT_EMAIL'];
+const CLIENT_EMAIL = process.env["GOOGLE_ANALYTICS_CLIENT_EMAIL"];
 const PRIVATE_KEY = Buffer.from(
-  process.env['GOOGLE_ANALYTICS_PRIVATE_KEY']!,
+  process.env["GOOGLE_ANALYTICS_PRIVATE_KEY"]!,
   "base64",
 ).toString("utf-8");
-const PROPERTY_ID = process.env['GOOGLE_ANALYTICS_PROPERTY_ID'];
+const PROPERTY_ID = process.env["GOOGLE_ANALYTICS_PROPERTY_ID"];
 
 const analyticsDataClient = new BetaAnalyticsDataClient({
   credentials: {
@@ -38,15 +38,17 @@ export async function getSources() {
 
   let activeUsersPerReferrer: any[] = [];
   if (response?.rows) {
-    activeUsersPerReferrer = response.rows.map((row) => {
-      if (row.dimensionValues?.[0] && row.metricValues?.[0]) {
-        return {
-          source: row.dimensionValues[0].value,
-          visitors: row.metricValues[0].value,
-        };
-      }
-      return undefined;
-    }).filter((item): item is NonNullable<typeof item> => item !== undefined);
+    activeUsersPerReferrer = response.rows
+      .map((row) => {
+        if (row.dimensionValues?.[0] && row.metricValues?.[0]) {
+          return {
+            source: row.dimensionValues[0].value,
+            visitors: row.metricValues[0].value,
+          };
+        }
+        return undefined;
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== undefined);
   } else {
     throw new Error("No response from Google Analytics");
   }
@@ -124,8 +126,12 @@ async function getPrevDayViewsChangePercent(): Promise<string> {
 
   if (response?.rows && response.rows.length === 2) {
     // GA SDK returns metricValues as strings
-    viewsFromYesterday = response.rows[0]?.metricValues?.[0]?.value as string | undefined;
-    viewsFromDayBeforeYesterday = response.rows[1]?.metricValues?.[0]?.value as string | undefined;
+    viewsFromYesterday = response.rows[0]?.metricValues?.[0]?.value as
+      | string
+      | undefined;
+    viewsFromDayBeforeYesterday = response.rows[1]?.metricValues?.[0]?.value as
+      | string
+      | undefined;
 
     if (viewsFromYesterday && viewsFromDayBeforeYesterday) {
       const viewsYesterday = parseInt(viewsFromYesterday);
@@ -133,15 +139,15 @@ async function getPrevDayViewsChangePercent(): Promise<string> {
       if (viewsYesterday === 0 || viewsDayBefore === 0) {
         return "0";
       }
-      console.table({ viewsFromYesterday: viewsYesterday, viewsFromDayBeforeYesterday: viewsDayBefore });
+      console.table({
+        viewsFromYesterday: viewsYesterday,
+        viewsFromDayBeforeYesterday: viewsDayBefore,
+      });
 
-      const change =
-        ((viewsYesterday - viewsDayBefore) /
-          viewsDayBefore) *
-        100;
+      const change = ((viewsYesterday - viewsDayBefore) / viewsDayBefore) * 100;
       return change.toFixed(0);
     }
   }
-  
+
   return "0";
 }

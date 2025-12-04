@@ -67,9 +67,9 @@ export const stripeWebhook: PaymentsWebhook = async (
       // E.g. via the `stripe trigger` command.
       // While these can be ignored safely in development, it's good to be aware of them.
       // For production we shouldn't have any extra webhook events.
-      if (process.env['NODE_ENV'] === "development") {
+      if (process.env["NODE_ENV"] === "development") {
         console.info("Unhandled Stripe webhook event in development: ", error);
-      } else if (process.env['NODE_ENV'] === "production") {
+      } else if (process.env["NODE_ENV"] === "production") {
         console.error("Unhandled Stripe webhook event in production: ", error);
       }
 

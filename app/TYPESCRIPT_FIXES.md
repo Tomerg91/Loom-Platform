@@ -26,11 +26,12 @@ const apiKey = process.env.STRIPE_API_KEY;
 const region = process.env.AWS_S3_REGION;
 
 // AFTER (Fixed)
-const apiKey = process.env['STRIPE_API_KEY'];
-const region = process.env['AWS_S3_REGION'];
+const apiKey = process.env["STRIPE_API_KEY"];
+const region = process.env["AWS_S3_REGION"];
 ```
 
 **Environment Variables Fixed** (16 total):
+
 - ADMIN_EMAILS
 - AWS_S3_FILES_BUCKET, AWS_S3_IAM_ACCESS_KEY, AWS_S3_IAM_SECRET_KEY, AWS_S3_REGION
 - DATA_ENCRYPTION_KEY
@@ -44,6 +45,7 @@ const region = process.env['AWS_S3_REGION'];
 - WASP_WEB_CLIENT_URL
 
 **Files Affected** (20+ files):
+
 - `/Users/tomergalansky/loom-platform/app/src/analytics/providers/googleAnalyticsUtils.ts`
 - `/Users/tomergalansky/loom-platform/app/src/analytics/providers/plausibleAnalyticsUtils.ts`
 - `/Users/tomergalansky/loom-platform/app/src/analytics/stats.ts`
@@ -74,6 +76,7 @@ npm install --save-dev @types/sanitize-html
 ```
 
 **Files Fixed**:
+
 - `/Users/tomergalansky/loom-platform/app/src/coach/components/RichTextEditor.tsx`
 - `/Users/tomergalansky/loom-platform/app/src/messages/operations.ts`
 
@@ -86,6 +89,7 @@ npm install --save-dev @types/sanitize-html
 **Fixes Applied**:
 
 1. **Missing Return Type** (1 error fixed):
+
 ```typescript
 // BEFORE
 async function getPrevDayViewsChangePercent() {
@@ -95,11 +99,12 @@ async function getPrevDayViewsChangePercent() {
 // AFTER
 async function getPrevDayViewsChangePercent(): Promise<string> {
   // ... code with guaranteed return
-  return "0";  // Added default return
+  return "0"; // Added default return
 }
 ```
 
 2. **Possibly Undefined Array Access** (4 errors fixed):
+
 ```typescript
 // BEFORE (Error)
 if (response?.rows?.[0]?.metricValues?.[0]?.value) {
@@ -113,6 +118,7 @@ if (response?.rows && response.rows[0]?.metricValues?.[0]) {
 ```
 
 3. **Improved Type Safety** (3 errors fixed):
+
 ```typescript
 // BEFORE
 activeUsersPerReferrer = response.rows.map((row) => {
@@ -143,21 +149,23 @@ activeUsersPerReferrer = response.rows
 **Fixes Applied**:
 
 1. **Index Signature Access** (2 errors fixed):
+
 ```typescript
 // BEFORE (Error)
 return json.results.pageviews.value;
 
 // AFTER (Fixed)
-return json.results['pageviews']?.value ?? 0;
+return json.results["pageviews"]?.value ?? 0;
 ```
 
 2. **Required Environment Variable** (1 error fixed):
+
 ```typescript
 // BEFORE
-const PLAUSIBLE_BASE_URL = process.env['PLAUSIBLE_BASE_URL'];
+const PLAUSIBLE_BASE_URL = process.env["PLAUSIBLE_BASE_URL"];
 
 // AFTER
-const PLAUSIBLE_BASE_URL = process.env['PLAUSIBLE_BASE_URL']!;
+const PLAUSIBLE_BASE_URL = process.env["PLAUSIBLE_BASE_URL"]!;
 ```
 
 ---
@@ -191,6 +199,7 @@ const PLAUSIBLE_BASE_URL = process.env['PLAUSIBLE_BASE_URL']!;
 **Fixes Applied** (4 errors):
 
 1. **Array Element Undefined Checks**:
+
 ```typescript
 // BEFORE (Error)
 return weeklyStats[0].totalRevenue - weeklyStats[1]?.totalRevenue > 0;
@@ -204,6 +213,7 @@ return current.totalRevenue - previous.totalRevenue > 0;
 ```
 
 2. **Proper Null Coalescing**:
+
 ```typescript
 // Consistent pattern for accessing array elements
 const current = weeklyStats[0];
@@ -223,14 +233,14 @@ if (!current || !previous) return;
 
 ```typescript
 // BEFORE (6 errors)
-bodyZone: bodyZones[i % bodyZones.length]
-sensation: sensations[Math.floor(Math.random() * sensations.length)]
-somaticAnchor: bodyZones[i % bodyZones.length]
+bodyZone: bodyZones[i % bodyZones.length];
+sensation: sensations[Math.floor(Math.random() * sensations.length)];
+somaticAnchor: bodyZones[i % bodyZones.length];
 
 // AFTER (Fixed)
-bodyZone: bodyZones[i % bodyZones.length]!
-sensation: sensations[Math.floor(Math.random() * sensations.length)]!
-somaticAnchor: bodyZones[i % bodyZones.length]!
+bodyZone: bodyZones[i % bodyZones.length]!;
+sensation: sensations[Math.floor(Math.random() * sensations.length)]!;
+somaticAnchor: bodyZones[i % bodyZones.length]!;
 ```
 
 **Justification**: Modulo operation guarantees index is within bounds
@@ -276,7 +286,7 @@ coachProfile: data.role === "COACH" ? { create: {} } : undefined
 ```typescript
 // BEFORE (4 errors)
 function getGithubEmailInfo(githubData: z.infer<typeof githubDataSchema>) {
-  return githubData.profile.emails[0];  // Can be undefined!
+  return githubData.profile.emails[0]; // Can be undefined!
 }
 
 // AFTER (Fixed)
@@ -297,31 +307,35 @@ function getGithubEmailInfo(githubData: z.infer<typeof githubDataSchema>) {
 
 ### By Error Category
 
-| Category | Count | Severity | Effort to Fix |
-|----------|-------|----------|---------------|
-| exactOptionalPropertyTypes mismatches | 20+ | Medium | Low-Medium |
-| Possibly undefined objects | 7 | Medium | Low |
-| Overload matching issues | 7 | High | Medium-High |
-| String \| undefined assignments | 6 | Low | Low |
-| Missing return statements | 3 | High | Low |
-| Other type incompatibilities | 6 | Medium | Medium |
+| Category                              | Count | Severity | Effort to Fix |
+| ------------------------------------- | ----- | -------- | ------------- |
+| exactOptionalPropertyTypes mismatches | 20+   | Medium   | Low-Medium    |
+| Possibly undefined objects            | 7     | Medium   | Low           |
+| Overload matching issues              | 7     | High     | Medium-High   |
+| String \| undefined assignments       | 6     | Low      | Low           |
+| Missing return statements             | 3     | High     | Low           |
+| Other type incompatibilities          | 6     | Medium   | Medium        |
 
 ### Top Files Needing Attention
 
 1. **`user/operations.ts`** (4 errors)
+
    - Prisma query type incompatibilities
    - Optional property handling
 
 2. **`payment/stripe/webhook.ts`** (3 errors)
+
    - Possibly undefined customer object
    - Missing return statement
    - Overload matching
 
 3. **`notifications/handlers/emailHandler.ts`** (3 errors)
+
    - Optional string properties in email templates
    - Type compatibility with email service
 
 4. **`client/SomaticLogForm.tsx`** (3 errors)
+
    - BodyZone optional/undefined mismatches
    - setState with potentially undefined values
 
@@ -348,7 +362,7 @@ $ wasp build
 ### No Breaking Changes
 
 - ✅ All environment variable access works correctly
-- ✅ Analytics providers function as expected  
+- ✅ Analytics providers function as expected
 - ✅ Database seeding operates without errors
 - ✅ Authentication flows unchanged
 - ✅ Admin dashboard renders properly
@@ -366,9 +380,9 @@ The TypeScript errors shown by `npx tsc --noEmit` are due to **IDE-specific stri
 {
   "compilerOptions": {
     "strict": true,
-    "exactOptionalPropertyTypes": true,      // ← Very strict
-    "noPropertyAccessFromIndexSignature": true,  // ← Fixed!
-    "noUncheckedIndexedAccess": true,        // ← Partially fixed
+    "exactOptionalPropertyTypes": true, // ← Very strict
+    "noPropertyAccessFromIndexSignature": true, // ← Fixed!
+    "noUncheckedIndexedAccess": true // ← Partially fixed
     // ...
   }
 }
@@ -385,6 +399,7 @@ The TypeScript errors shown by `npx tsc --noEmit` are due to **IDE-specific stri
 ### Option A: Continue Fixing (Recommended)
 
 **Benefits**:
+
 - Maintains high type safety standards
 - Improves code quality and maintainability
 - Catches potential bugs at compile time
@@ -393,6 +408,7 @@ The TypeScript errors shown by `npx tsc --noEmit` are due to **IDE-specific stri
 **Estimated Effort**: 2-3 hours to fix remaining 49 errors
 
 **Next Steps**:
+
 1. Fix exactOptionalPropertyTypes issues (use conditional spreading)
 2. Add null checks for possibly undefined objects
 3. Resolve overload matching with explicit type annotations
@@ -401,20 +417,23 @@ The TypeScript errors shown by `npx tsc --noEmit` are due to **IDE-specific stri
 ### Option B: Relax tsconfig.json
 
 **Benefits**:
+
 - Immediate error reduction
 - Less strict IDE experience
 - Build already works
 
 **Trade-offs**:
+
 - Reduced type safety
 - May miss potential bugs
 - Less helpful IDE suggestions
 
 **Implementation**:
+
 ```json
 {
   "compilerOptions": {
-    "strict": true,
+    "strict": true
     // "exactOptionalPropertyTypes": true,  // Comment out
     // "noUncheckedIndexedAccess": true,    // Comment out
     // Keep other strict options enabled
@@ -428,27 +447,28 @@ The TypeScript errors shown by `npx tsc --noEmit` are due to **IDE-specific stri
 
 ### Critical Fixes (7 files)
 
-| File Path | Lines Changed | Errors Fixed |
-|-----------|---------------|--------------|
-| `/Users/tomergalansky/loom-platform/app/src/analytics/providers/googleAnalyticsUtils.ts` | ~20 | 8 |
-| `/Users/tomergalansky/loom-platform/app/src/analytics/providers/plausibleAnalyticsUtils.ts` | ~10 | 6 |
-| `/Users/tomergalansky/loom-platform/app/src/admin/dashboards/analytics/AnalyticsDashboardPage.tsx` | ~15 | 4 |
-| `/Users/tomergalansky/loom-platform/app/src/admin/dashboards/analytics/TotalRevenueCard.tsx` | ~12 | 5 |
-| `/Users/tomergalansky/loom-platform/app/src/server/scripts/dbSeeds.ts` | ~8 | 7 |
-| `/Users/tomergalansky/loom-platform/app/src/somatic-logs/analytics.ts` | ~3 | 3 |
-| `/Users/tomergalansky/loom-platform/app/src/auth/userSignupFields.ts` | ~6 | 4 |
+| File Path                                                                                          | Lines Changed | Errors Fixed |
+| -------------------------------------------------------------------------------------------------- | ------------- | ------------ |
+| `/Users/tomergalansky/loom-platform/app/src/analytics/providers/googleAnalyticsUtils.ts`           | ~20           | 8            |
+| `/Users/tomergalansky/loom-platform/app/src/analytics/providers/plausibleAnalyticsUtils.ts`        | ~10           | 6            |
+| `/Users/tomergalansky/loom-platform/app/src/admin/dashboards/analytics/AnalyticsDashboardPage.tsx` | ~15           | 4            |
+| `/Users/tomergalansky/loom-platform/app/src/admin/dashboards/analytics/TotalRevenueCard.tsx`       | ~12           | 5            |
+| `/Users/tomergalansky/loom-platform/app/src/server/scripts/dbSeeds.ts`                             | ~8            | 7            |
+| `/Users/tomergalansky/loom-platform/app/src/somatic-logs/analytics.ts`                             | ~3            | 3            |
+| `/Users/tomergalansky/loom-platform/app/src/auth/userSignupFields.ts`                              | ~6            | 4            |
 
 ### Bulk Environment Variable Fixes (17+ files)
 
 All files accessing `process.env.*` were updated to use bracket notation:
-- analytics/*
-- auth/*
-- file-upload/*
-- notifications/*
-- payment/* (multiple files)
-- resources/*
-- server/*
-- utils/*
+
+- analytics/\*
+- auth/\*
+- file-upload/\*
+- notifications/\*
+- payment/\* (multiple files)
+- resources/\*
+- server/\*
+- utils/\*
 
 ### Dependencies (2 files)
 
@@ -465,7 +485,7 @@ Successfully reduced TypeScript compilation errors by **61%** (125 → 49) while
 ✅ Improving code type safety  
 ✅ Ensuring successful builds  
 ✅ Following TypeScript best practices  
-✅ Documenting all changes  
+✅ Documenting all changes
 
 The remaining 49 errors are primarily related to `exactOptionalPropertyTypes` and can be systematically addressed following the patterns established in this fix session.
 
@@ -475,4 +495,3 @@ The remaining 49 errors are primarily related to `exactOptionalPropertyTypes` an
 **Project**: Loom Platform - Somatic Coaching Application  
 **TypeScript Version**: 5.8.2  
 **Wasp Version**: 0.19.0
-

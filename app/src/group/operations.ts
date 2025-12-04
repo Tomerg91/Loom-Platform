@@ -464,19 +464,27 @@ export const deleteGroupPost: any = async (rawArgs: any, context: any) => {
 // ============================================
 
 const requestMentorStatusSchema = z.object({
-  reason: z.string().min(10, "Please provide at least 10 characters explaining why you want to be a mentor").max(1000),
+  reason: z
+    .string()
+    .min(
+      10,
+      "Please provide at least 10 characters explaining why you want to be a mentor",
+    )
+    .max(1000),
 });
-type RequestMentorStatusInput = z.infer<typeof requestMentorStatusSchema>;
+export type RequestMentorStatusInput = z.infer<
+  typeof requestMentorStatusSchema
+>;
 
 /**
  * Coach requests to become a mentor (requires admin approval)
  * Database-level unique constraint prevents duplicate PENDING requests
  */
-export const requestMentorStatus: any = async (
-  rawArgs: any,
-  context: any
-) => {
-  const args = ensureArgsSchemaOrThrowHttpError(requestMentorStatusSchema, rawArgs);
+export const requestMentorStatus: any = async (rawArgs: any, context: any) => {
+  const args = ensureArgsSchemaOrThrowHttpError(
+    requestMentorStatusSchema,
+    rawArgs,
+  );
 
   const coachProfile = await getCoachProfile(context);
 
@@ -514,16 +522,18 @@ export const requestMentorStatus: any = async (
 const approveMentorRequestSchema = z.object({
   requestId: z.string().uuid("Invalid request ID"),
 });
-type ApproveMentorRequestInput = z.infer<typeof approveMentorRequestSchema>;
+export type ApproveMentorRequestInput = z.infer<
+  typeof approveMentorRequestSchema
+>;
 
 /**
  * Admin approves a coach to become a mentor
  */
-export const approveMentorRequest: any = async (
-  rawArgs: any,
-  context: any
-) => {
-  const args = ensureArgsSchemaOrThrowHttpError(approveMentorRequestSchema, rawArgs);
+export const approveMentorRequest: any = async (rawArgs: any, context: any) => {
+  const args = ensureArgsSchemaOrThrowHttpError(
+    approveMentorRequestSchema,
+    rawArgs,
+  );
 
   // Verify user is admin
   if (!context.user?.isAdmin) {
@@ -569,19 +579,24 @@ export const approveMentorRequest: any = async (
 
 const rejectMentorRequestSchema = z.object({
   requestId: z.string().uuid("Invalid request ID"),
-  reason: z.string().min(10, "Please provide at least 10 characters explaining the rejection").max(1000),
+  reason: z
+    .string()
+    .min(10, "Please provide at least 10 characters explaining the rejection")
+    .max(1000),
 });
-type RejectMentorRequestInput = z.infer<typeof rejectMentorRequestSchema>;
+export type RejectMentorRequestInput = z.infer<
+  typeof rejectMentorRequestSchema
+>;
 
 /**
  * Admin rejects a coach's mentor request
  * Requires detailed reason to help coach improve future applications
  */
-export const rejectMentorRequest: any = async (
-  rawArgs: any,
-  context: any
-) => {
-  const args = ensureArgsSchemaOrThrowHttpError(rejectMentorRequestSchema, rawArgs);
+export const rejectMentorRequest: any = async (rawArgs: any, context: any) => {
+  const args = ensureArgsSchemaOrThrowHttpError(
+    rejectMentorRequestSchema,
+    rawArgs,
+  );
 
   // Verify user is admin
   if (!context.user?.isAdmin) {
@@ -639,7 +654,7 @@ export const rejectMentorRequest: any = async (
  */
 export const getPendingMentorRequests: any = async (
   rawArgs: any,
-  context: any
+  context: any,
 ) => {
   // Verify user is admin
   if (!context.user?.isAdmin) {
@@ -681,10 +696,7 @@ export const getPendingMentorRequests: any = async (
  * Coach views their own mentor request history
  * Allows coaches to see current status and rejection reasons
  */
-export const getMyMentorRequests: any = async (
-  rawArgs: any,
-  context: any
-) => {
+export const getMyMentorRequests: any = async (rawArgs: any, context: any) => {
   const coachProfile = await getCoachProfile(context);
 
   const requests = await context.entities.MentorRequest.findMany({

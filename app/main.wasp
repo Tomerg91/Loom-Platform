@@ -102,6 +102,16 @@ app OpenSaaS {
   },
 }
 
+route PrivacyRoute { path: "/privacy", to: PrivacyPage }
+page PrivacyPage {
+  component: import PrivacyPage from "@src/landing-page/PrivacyPage"
+}
+
+route TermsRoute { path: "/terms", to: TermsPage }
+page TermsPage {
+  component: import TermsPage from "@src/landing-page/TermsPage"
+}
+
 route LandingPageRoute { path: "/", to: LandingPage }
 page LandingPage {
   component: import LandingPage from "@src/landing-page/LandingPage"

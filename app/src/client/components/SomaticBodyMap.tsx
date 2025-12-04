@@ -173,7 +173,7 @@ export default function SomaticBodyMap() {
               width="200%"
               height="200%"
             >
-              <feGaussianBlur stdDeviation="12" result="coloredBlur" />
+              <feGaussianBlur stdDeviation="16" result="coloredBlur" />
               <feMerge>
                 <feMergeNode in="coloredBlur" />
                 <feMergeNode in="SourceGraphic" />
@@ -182,15 +182,15 @@ export default function SomaticBodyMap() {
 
             {/* Inner Body Shadow for 2.5D effect - Softer */}
             <filter id="inner-body-shadow">
-              <feOffset dx="0" dy="2" />
-              <feGaussianBlur stdDeviation="3" result="offset-blur" />
+              <feOffset dx="0" dy="4" />
+              <feGaussianBlur stdDeviation="6" result="offset-blur" />
               <feComposite
                 operator="out"
                 in="SourceGraphic"
                 in2="offset-blur"
                 result="inverse"
               />
-              <feFlood floodColor="black" floodOpacity="0.15" result="color" />
+              <feFlood floodColor="black" floodOpacity="0.1" result="color" />
               <feComposite
                 operator="in"
                 in="color"
@@ -201,60 +201,60 @@ export default function SomaticBodyMap() {
             </filter>
 
             {/* 2. GRADIENTS (Refined - Organic & Deep) */}
-            {/* Head: Violet/Ether */}
-            <radialGradient id="ether-violet" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#A78BFA" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
+            {/* Head: Violet/Ether - Crown Chakra */}
+            <radialGradient id="ether-violet" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#C4B5FD" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#8B5CF6" stopOpacity={0.5} />
+              <stop offset="100%" stopColor="#7C3AED" stopOpacity={0} />
             </radialGradient>
 
-            {/* Throat: Blue/Clarity */}
-            <radialGradient id="clarity-blue" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#60A5FA" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+            {/* Throat: Blue/Clarity - Throat Chakra */}
+            <radialGradient id="clarity-blue" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#93C5FD" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#3B82F6" stopOpacity={0.5} />
+              <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
             </radialGradient>
 
-            {/* Chest: Rose/Heart */}
-            <radialGradient id="heart-rose" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#EC4899" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#F472B6" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#EC4899" stopOpacity={0} />
+            {/* Chest: Rose/Heart - Heart Chakra */}
+            <radialGradient id="heart-rose" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#FBCFE8" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#EC4899" stopOpacity={0.5} />
+              <stop offset="100%" stopColor="#DB2777" stopOpacity={0} />
             </radialGradient>
 
-            {/* Solar Plexus: Gold/Power */}
-            <radialGradient id="power-gold" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#FBBF24" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
-            </radialGradient>
-
-            {/* Belly: Orange/Gut */}
-            <radialGradient id="gut-orange" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#F97316" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#FB923C" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#F97316" stopOpacity={0} />
-            </radialGradient>
-
-            {/* Pelvis: Red/Root */}
-            <radialGradient id="root-red" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
-              <stop offset="60%" stopColor="#F87171" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
-            </radialGradient>
-
-            {/* Arms: Amber/Action */}
-            <radialGradient id="action-amber" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#D97706" stopOpacity={0.7} />
-              <stop offset="60%" stopColor="#F59E0B" stopOpacity={0.2} />
+            {/* Solar Plexus: Gold/Power - Solar Plexus Chakra */}
+            <radialGradient id="power-gold" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#FDE68A" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#F59E0B" stopOpacity={0.5} />
               <stop offset="100%" stopColor="#D97706" stopOpacity={0} />
             </radialGradient>
 
+            {/* Belly: Orange/Gut - Sacral Chakra */}
+            <radialGradient id="gut-orange" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#FDBA74" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#F97316" stopOpacity={0.5} />
+              <stop offset="100%" stopColor="#EA580C" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Pelvis: Red/Root - Root Chakra */}
+            <radialGradient id="root-red" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#FCA5A5" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#EF4444" stopOpacity={0.5} />
+              <stop offset="100%" stopColor="#DC2626" stopOpacity={0} />
+            </radialGradient>
+
+            {/* Arms: Amber/Action */}
+            <radialGradient id="action-amber" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#FCD34D" stopOpacity={0.8} />
+              <stop offset="50%" stopColor="#F59E0B" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#B45309" stopOpacity={0} />
+            </radialGradient>
+
             {/* Legs: Green/Ground */}
-            <radialGradient id="ground-earth" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#10B981" stopOpacity={0.7} />
-              <stop offset="60%" stopColor="#34D399" stopOpacity={0.2} />
-              <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+            <radialGradient id="ground-earth" cx="50%" cy="40%" r="70%">
+              <stop offset="0%" stopColor="#6EE7B7" stopOpacity={0.8} />
+              <stop offset="50%" stopColor="#10B981" stopOpacity={0.4} />
+              <stop offset="100%" stopColor="#047857" stopOpacity={0} />
             </radialGradient>
 
             {/* 3. MASKS */}

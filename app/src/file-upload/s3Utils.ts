@@ -12,10 +12,10 @@ import * as path from "path";
 import { MAX_FILE_SIZE_BYTES } from "./validation";
 
 export const s3Client = new S3Client({
-  region: process.env['AWS_S3_REGION'],
+  region: process.env["AWS_S3_REGION"],
   credentials: {
-    accessKeyId: process.env['AWS_S3_IAM_ACCESS_KEY']!,
-    secretAccessKey: process.env['AWS_S3_IAM_SECRET_KEY']!,
+    accessKeyId: process.env["AWS_S3_IAM_ACCESS_KEY"]!,
+    secretAccessKey: process.env["AWS_S3_IAM_SECRET_KEY"]!,
   },
 });
 
@@ -36,7 +36,7 @@ export const getUploadFileSignedURLFromS3 = async ({
 
   const { url: s3UploadUrl, fields: s3UploadFields } =
     await createPresignedPost(s3Client, {
-      Bucket: process.env['AWS_S3_FILES_BUCKET']!,
+      Bucket: process.env["AWS_S3_FILES_BUCKET"]!,
       Key: s3Key,
       Conditions: [["content-length-range", 0, MAX_FILE_SIZE_BYTES]],
       Fields: {
@@ -54,7 +54,7 @@ export const getDownloadFileSignedURLFromS3 = async ({
   s3Key: string;
 }) => {
   const command = new GetObjectCommand({
-    Bucket: process.env['AWS_S3_FILES_BUCKET'],
+    Bucket: process.env["AWS_S3_FILES_BUCKET"],
     Key: s3Key,
   });
   return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
@@ -62,7 +62,7 @@ export const getDownloadFileSignedURLFromS3 = async ({
 
 export const deleteFileFromS3 = async ({ s3Key }: { s3Key: string }) => {
   const command = new DeleteObjectCommand({
-    Bucket: process.env['AWS_S3_FILES_BUCKET'],
+    Bucket: process.env["AWS_S3_FILES_BUCKET"],
     Key: s3Key,
   });
   await s3Client.send(command);
@@ -70,7 +70,7 @@ export const deleteFileFromS3 = async ({ s3Key }: { s3Key: string }) => {
 
 export const checkFileExistsInS3 = async ({ s3Key }: { s3Key: string }) => {
   const command = new HeadObjectCommand({
-    Bucket: process.env['AWS_S3_FILES_BUCKET'],
+    Bucket: process.env["AWS_S3_FILES_BUCKET"],
     Key: s3Key,
   });
   try {

@@ -1,7 +1,7 @@
 import { defineUserSignupFields } from "wasp/auth/providers/types";
 import { z } from "zod";
 
-const adminEmails = process.env['ADMIN_EMAILS']?.split(",") || [];
+const adminEmails = process.env["ADMIN_EMAILS"]?.split(",") || [];
 
 // ============================================
 // EMAIL SIGNUP

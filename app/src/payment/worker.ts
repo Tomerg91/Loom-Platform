@@ -172,7 +172,7 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
               renewalDate: new Date(),
               nextRenewalDate,
               appUrl: `${
-                process.env['WASP_WEB_CLIENT_URL'] || "https://loom.local"
+                process.env["WASP_WEB_CLIENT_URL"] || "https://loom.local"
               }/dashboard`,
             });
 
@@ -225,10 +225,10 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
                 planName: formatPlanName(user.subscriptionPlan),
                 cancelledDate: new Date(),
                 appUrl: `${
-                  process.env['WASP_WEB_CLIENT_URL'] || "https://loom.local"
+                  process.env["WASP_WEB_CLIENT_URL"] || "https://loom.local"
                 }/dashboard`,
                 supportContactUrl: `${
-                  process.env['WASP_WEB_CLIENT_URL'] || "https://loom.local"
+                  process.env["WASP_WEB_CLIENT_URL"] || "https://loom.local"
                 }/support`,
               });
 
@@ -285,7 +285,7 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
                 attemptNumber: newRetryCount,
                 retryDate: nextRetryDate,
                 appUrl: `${
-                  process.env['WASP_WEB_CLIENT_URL'] || "https://loom.local"
+                  process.env["WASP_WEB_CLIENT_URL"] || "https://loom.local"
                 }/dashboard`,
               });
 

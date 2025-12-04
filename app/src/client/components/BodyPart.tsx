@@ -70,13 +70,13 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         opacity: 0.5,
         scale: 1.05,
         filter: "blur(15px)",
-        transition: { duration: 0.4, ease: "easeOut" },
+        transition: { duration: 0.4, ease: "easeOut" as const },
       },
       active: {
         opacity: 0.85,
         scale: 1.15,
         filter: "blur(12px)",
-        transition: { duration: 0.5, ease: "easeOut" },
+        transition: { duration: 0.5, ease: "easeOut" as const },
       },
     };
 
@@ -86,13 +86,13 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
         duration: 3,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
       },
       scale: {
         duration: 4,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
       },
     };
 
@@ -113,24 +113,46 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
 
           {/* Secondary "Core" for extra depth when active */}
           {isSelected && (
-            <motion.circle
-              cx={center.x}
-              cy={center.y}
-              r={center.r * 0.5}
-              fill="white"
-              opacity={0.2}
-              filter="blur(8px)"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{
-                scale: [0.8, 1.1, 0.8],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+            <>
+              {/* Inner bright core */}
+              <motion.circle
+                cx={center.x}
+                cy={center.y}
+                r={center.r * 0.4}
+                fill="white"
+                opacity={0.3}
+                filter="blur(12px)"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{
+                  scale: [0.5, 0.8, 0.5],
+                  opacity: [0.2, 0.5, 0.2],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              {/* Outer ripple */}
+              <motion.circle
+                cx={center.x}
+                cy={center.y}
+                r={center.r * 0.8}
+                fill={`url(#${gradientId})`}
+                opacity={0.2}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{
+                  scale: [0.8, 1.2, 0.8],
+                  opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5,
+                }}
+              />
+            </>
           )}
         </g>
 
@@ -144,13 +166,29 @@ const BodyPart = React.forwardRef<SVGPathElement, BodyPartProps>(
           className="cursor-pointer focus-visible:outline-none"
           fill="transparent"
           // Rim light effect
-          stroke={isSelected ? "white" : isHovered ? "rgba(255,255,255,0.5)" : "transparent"}
+          stroke={
+            isSelected
+              ? "white"
+              : isHovered
+                ? "rgba(255,255,255,0.5)"
+                : "transparent"
+          }
           strokeOpacity={isSelected ? 0.6 : isHovered ? 0.4 : 0}
-          strokeWidth={isSelected ? 1.5 : 1}
+          strokeWidth={isSelected ? 1.5 : 15} // Increased stroke width for hit area, visually handled by opacity
+          strokeLinecap="round"
+          strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
           initial={false}
           animate={{
             strokeOpacity: isSelected ? 0.6 : isHovered ? 0.4 : 0,
+            // When not selected/hovered, we want the stroke to be invisible but present for clicks
+            // However, strokeOpacity 0 makes it unclickable in some SVG implementations if fill is also transparent.
+            // A better approach for "invisible hit area" is to use a separate path, but here we can keep strokeOpacity > 0 but stroke color transparent.
+            // Actually, 'transparent' color with width 15 works best for hit testing.
+          }}
+          style={{
+            // Ensure the stroke captures events even if transparent
+            pointerEvents: "all",
           }}
           transition={{ duration: 0.3 }}
           onClick={onClick}

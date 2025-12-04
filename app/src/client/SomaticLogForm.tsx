@@ -30,6 +30,9 @@ import { Slider } from "../components/ui/slider";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Loader2, Eye, EyeOff, AlertCircle, RefreshCw } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
+import VoiceInput from "./components/VoiceInput";
+import { toast } from "../hooks/use-toast";
+import i18n from "./i18n";
 
 const SENSATIONS = [
   "Tight",
@@ -320,7 +323,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   // ============================================
   const handleRetry = async () => {
     setShowRetryButton(false);
-    await handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+    await handleSubmit({ preventDefault: () => { } } as React.FormEvent);
   };
 
   return (
@@ -368,11 +371,10 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
                   key={sensation}
                   type="button"
                   onClick={() => handleSensationChange(sensation)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedSensation === sensation
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedSensation === sensation
                       ? "bg-primary text-primary-foreground shadow-md"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  }`}
+                    }`}
                   disabled={isSubmitting}
                 >
                   {sensation}
@@ -400,7 +402,11 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               max={10}
               step={1}
               value={[intensity]}
-              onValueChange={(value) => setIntensity(value[0])}
+              onValueChange={(value) => {
+                if (value && value.length > 0) {
+                  setIntensity(value[0] ?? 5);
+                }
+              }}
               disabled={isSubmitting}
               className="w-full"
             />
@@ -412,7 +418,30 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
 
           {/* Optional Note */}
           <FormFieldWithValidation
-            label="Notes (Optional)"
+            label={
+              <div className="flex items-center justify-between w-full">
+                <span>Notes (Optional)</span>
+                <VoiceInput
+                  onTranscript={(text: string) => {
+                    // Append text with a space if note is not empty
+                    const newNote = note ? `${note} ${text}` : text;
+                    // Truncate if exceeds limit
+                    if (newNote.length <= 1000) {
+                      handleNoteChange(newNote);
+                    } else {
+                      handleNoteChange(newNote.slice(0, 1000));
+                      toast({
+                        title: "Note limit reached",
+                        description:
+                          "Your note has been truncated to 1000 characters.",
+                        variant: "destructive", // Changed from warning to destructive as warning might not exist
+                      });
+                    }
+                  }}
+                  language={i18n.language === "he" ? "he-IL" : "en-US"}
+                />
+              </div>
+            }
             error={errors.note}
             touched={touched.note}
             success={touched.note && !errors.note && note.length > 0}
@@ -426,11 +455,9 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               onBlur={() => handleFieldBlur("note")}
               disabled={isSubmitting}
               rows={3}
-              className={`resize-none ${
-                touched.note && errors.note ? "border-red-500" : ""
-              } ${
-                touched.note && !errors.note && note ? "border-green-500" : ""
-              }`}
+              className={`resize-none ${touched.note && errors.note ? "border-red-500" : ""
+                } ${touched.note && !errors.note && note ? "border-green-500" : ""
+                }`}
             />
           </FormFieldWithValidation>
 
@@ -455,14 +482,12 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               type="button"
               onClick={() => setSharedWithCoach(!sharedWithCoach)}
               disabled={isSubmitting}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                sharedWithCoach ? "bg-primary" : "bg-muted-foreground"
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${sharedWithCoach ? "bg-primary" : "bg-muted-foreground"
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  sharedWithCoach ? "translate-x-6" : "translate-x-1"
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${sharedWithCoach ? "translate-x-6" : "translate-x-1"
+                  }`}
               />
             </button>
           </div>

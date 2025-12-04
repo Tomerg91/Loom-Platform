@@ -11,7 +11,7 @@ import { Check, AlertCircle } from "lucide-react";
 import { Label } from "./ui/label";
 
 interface FormFieldWithValidationProps {
-  label: string;
+  label: React.ReactNode;
   error?: string;
   touched?: boolean;
   success?: boolean;

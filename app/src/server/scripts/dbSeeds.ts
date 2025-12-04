@@ -24,9 +24,9 @@ type MockUserData = Omit<User, "id" | "onboardingSteps" | "deletedAt"> & {
 
 /**
  * This function, which we've imported in `app.db.seeds` in the `main.wasp` file,
-  * seeds the database with mock users via the `wasp db seed` command.
-  * For more info see: https://wasp.sh/docs/data-model/backends#seeding-the-database
-  */
+ * seeds the database with mock users via the `wasp db seed` command.
+ * For more info see: https://wasp.sh/docs/data-model/backends#seeding-the-database
+ */
 export async function seedMockUsers(prismaClient: PrismaClient) {
   ensureDevSeedAllowed("seedMockUsers");
 
@@ -97,9 +97,9 @@ function generateMockUserData(): MockUserData {
  * with realistic data for development and testing.
  *
  * To use in development, signup with:
-  * - Coach: coach@test.com (then invite clients)
-  * - Or use existing clients if they were seeded
-  */
+ * - Coach: coach@test.com (then invite clients)
+ * - Or use existing clients if they were seeded
+ */
 export async function seedTestCoachWithClients(prismaClient: PrismaClient) {
   ensureDevSeedAllowed("seedTestCoachWithClients");
 

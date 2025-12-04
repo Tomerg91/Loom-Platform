@@ -17,6 +17,39 @@ import CookieConsentBanner from "./components/cookie-consent/Banner";
  * use this component to wrap all child components
  * this is useful for templates, themes, and context
  */
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6 text-center">
+      <div className="max-w-md space-y-4">
+        <h2 className="text-2xl font-serif font-bold text-destructive">
+          Something went wrong
+        </h2>
+        <p className="text-muted-foreground">
+          We apologize for the inconvenience. The application encountered an
+          unexpected error.
+        </p>
+        <pre className="bg-muted p-4 rounded text-xs text-left overflow-auto max-h-40">
+          {error.message}
+        </pre>
+        <button
+          onClick={resetErrorBoundary}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const location = useLocation();
   const { data: user } = useAuth();
@@ -117,7 +150,10 @@ export default function App() {
   }, [location]);
 
   return (
-    <>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => window.location.reload()}
+    >
       <div className="bg-background text-foreground min-h-screen">
         {isAdminDashboard ? (
           <Outlet />
@@ -134,6 +170,6 @@ export default function App() {
       </div>
       <Toaster position="bottom-right" />
       <CookieConsentBanner />
-    </>
+    </ErrorBoundary>
   );
 }

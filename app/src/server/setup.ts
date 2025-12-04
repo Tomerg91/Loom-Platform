@@ -8,9 +8,9 @@ import type { Application } from "express";
  */
 export const setupServer = async (app: Application) => {
   // Get Plausible configuration from environment (optional)
-  const plausibleSiteId = process.env['PLAUSIBLE_SITE_ID'];
+  const plausibleSiteId = process.env["PLAUSIBLE_SITE_ID"];
   const plausibleBaseUrl =
-    process.env['PLAUSIBLE_BASE_URL'] || "https://plausible.io";
+    process.env["PLAUSIBLE_BASE_URL"] || "https://plausible.io";
 
   // Build Content Security Policy directives
   const cspDirectives = {
@@ -48,13 +48,13 @@ export const setupServer = async (app: Application) => {
       "https://analytics.google.com",
       ...(plausibleSiteId ? [plausibleBaseUrl] : []),
       // Allow S3 bucket connections for file downloads
-      `https://${process.env['AWS_S3_FILES_BUCKET'] || "*"}.s3.${
-        process.env['AWS_S3_REGION'] || "*"
+      `https://${process.env["AWS_S3_FILES_BUCKET"] || "*"}.s3.${
+        process.env["AWS_S3_REGION"] || "*"
       }.amazonaws.com`,
       // Allow Stripe if configured
-      ...(process.env['STRIPE_API_KEY'] ? ["https://api.stripe.com"] : []),
+      ...(process.env["STRIPE_API_KEY"] ? ["https://api.stripe.com"] : []),
       // Allow LemonSqueezy if configured
-      ...(process.env['LEMONSQUEEZY_API_KEY']
+      ...(process.env["LEMONSQUEEZY_API_KEY"]
         ? ["https://api.lemonsqueezy.com"]
         : []),
     ],
@@ -62,7 +62,7 @@ export const setupServer = async (app: Application) => {
     // Frames: allow Stripe for payment forms
     "frame-src": [
       "'self'",
-      ...(process.env['STRIPE_API_KEY'] ? ["https://js.stripe.com"] : []),
+      ...(process.env["STRIPE_API_KEY"] ? ["https://js.stripe.com"] : []),
     ],
 
     // Objects: block plugins
@@ -74,7 +74,7 @@ export const setupServer = async (app: Application) => {
     // Form actions: allow same origin and payment providers
     "form-action": [
       "'self'",
-      ...(process.env['STRIPE_API_KEY'] ? ["https://checkout.stripe.com"] : []),
+      ...(process.env["STRIPE_API_KEY"] ? ["https://checkout.stripe.com"] : []),
     ],
 
     // Upgrade insecure requests (HTTP to HTTPS)

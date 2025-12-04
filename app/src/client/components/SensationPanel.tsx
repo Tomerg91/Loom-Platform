@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Activity, Thermometer, Wind, Zap, Droplets, Anchor, AlertCircle, CircleDashed } from "lucide-react";
+import {
+  X,
+  Save,
+  Activity,
+  Thermometer,
+  Wind,
+  Zap,
+  Droplets,
+  Anchor,
+  AlertCircle,
+  CircleDashed,
+} from "lucide-react";
 
 type BodyZone =
   | "HEAD"
@@ -88,7 +99,10 @@ export default function SensationPanel({
             What do you feel?
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Focusing on your <span className="font-semibold text-teal-600 dark:text-teal-400">{zoneLabels[selectedZone]}</span>
+            Focusing on your{" "}
+            <span className="font-semibold text-teal-600 dark:text-teal-400">
+              {zoneLabels[selectedZone]}
+            </span>
           </p>
         </div>
         <button
@@ -123,13 +137,20 @@ export default function SensationPanel({
             }}
             className={`
               relative group flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all duration-300
-              ${selectedSensation === label
-                ? "bg-teal-600/90 border-teal-500 text-white shadow-lg shadow-teal-900/20 scale-[1.02]"
-                : "bg-white/40 dark:bg-slate-800/40 border-white/40 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-teal-200 dark:hover:border-teal-800"
+              ${
+                selectedSensation === label
+                  ? "bg-teal-600/90 border-teal-500 text-white shadow-lg shadow-teal-900/20 scale-[1.02]"
+                  : "bg-white/40 dark:bg-slate-800/40 border-white/40 dark:border-slate-700/40 text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-teal-200 dark:hover:border-teal-800"
               }
             `}
           >
-            <Icon className={`w-6 h-6 ${selectedSensation === label ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors"}`} />
+            <Icon
+              className={`w-6 h-6 ${
+                selectedSensation === label
+                  ? "text-white"
+                  : "text-slate-400 dark:text-slate-500 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors"
+              }`}
+            />
             <span className="text-sm font-medium">{label}</span>
           </motion.button>
         ))}

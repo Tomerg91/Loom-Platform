@@ -74,7 +74,7 @@ export const getUploadUrl: GetUploadUrl<
     const { url: uploadUrl, fields: uploadFields } = await createPresignedPost(
       s3Client,
       {
-        Bucket: process.env['AWS_S3_FILES_BUCKET']!,
+        Bucket: process.env["AWS_S3_FILES_BUCKET"]!,
         Key: s3Key,
         Conditions: [["content-length-range", 0, MAX_RESOURCE_FILE_SIZE]],
         Fields: {

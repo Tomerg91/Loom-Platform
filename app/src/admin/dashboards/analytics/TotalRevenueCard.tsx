@@ -23,14 +23,12 @@ const TotalRevenueCard = ({
     const current = weeklyStats[0];
     const previous = weeklyStats[1];
     if (!current || !previous) return;
-    if (previous.totalRevenue === 0 || current.totalRevenue === 0)
-      return 0;
+    if (previous.totalRevenue === 0 || current.totalRevenue === 0) return 0;
 
     weeklyStats.sort((a, b) => b.id - a.id);
 
     const percentage =
-      ((current.totalRevenue - previous.totalRevenue) /
-        previous.totalRevenue) *
+      ((current.totalRevenue - previous.totalRevenue) / previous.totalRevenue) *
       100;
     return Math.floor(percentage);
   }, [weeklyStats]);

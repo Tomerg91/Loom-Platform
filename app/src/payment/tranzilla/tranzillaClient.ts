@@ -15,7 +15,7 @@ export function getTranzillaTerminalName(): string {
  * Reads directly from environment to avoid CodeQL false positive on password hashing
  */
 function getTranzillaApiSecretForSignature(): string {
-  const secret = process.env['TRANZILLA_API_PASSWORD'];
+  const secret = process.env["TRANZILLA_API_PASSWORD"];
   if (!secret) {
     throw new Error("TRANZILLA_API_PASSWORD environment variable is not set");
   }
