@@ -40,7 +40,7 @@ export function getSessionReminderEmailContent(data: SessionReminderData) {
           <strong style="font-size: 18px;">📅 ${formattedDate}</strong>
         </p>
         ${
-          data.time
+          data.time && data.time.length > 0
             ? `<p style="margin: 8px 0 0 0; color: #666;">⏰ ${escapeHtml(
                 data.time,
               )}</p>`
@@ -72,12 +72,15 @@ export function getSessionReminderEmailContent(data: SessionReminderData) {
     subject: `Reminder: Your session with ${data.coachName} is tomorrow`,
     text: `Session Reminder: You have a coaching session scheduled with ${
       data.coachName
-    } on ${formattedDate}${data.time ? ` at ${data.time}` : ""}.`,
+    } on ${formattedDate}${
+      data.time && data.time.length > 0 ? ` at ${data.time}` : ""
+    }.`,
     html,
   };
 }
 
-function escapeHtml(text: string): string {
+function escapeHtml(text: string | undefined): string {
+  if (!text) return "";
   const map: Record<string, string> = {
     "&": "&amp;",
     "<": "&lt;",

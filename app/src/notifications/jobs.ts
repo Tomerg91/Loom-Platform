@@ -53,14 +53,14 @@ export async function checkUpcomingSessionsJob(
       if (clientProfile.nextSessionDate) {
         try {
           // Get coach name if coach is assigned
-          let coachName = "Your Coach";
+          let coachName: string = "Your Coach";
           if (clientProfile.coachId) {
             const coach = await context.entities.coachProfile.findUnique({
               where: { id: clientProfile.coachId },
               include: { user: true },
             });
-            if (coach?.user?.email) {
-              coachName = coach.user.email.split("@")[0];
+            if (coach?.user && coach.user.email) {
+              coachName = coach.user.email.split("@")[0] || "Your Coach";
             }
           }
 
