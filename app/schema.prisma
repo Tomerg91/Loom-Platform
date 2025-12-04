@@ -651,15 +651,17 @@ model MentorRequest {
   coachProfile  CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
   coachId       String
 
-  // Request status
-  status        String    @default("PENDING") // 'PENDING', 'APPROVED', 'REJECTED'
-  rejectionNote String?   @db.Text // Reason if rejected
+  // Request status and reasons
+  status            String    @default("PENDING") // 'PENDING', 'APPROVED', 'REJECTED'
+  requestReason     String?   @db.Text  // Why coach wants mentor status
+  rejectionNote     String?   @db.Text  // Why admin rejected (only if status=REJECTED)
 
   // Admin who approved/rejected
-  reviewedBy   User?     @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-  reviewedByUserId String?
-  reviewedAt    DateTime?
+  reviewedBy        User?     @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
 
+  @@unique([coachId, status], where: "status = 'PENDING'") // Prevent duplicate PENDING requests
   @@index([coachId, status])
   @@index([status])
   @@index([createdAt])

@@ -8,6 +8,7 @@ CREATE TABLE "MentorRequest" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
     "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "requestReason" TEXT,
     "rejectionNote" TEXT,
     "coachId" TEXT NOT NULL,
     "reviewedByUserId" TEXT,
@@ -112,6 +113,9 @@ CREATE INDEX "GroupPostReply_authorId_idx" ON "GroupPostReply"("authorId");
 CREATE INDEX "GroupPostReply_deletedAt_idx" ON "GroupPostReply"("deletedAt");
 
 -- CreateIndex for MentorRequest
+CREATE UNIQUE INDEX "MentorRequest_coachId_status_key" ON "MentorRequest"("coachId", "status") WHERE "status" = 'PENDING';
+
+-- CreateIndex
 CREATE INDEX "MentorRequest_coachId_status_idx" ON "MentorRequest"("coachId", "status");
 
 -- CreateIndex

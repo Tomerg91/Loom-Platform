@@ -445,12 +445,13 @@ export const deleteGroupPost: any = async (rawArgs: any, context: any) => {
 // ============================================
 
 const requestMentorStatusSchema = z.object({
-  reason: z.string().min(1, "Please provide a reason").max(1000),
+  reason: z.string().min(10, "Please provide at least 10 characters explaining why you want to be a mentor").max(1000),
 });
 type RequestMentorStatusInput = z.infer<typeof requestMentorStatusSchema>;
 
 /**
  * Coach requests to become a mentor (requires admin approval)
+ * Database-level unique constraint prevents duplicate PENDING requests
  */
 export const requestMentorStatus: any = async (
   rawArgs: any,
@@ -465,34 +466,30 @@ export const requestMentorStatus: any = async (
     throw new HttpError(400, "You are already a mentor");
   }
 
-  // Check for pending request
-  const existingRequest = await context.entities.MentorRequest.findFirst({
-    where: {
-      coachId: coachProfile.id,
-      status: "PENDING",
-      deletedAt: null,
-    },
-  });
-
-  if (existingRequest) {
-    throw new HttpError(400, "You already have a pending mentor request");
-  }
-
   // Create mentor request
-  const request = await context.entities.MentorRequest.create({
-    data: {
-      coachId: coachProfile.id,
-      rejectionNote: args.reason, // Store reason in rejectionNote for now (will replace with description field if needed)
-    },
-  });
+  // Database unique constraint on (coachId, status) WHERE status='PENDING' prevents duplicates
+  try {
+    const request = await context.entities.MentorRequest.create({
+      data: {
+        coachId: coachProfile.id,
+        requestReason: args.reason, // Why coach wants mentor status
+      },
+    });
 
-  // TODO: Send notification to admins about new mentor request
+    // TODO: Send notification to admins about new mentor request
 
-  return {
-    id: request.id,
-    status: request.status,
-    createdAt: request.createdAt,
-  };
+    return {
+      id: request.id,
+      status: request.status,
+      createdAt: request.createdAt,
+    };
+  } catch (error: any) {
+    // Handle Prisma unique constraint violation (P2002)
+    if (error.code === "P2002") {
+      throw new HttpError(400, "You already have a pending mentor request");
+    }
+    throw error;
+  }
 };
 
 const approveMentorRequestSchema = z.object({
@@ -553,12 +550,13 @@ export const approveMentorRequest: any = async (
 
 const rejectMentorRequestSchema = z.object({
   requestId: z.string().uuid("Invalid request ID"),
-  reason: z.string().min(1, "Please provide a rejection reason").max(1000),
+  reason: z.string().min(10, "Please provide at least 10 characters explaining the rejection").max(1000),
 });
 type RejectMentorRequestInput = z.infer<typeof rejectMentorRequestSchema>;
 
 /**
  * Admin rejects a coach's mentor request
+ * Requires detailed reason to help coach improve future applications
  */
 export const rejectMentorRequest: any = async (
   rawArgs: any,
@@ -571,9 +569,18 @@ export const rejectMentorRequest: any = async (
     throw new HttpError(403, "Only admins can reject mentor requests");
   }
 
-  // Get the request
+  // Get the request with coach info for notification
   const request = await context.entities.MentorRequest.findUnique({
     where: { id: args.requestId, deletedAt: null },
+    include: {
+      coachProfile: {
+        include: {
+          user: {
+            select: { id: true, email: true },
+          },
+        },
+      },
+    },
   });
 
   if (!request) {
@@ -581,21 +588,25 @@ export const rejectMentorRequest: any = async (
   }
 
   if (request.status !== "PENDING") {
-    throw new HttpError(400, "This request has already been reviewed");
+    const statusMessage =
+      request.status === "APPROVED"
+        ? "This request has already been approved"
+        : "This request has already been rejected";
+    throw new HttpError(400, statusMessage);
   }
 
-  // Update request status
+  // Update request status with rejection reason
   await context.entities.MentorRequest.update({
     where: { id: args.requestId },
     data: {
       status: "REJECTED",
-      rejectionNote: args.reason,
+      rejectionNote: args.reason, // Detailed feedback for coach
       reviewedByUserId: context.user.id,
       reviewedAt: new Date(),
     },
   });
 
-  // TODO: Send notification to coach with rejection reason
+  // TODO: Send email notification to coach with rejection reason
 
   return {
     requestId: request.id,
@@ -605,6 +616,7 @@ export const rejectMentorRequest: any = async (
 
 /**
  * Admin gets all pending mentor requests
+ * Excludes soft-deleted coaches from results
  */
 export const getPendingMentorRequests: any = async (
   rawArgs: any,
@@ -619,6 +631,9 @@ export const getPendingMentorRequests: any = async (
     where: {
       status: "PENDING",
       deletedAt: null,
+      coachProfile: {
+        deletedAt: null, // Exclude soft-deleted coaches
+      },
     },
     include: {
       coachProfile: {
@@ -638,6 +653,43 @@ export const getPendingMentorRequests: any = async (
       id: req.coachProfile.id,
       user: { email: req.coachProfile.user.email },
     },
+    requestReason: req.requestReason,
     createdAt: req.createdAt,
+  }));
+};
+
+/**
+ * Coach views their own mentor request history
+ * Allows coaches to see current status and rejection reasons
+ */
+export const getMyMentorRequests: any = async (
+  rawArgs: any,
+  context: any
+) => {
+  const coachProfile = await getCoachProfile(context);
+
+  const requests = await context.entities.MentorRequest.findMany({
+    where: {
+      coachId: coachProfile.id,
+      deletedAt: null,
+    },
+    include: {
+      reviewedBy: {
+        select: {
+          username: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return requests.map((req) => ({
+    id: req.id,
+    status: req.status,
+    requestReason: req.requestReason,
+    rejectionNote: req.rejectionNote,
+    reviewedAt: req.reviewedAt,
+    reviewedBy: req.reviewedBy ? { email: req.reviewedBy.email } : null,
   }));
 };

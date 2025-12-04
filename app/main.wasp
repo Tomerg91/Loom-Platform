@@ -570,6 +570,11 @@ query getPendingMentorRequests {
   fn: import { getPendingMentorRequests } from "@src/group/operations",
   entities: [User, CoachProfile, MentorRequest]
 }
+
+query getMyMentorRequests {
+  fn: import { getMyMentorRequests } from "@src/group/operations",
+  entities: [User, CoachProfile, MentorRequest]
+}
 //#endregion
 
 //#region Analytics
