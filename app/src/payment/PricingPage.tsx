@@ -33,50 +33,69 @@ interface PaymentPlanCard {
   features: string[];
 }
 
-const getPricingPageCards = (
-  t: (key: string) => string,
-): Record<PaymentPlanId, PaymentPlanCard> => ({
-  [PaymentPlanId.Hobby]: {
-    name: prettyPaymentPlanName(PaymentPlanId.Hobby),
-    price: "$9.99",
-    description: t("pricing.starter.description"),
+const getPricingPageCards = (): Record<PaymentPlanId, PaymentPlanCard> => ({
+  [PaymentPlanId.Starter]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Starter),
+    price: "₪99",
+    description: "The Digital Journal",
     features: [
-      t("pricing.starter.features.0"),
-      t("pricing.starter.features.1"),
+      "Unlimited somatic logs",
+      "7-day history retention",
+      "Up to 5 clients",
     ],
   },
   [PaymentPlanId.Pro]: {
     name: prettyPaymentPlanName(PaymentPlanId.Pro),
-    price: "$19.99",
-    description: t("pricing.pro.description"),
-    features: [t("pricing.pro.features.0"), t("pricing.pro.features.1")],
+    price: "₪169",
+    description: "The Somatic Explorer",
+    features: ["Unlimited history", "Unlimited clients", "Advanced Analytics"],
+  },
+  [PaymentPlanId.Clinic]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Clinic),
+    price: "₪399",
+    description: "The Anchor",
+    features: [
+      "Everything in Pro",
+      "Invite up to 5 coaches",
+      "Clinic Dashboard",
+    ],
   },
   [PaymentPlanId.Credits10]: {
     name: prettyPaymentPlanName(PaymentPlanId.Credits10),
-    price: "$9.99",
+    price: "₪39",
     description: "One-time purchase of 10 credits for your account",
-    features: ["Use credits for e.g. OpenAI API calls", "No expiration date"],
+    features: ["Use credits for AI features", "No expiration date"],
   },
 });
 
 export const paymentPlanCards: Record<PaymentPlanId, PaymentPlanCard> = {
-  [PaymentPlanId.Hobby]: {
-    name: prettyPaymentPlanName(PaymentPlanId.Hobby),
-    price: "$9.99",
-    description: "All you need to get started",
-    features: ["Limited monthly usage", "Basic support"],
+  [PaymentPlanId.Starter]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Starter),
+    price: "₪99",
+    description: "The Digital Journal",
+    features: ["Unlimited somatic logs", "7-day history", "Up to 5 clients"],
   },
   [PaymentPlanId.Pro]: {
     name: prettyPaymentPlanName(PaymentPlanId.Pro),
-    price: "$19.99",
-    description: "Our most popular plan",
-    features: ["Unlimited monthly usage", "Priority customer support"],
+    price: "₪169",
+    description: "The Somatic Explorer",
+    features: ["Unlimited history", "Unlimited clients", "Advanced Analytics"],
+  },
+  [PaymentPlanId.Clinic]: {
+    name: prettyPaymentPlanName(PaymentPlanId.Clinic),
+    price: "₪399",
+    description: "The Anchor",
+    features: [
+      "Everything in Pro",
+      "Invite up to 5 coaches",
+      "Clinic Dashboard",
+    ],
   },
   [PaymentPlanId.Credits10]: {
     name: prettyPaymentPlanName(PaymentPlanId.Credits10),
-    price: "$9.99",
+    price: "₪39",
     description: "One-time purchase of 10 credits for your account",
-    features: ["Use credits for e.g. OpenAI API calls", "No expiration date"],
+    features: ["Use credits for AI features", "No expiration date"],
   },
 };
 
@@ -84,7 +103,7 @@ const PricingPage = () => {
   const { t } = useTranslation();
   const [isPaymentLoading, setIsPaymentLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const pricingCards = getPricingPageCards(t);
+  const pricingCards = getPricingPageCards();
 
   const { data: user } = useAuth();
   const isUserSubscribed =
@@ -248,6 +267,61 @@ const PricingPage = () => {
             </Card>
           ))}
         </div>
+      </div>
+      <div className="mx-auto mt-24 max-w-4xl divide-y divide-gray-900/10">
+        <h2 className="text-2xl font-bold leading-10 tracking-tight text-foreground">
+          Frequently asked questions
+        </h2>
+        <dl className="mt-10 space-y-6 divide-y divide-gray-900/10">
+          <div className="pt-6">
+            <dt>
+              <button className="flex w-full items-start justify-between text-left text-foreground">
+                <span className="text-base font-semibold leading-7">
+                  Can I switch plans later?
+                </span>
+              </button>
+            </dt>
+            <dd className="mt-2 pr-12">
+              <p className="text-base leading-7 text-muted-foreground">
+                Yes, you can upgrade or downgrade your plan at any time. Changes
+                take effect immediately, and we&apos;ll prorate the difference.
+              </p>
+            </dd>
+          </div>
+          <div className="pt-6">
+            <dt>
+              <button className="flex w-full items-start justify-between text-left text-foreground">
+                <span className="text-base font-semibold leading-7">
+                  What happens to my data if I downgrade?
+                </span>
+              </button>
+            </dt>
+            <dd className="mt-2 pr-12">
+              <p className="text-base leading-7 text-muted-foreground">
+                If you downgrade to the Starter plan, you will only be able to
+                view the last 7 days of history. However, your older data is
+                safely stored and will become accessible again if you upgrade
+                back to Pro.
+              </p>
+            </dd>
+          </div>
+          <div className="pt-6">
+            <dt>
+              <button className="flex w-full items-start justify-between text-left text-foreground">
+                <span className="text-base font-semibold leading-7">
+                  How does the Clinic plan work?
+                </span>
+              </button>
+            </dt>
+            <dd className="mt-2 pr-12">
+              <p className="text-base leading-7 text-muted-foreground">
+                The Clinic plan allows you to invite up to 5 other coaches to
+                your organization. You get a centralized dashboard to view
+                analytics across your entire clinic.
+              </p>
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
   );

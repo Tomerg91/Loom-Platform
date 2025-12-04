@@ -89,6 +89,10 @@ const createOfflineClientSchema = z.object({
 
 type CreateOfflineClientInput = z.infer<typeof createOfflineClientSchema>;
 
+import { getMaxClients } from "../auth/permissions";
+
+// ... (existing imports)
+
 export const createOfflineClient: CreateOfflineClient<
   CreateOfflineClientInput,
   void
@@ -108,6 +112,19 @@ export const createOfflineClient: CreateOfflineClient<
 
   if (!coachProfile) {
     throw new HttpError(404, "Coach profile not found");
+  }
+
+  // Check client limit
+  const currentClientCount = await coachContext.entities.ClientProfile.count({
+    where: { coachId: coachProfile.id },
+  });
+
+  const maxClients = getMaxClients(coachContext.user);
+  if (currentClientCount >= maxClients) {
+    throw new HttpError(
+      403,
+      `You have reached the maximum number of clients (${maxClients}) for your current plan. Please upgrade to add more clients.`,
+    );
   }
 
   // Create the offline client profile (no userId)
