@@ -50,17 +50,26 @@ export function ErrorBoundary({
   onError,
   resetKeys,
 }: ErrorBoundaryProps) {
+  const errorBoundaryProps: {
+    fallbackRender: (props: FallbackProps) => ReactNode;
+    onError?: (error: Error, errorInfo: unknown) => void;
+    resetKeys?: Array<string | number>;
+  } = {
+    fallbackRender: (props) =>
+      fallback
+        ? fallback(props.error, props.resetErrorBoundary)
+        : DefaultFallback(props),
+  };
+
+  if (onError) {
+    errorBoundaryProps.onError = onError;
+  }
+
+  if (resetKeys) {
+    errorBoundaryProps.resetKeys = resetKeys;
+  }
+
   return (
-    <ReactErrorBoundary
-      onError={onError}
-      resetKeys={resetKeys}
-      fallbackRender={(props) =>
-        fallback
-          ? fallback(props.error, props.resetErrorBoundary)
-          : DefaultFallback(props)
-      }
-    >
-      {children}
-    </ReactErrorBoundary>
+    <ReactErrorBoundary {...errorBoundaryProps}>{children}</ReactErrorBoundary>
   );
 }

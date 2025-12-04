@@ -479,7 +479,9 @@ export default function GoalRoadmap({
                     value={milestone.text}
                     onChange={(e) => {
                       const updated = [...newGoalData.milestones];
-                      updated[index].text = e.target.value;
+                      if (updated[index]) {
+                        updated[index].text = e.target.value;
+                      }
                       setNewGoalData({ ...newGoalData, milestones: updated });
                     }}
                   />

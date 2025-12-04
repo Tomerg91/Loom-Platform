@@ -124,11 +124,26 @@ export const getCalendarConnection: GetCalendarConnection<
     return null;
   }
 
-  return {
+  const result: {
+    isConnected: boolean;
+    calendarName?: string;
+    lastSyncAt?: Date;
+    syncErrorCount: number;
+    lastError?: string;
+  } = {
     isConnected: connection.isConnected,
-    calendarName: connection.calendarName ?? undefined,
-    lastSyncAt: connection.lastSyncAt ?? undefined,
     syncErrorCount: connection.syncErrorCount,
-    lastError: connection.lastError ?? undefined,
   };
+
+  if (connection.calendarName) {
+    result.calendarName = connection.calendarName;
+  }
+  if (connection.lastSyncAt) {
+    result.lastSyncAt = connection.lastSyncAt;
+  }
+  if (connection.lastError) {
+    result.lastError = connection.lastError;
+  }
+
+  return result;
 };

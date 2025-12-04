@@ -59,8 +59,9 @@ const getConfig = () => {
             label: "Google Analytics",
             onAccept: () => {
               try {
-                const GA_ANALYTICS_ID = import.meta.env
-                  .VITE_GOOGLE_ANALYTICS_ID;
+                const GA_ANALYTICS_ID = import.meta.env[
+                  "VITE_GOOGLE_ANALYTICS_ID"
+                ];
                 if (!GA_ANALYTICS_ID || !GA_ANALYTICS_ID.length) {
                   console.info("Google Analytics ID is not configured");
                   return;

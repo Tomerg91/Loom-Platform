@@ -661,7 +661,7 @@ model MentorRequest {
   reviewedByUserId  String?
   reviewedAt        DateTime?
 
-  @@unique([coachId, status], where: "status = 'PENDING'") // Prevent duplicate PENDING requests
+  // Note: Conditional unique constraint (prevent duplicate PENDING) enforced at application level
   @@index([coachId, status])
   @@index([status])
   @@index([createdAt])

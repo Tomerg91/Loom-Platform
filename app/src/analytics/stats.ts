@@ -165,10 +165,10 @@ async function fetchTotalStripeRevenue() {
       }
     }
 
-    if (balanceTransactions.has_more) {
+    if (balanceTransactions.has_more && balanceTransactions.data.length > 0) {
       // Set the starting point for the next iteration to the last object fetched
       params.starting_after =
-        balanceTransactions.data[balanceTransactions.data.length - 1].id;
+        balanceTransactions.data[balanceTransactions.data.length - 1]!.id;
     } else {
       hasMore = false;
     }
@@ -185,9 +185,10 @@ async function fetchTotalLemonSqueezyRevenue() {
     let currentPage = 1;
 
     while (hasNextPage) {
+      const storeId = process.env["LEMONSQUEEZY_STORE_ID"];
       const { data: response } = await listOrders({
         filter: {
-          storeId: process.env["LEMONSQUEEZY_STORE_ID"],
+          ...(storeId ? { storeId } : {}),
         },
         page: {
           number: currentPage,

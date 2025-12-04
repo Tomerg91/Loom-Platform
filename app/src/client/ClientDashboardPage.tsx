@@ -168,7 +168,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
         userRole={user.role}
-        onboardingSteps={onboardingStatus?.onboardingSteps}
+        onboardingSteps={onboardingStatus?.onboardingSteps ?? null}
         onMarkComplete={handleOnboardingComplete}
       />
 

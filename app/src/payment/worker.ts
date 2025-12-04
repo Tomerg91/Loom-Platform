@@ -309,7 +309,7 @@ export const checkExpiredSubscriptions: CheckExpiredSubscriptionsJob<
               userId: user.id,
               email: user.email,
               status: "failure",
-              reason: chargeResult.error,
+              ...(chargeResult.error && { reason: chargeResult.error }),
             });
           }
         }

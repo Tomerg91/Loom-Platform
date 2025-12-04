@@ -207,14 +207,35 @@ export const updateNotificationPreferences: UpdateNotificationPreferences<
     where: { userId: context.user.id },
   });
 
+  // Build update data, only including defined values
+  const updateData: Record<string, any> = {};
+  if (args.emailSessionReminders !== undefined) {
+    updateData["emailSessionReminders"] = args.emailSessionReminders;
+  }
+  if (args.emailSessionSummaries !== undefined) {
+    updateData["emailSessionSummaries"] = args.emailSessionSummaries;
+  }
+  if (args.emailResourceShared !== undefined) {
+    updateData["emailResourceShared"] = args.emailResourceShared;
+  }
+  if (args.inAppSessionReminders !== undefined) {
+    updateData["inAppSessionReminders"] = args.inAppSessionReminders;
+  }
+  if (args.inAppSessionSummaries !== undefined) {
+    updateData["inAppSessionSummaries"] = args.inAppSessionSummaries;
+  }
+  if (args.inAppResourceShared !== undefined) {
+    updateData["inAppResourceShared"] = args.inAppResourceShared;
+  }
+
   if (!preferences) {
     preferences = await context.entities.NotificationPreferences.create({
-      data: { userId: context.user.id, ...args },
+      data: { userId: context.user.id, ...updateData },
     });
   } else {
     preferences = await context.entities.NotificationPreferences.update({
       where: { userId: context.user.id },
-      data: args,
+      data: updateData,
     });
   }
 

@@ -110,32 +110,43 @@ export const getPaginatedUsers: GetPaginatedUsers<
 
   const pageSize = 10;
 
+  // Build where conditions conditionally
+  const whereConditions: Prisma.UserWhereInput[] = [];
+
+  // Email filter
+  if (emailContains) {
+    whereConditions.push({
+      email: {
+        contains: emailContains,
+        mode: "insensitive",
+      },
+    });
+  }
+
+  // Admin filter
+  if (isAdmin !== undefined) {
+    whereConditions.push({ isAdmin });
+  }
+
+  // Subscription status filter
+  if (desiredSubscriptionStatuses && desiredSubscriptionStatuses.length > 0) {
+    whereConditions.push({
+      subscriptionStatus: {
+        in: desiredSubscriptionStatuses,
+      },
+    });
+  }
+
+  if (includeUnsubscribedUsers) {
+    whereConditions.push({
+      subscriptionStatus: null,
+    });
+  }
+
   const userPageQuery: Prisma.UserFindManyArgs = {
     skip: skipPages * pageSize,
     take: pageSize,
-    where: {
-      AND: [
-        {
-          email: {
-            contains: emailContains,
-            mode: "insensitive",
-          },
-          isAdmin,
-        },
-        {
-          OR: [
-            {
-              subscriptionStatus: {
-                in: desiredSubscriptionStatuses,
-              },
-            },
-            {
-              subscriptionStatus: includeUnsubscribedUsers ? null : undefined,
-            },
-          ],
-        },
-      ],
-    },
+    where: whereConditions.length > 0 ? { AND: whereConditions } : {},
     select: {
       id: true,
       email: true,

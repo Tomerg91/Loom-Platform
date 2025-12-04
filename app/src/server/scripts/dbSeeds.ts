@@ -6,10 +6,10 @@ import {
   SubscriptionStatus,
 } from "../../payment/plans";
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env["NODE_ENV"] === "production";
 
 function ensureDevSeedAllowed(seedName: string) {
-  const allowProdSeeds = process.env.ALLOW_PRODUCTION_SEEDS === "true";
+  const allowProdSeeds = process.env["ALLOW_PRODUCTION_SEEDS"] === "true";
 
   if (isProduction && !allowProdSeeds) {
     throw new Error(

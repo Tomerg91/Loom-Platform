@@ -19,7 +19,7 @@ export async function ensureStripeCustomer(
       email: userEmail,
     });
   } else {
-    return stripeCustomers.data[0];
+    return stripeCustomers.data[0]!;
   }
 }
 

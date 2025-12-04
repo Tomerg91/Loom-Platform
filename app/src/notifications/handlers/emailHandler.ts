@@ -101,7 +101,7 @@ export class EmailNotificationHandler {
           clientName: clientProfile.user.username || "Client",
           coachName,
           sessionDate: payload.sessionDate,
-          time: timeString,
+          time: timeString || "",
           appUrl: `${process.env["WASP_WEB_CLIENT_URL"]}/client/sessions`,
         });
 
@@ -178,7 +178,7 @@ export class EmailNotificationHandler {
           clientName: clientProfile.user.username || "Client",
           coachName,
           sessionDate: session.sessionDate,
-          topic: payload.topic,
+          topic: payload.topic || "",
           summary: payload.sharedSummary,
           appUrl: `${process.env["WASP_WEB_CLIENT_URL"]}/client/sessions`,
         });

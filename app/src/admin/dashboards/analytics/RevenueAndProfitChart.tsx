@@ -117,6 +117,7 @@ const RevenueAndProfitChart = ({ weeklyStats }: DailyStatsProps) => {
       });
       return sortedWeeks.map((stat) => stat.totalRevenue);
     }
+    return [];
   }, [weeklyStats]);
 
   const daysOfWeekArr = useMemo(() => {
@@ -128,6 +129,7 @@ const RevenueAndProfitChart = ({ weeklyStats }: DailyStatsProps) => {
       });
       return datesArr;
     }
+    return [];
   }, [weeklyStats]);
 
   const [state, setState] = useState<ChartOneState>({
