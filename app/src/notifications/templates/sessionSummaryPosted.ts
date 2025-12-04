@@ -93,5 +93,5 @@ function escapeHtml(text: string | undefined): string {
     '"': "&quot;",
     "'": "&#039;",
   };
-  return text.replace(/[&<>"']/g, (char) => map[char]);
+  return text.replace(/[&<>"']/g, (char) => map[char] || char);
 }
