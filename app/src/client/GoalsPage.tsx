@@ -89,8 +89,8 @@ export default function ClientGoalsPage({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mt-10 px-6">
+    <div className="min-h-screen">
+      <div className="content-container section-padding pb-12">
         <GoalRoadmap
           goals={goals || []}
           clientId={clientId}
