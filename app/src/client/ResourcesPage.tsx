@@ -63,19 +63,20 @@ export default function ClientResourcesPage() {
   };
 
   return (
-    <div className="mt-10 px-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
+    <div className="content-container section-padding pb-12">
+      <div className="mb-10 animate-fade-in">
+        <h1 className="text-4xl font-display font-bold text-foreground tracking-tight">
           {t("resources.resources")}
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-3 text-lg">
           {t("resources.accessCoachResources")}
         </p>
       </div>
 
-      <Card>
+      <Card variant="glass" className="animate-slide-in-from-bottom animate-delay-100">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
             {t("resources.availableResources", {
               count: resources?.length || 0,
             })}
@@ -91,25 +92,25 @@ export default function ClientResourcesPage() {
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="p-4 border rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-900"
+                  className="p-4 border border-border/50 rounded-xl hover:bg-white/50 dark:hover:bg-white/5 transition-all duration-300 group"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="mt-1 text-muted-foreground">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className="mt-1 p-2 bg-primary/10 rounded-lg text-primary group-hover:bg-primary/20 transition-colors">
                         {getFileIcon(resource.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
+                        <div className="font-medium text-base truncate text-foreground group-hover:text-primary transition-colors">
                           {resource.name}
                         </div>
                         {resource.description && (
-                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
                             {resource.description}
                           </div>
                         )}
-                        <div className="text-xs text-muted-foreground mt-2">
-                          {t("resources.shared")}{" "}
-                          {formatRelativeTime(resource.createdAt)}
+                        <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                          <span>{t("resources.shared")}</span>
+                          <span className="font-medium">{formatRelativeTime(resource.createdAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -117,7 +118,7 @@ export default function ClientResourcesPage() {
                       onClick={() => handleDownload(resource.id, resource.name)}
                       disabled={downloadingResourceId === resource.id}
                       size="sm"
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 rounded-full shadow-soft hover:shadow-soft-md"
                     >
                       {downloadingResourceId === resource.id ? (
                         <>
@@ -136,9 +137,11 @@ export default function ClientResourcesPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-40" />
-              <p className="text-muted-foreground">
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4 opacity-50">
+                <FileText className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-lg">
                 {t("resources.noResourcesAvailableYet")}
               </p>
             </div>

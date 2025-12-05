@@ -38,6 +38,7 @@ import {
   Plus,
   Lock,
   X,
+  Building,
 } from "lucide-react";
 import FormFieldWithValidation from "../components/FormFieldWithValidation";
 import { formatRelativeTime } from "../shared/date";
@@ -429,6 +430,28 @@ export default function CoachDashboardPage({ user }: { user: User }) {
                   ? `Active - ${user.subscriptionPlan} Plan`
                   : "No active subscription"}
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Clinic Management Card */}
+          <Card className="hover-scale-subtle">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-display">
+                <Building className="h-5 w-5" />
+                Clinic Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage your clinic members and invitations.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate("/clinic")}
+              >
+                Go to Clinic Dashboard
+              </Button>
             </CardContent>
           </Card>
         </div>

@@ -27,21 +27,21 @@ function ErrorFallback({
   resetErrorBoundary: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6 text-center">
-      <div className="max-w-md space-y-4">
-        <h2 className="text-2xl font-serif font-bold text-destructive">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6 text-center grain">
+      <div className="max-w-md space-y-6 glass-panel p-8 rounded-2xl">
+        <h2 className="text-3xl font-display font-bold text-destructive">
           Something went wrong
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-lg">
           We apologize for the inconvenience. The application encountered an
           unexpected error.
         </p>
-        <pre className="bg-muted p-4 rounded text-xs text-left overflow-auto max-h-40">
+        <pre className="bg-muted/50 p-4 rounded-lg text-xs text-left overflow-auto max-h-40 font-mono border border-border">
           {error.message}
         </pre>
         <button
           onClick={resetErrorBoundary}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          className="px-6 py-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all shadow-soft hover:shadow-soft-md font-medium"
         >
           Try again
         </button>
@@ -154,7 +154,7 @@ export default function App() {
       FallbackComponent={ErrorFallback}
       onReset={() => window.location.reload()}
     >
-      <div className="bg-background text-foreground min-h-screen">
+      <div className="bg-background text-foreground min-h-screen grain">
         {isAdminDashboard ? (
           <Outlet />
         ) : (
@@ -162,7 +162,7 @@ export default function App() {
             {shouldDisplayAppNavBar && (
               <NavBar navigationItems={navigationItems} />
             )}
-            <div className="mx-auto max-w-screen-2xl">
+            <div className="content-container section-padding">
               <Outlet />
             </div>
           </>

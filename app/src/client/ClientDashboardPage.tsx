@@ -172,24 +172,24 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         onMarkComplete={handleOnboardingComplete}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 pb-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
+      <div className="content-container section-padding pb-12">
+        <div className="mb-10 animate-fade-in">
+          <h1 className="text-4xl font-display font-bold text-foreground tracking-tight">
             Welcome, {user.username || user.email}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-3 text-lg">
             Track your somatic journey with the Satya Method
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-2">
           {/* Somatic Log Form */}
-          <div>
+          <div className="animate-slide-in-from-bottom animate-delay-100">
             <SomaticLogForm onSuccess={handleLogSuccess} />
           </div>
 
           {/* Recent Sensations */}
-          <Card>
+          <Card variant="glass" className="animate-slide-in-from-bottom animate-delay-200">
             <CardHeader>
               <CardTitle>{t("client.recentSensations")}</CardTitle>
             </CardHeader>
@@ -237,18 +237,18 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                   />
                 )
               ) : (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {logs.map((log) => (
                     <div
                       key={log.id}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                      className="border border-border/50 rounded-xl p-4 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded">
+                          <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                             {log.bodyZone.replace(/_/g, " ")}
                           </span>
-                          <span className="ml-2 inline-block px-2 py-1 bg-secondary text-secondary-foreground text-xs font-medium rounded">
+                          <span className="ml-2 inline-block px-2.5 py-1 bg-secondary/10 text-secondary text-xs font-medium rounded-full">
                             {log.sensation}
                           </span>
                         </div>
@@ -260,7 +260,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                                 log.sharedWithCoach,
                               )
                             }
-                            className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+                            className="p-1.5 rounded-full hover:bg-muted transition-colors"
                             title={
                               log.sharedWithCoach
                                 ? t("sharing.private")
@@ -287,11 +287,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                             {Array.from({ length: 10 }, (_, i) => (
                               <div
                                 key={i}
-                                className={`w-2 h-4 rounded-sm ${
-                                  i < log.intensity
+                                className={`w-1.5 h-4 rounded-full ${i < log.intensity
                                     ? "bg-primary"
-                                    : "bg-gray-200"
-                                }`}
+                                    : "bg-muted"
+                                  }`}
                               />
                             ))}
                           </div>
@@ -301,7 +300,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                         </div>
                       </div>
                       {log.note && (
-                        <p className="text-sm text-muted-foreground mt-2 italic">
+                        <p className="text-sm text-muted-foreground mt-2 italic font-serif">
                           &ldquo;{log.note}&rdquo;
                         </p>
                       )}
@@ -314,10 +313,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         </div>
 
         {/* Goals Overview */}
-        <Card className="mt-6">
+        <Card variant="glass" className="mt-8 animate-slide-in-from-bottom animate-delay-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
+              <Zap className="h-5 w-5 text-accent" />
               {t("clientGoals.overviewTitle")}
             </CardTitle>
           </CardHeader>
@@ -331,8 +330,8 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                 {t("clientGoals.noGoals")}
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="flex flex-col gap-2">
+              <div className="space-y-6">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       {t("clientGoals.activeCount", {
@@ -344,13 +343,13 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                       {Math.round(averageGoalProgress)}%
                     </span>
                   </div>
-                  <Progress value={averageGoalProgress} />
+                  <Progress value={averageGoalProgress} className="h-3" />
                 </div>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                   {activeGoals.slice(0, 4).map((goal) => (
                     <div
                       key={goal.id}
-                      className="border rounded-lg p-3 space-y-2"
+                      className="border border-border/50 rounded-xl p-4 space-y-3 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -359,11 +358,11 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                             {t("clientGoals.goalType", { type: goal.type })}
                           </p>
                         </div>
-                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
                           {Math.round(goal.progress || 0)}%
                         </span>
                       </div>
-                      <Progress value={goal.progress || 0} />
+                      <Progress value={goal.progress || 0} className="h-2" />
                       <p className="text-xs text-muted-foreground">
                         {goal.milestones?.find((m: any) => !m.completed)
                           ?.text || t("clientGoals.awaitingCoach")}
@@ -382,7 +381,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         </Card>
 
         {/* Filters - Full Width Below */}
-        <div className="mt-6">
+        <div className="mt-8 animate-slide-in-from-bottom animate-delay-300">
           <SomaticLogFilters
             filters={filters}
             onFiltersChange={handleFiltersChange}
@@ -390,10 +389,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         </div>
 
         {/* Recent Sessions */}
-        <Card className="mt-6">
+        <Card variant="glass" className="mt-8 animate-slide-in-from-bottom animate-delay-500">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+              <Calendar className="h-5 w-5 text-secondary" />
               {t("client.recentSessions")}
             </CardTitle>
           </CardHeader>
@@ -427,11 +426,11 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                 }
               />
             ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 {recentSessions.map((session) => (
                   <div
                     key={session.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className="border border-border/50 rounded-xl p-4 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -447,7 +446,7 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                       </span>
                     </div>
                     {session.sharedSummary && (
-                      <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                      <p className="text-sm text-muted-foreground mt-3 leading-relaxed font-serif">
                         &ldquo;{session.sharedSummary}&rdquo;
                       </p>
                     )}

@@ -9,19 +9,23 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default: "bg-card text-card-foreground shadow-soft hover:shadow-soft-md",
+        glass: "glass-panel text-card-foreground hover:shadow-soft-lg transition-all duration-300",
         accent: "bg-card-accent text-card-accent-foreground hover:scale-[1.02]",
         faded: "text-card-faded-foreground scale-95 opacity-50",
         bento:
           "bg-card-subtle text-card-subtle-foreground hover:scale-[1.02] border-none dark:shadow-none",
       },
     },
+    defaultVariants: {
+      variant: "default",
+    },
   },
 );
 
 interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {}
+  VariantProps<typeof cardVariants> { }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = "default", ...props }, ref) => (

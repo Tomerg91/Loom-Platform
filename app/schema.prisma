@@ -150,6 +150,13 @@ model CoachProfile {
 
   // Availability slots for scheduling
   availabilitySlots AvailabilitySlot[]
+
+  // CLINIC MEMBERSHIP
+  clinic     Clinic? @relation(fields: [clinicId], references: [id])
+  clinicId   String?
+  clinicRole String? // 'OWNER', 'ADMIN', 'MEMBER'
+
+  @@index([clinicId])
 }
 
 model ClientProfile {
@@ -757,8 +764,48 @@ model GroupPostReply {
   author      CoachProfile @relation("RepliedToPosts", fields: [authorId], references: [id], onDelete: Cascade)
   authorId    String
 
-  @@index([postId, createdAt])
   @@index([postId, deletedAt]) // Composite index for common WHERE clause (postId + soft delete filtering)
   @@index([authorId])
   @@index([deletedAt])
+}
+
+// ============================================
+// CLINIC MANAGEMENT (Phase 2)
+// ============================================
+model Clinic {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // The user who pays for the subscription (Owner)
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  // Coaches who are members of this clinic
+  members CoachProfile[]
+
+  // Pending invitations
+  invitations ClinicInvitation[]
+
+  @@index([ownerId])
+  @@index([deletedAt])
+}
+
+model ClinicInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  role      String   @default("MEMBER") // 'ADMIN', 'MEMBER'
+  status    String   @default("PENDING") // 'PENDING', 'ACCEPTED', 'EXPIRED'
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  deletedAt DateTime?
+
+  clinic   Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  clinicId String
+
+  @@index([clinicId, status])
+  @@index([email])
 }

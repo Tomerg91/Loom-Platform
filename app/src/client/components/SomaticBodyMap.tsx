@@ -142,7 +142,7 @@ export default function SomaticBodyMap() {
     <div className="w-full h-full flex flex-col lg:flex-row gap-8 items-stretch relative">
       {/* Background Pulse Animation */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-teal-50/50 via-transparent to-purple-50/50 dark:from-teal-900/20 dark:to-purple-900/20 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 dark:from-primary/20 dark:to-secondary/20 pointer-events-none"
         animate={{
           opacity: [0.3, 0.6, 0.3],
         }}
@@ -294,8 +294,8 @@ export default function SomaticBodyMap() {
         </svg>
 
         {/* Legend Card - Simplified */}
-        <div className="mt-4 px-6 py-3 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md rounded-full shadow-sm border border-white/20 dark:border-slate-700/30">
-          <span className="text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">
+        <div className="mt-4 px-6 py-3 glass-panel rounded-full">
+          <span className="text-sm text-muted-foreground font-medium tracking-wide">
             Select a body area to explore sensations
           </span>
         </div>
