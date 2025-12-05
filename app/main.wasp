@@ -782,6 +782,45 @@ action getAdminAvatarUploadUrl {
   entities: [AdminSettings]
 }
 
+//#region Clinic Management
+route ClinicDashboardRoute { path: "/clinic", to: ClinicDashboardPage }
+page ClinicDashboardPage {
+  authRequired: true,
+  component: import ClinicDashboardPage from "@src/clinic/ClinicDashboardPage"
+}
+
+route AcceptClinicInviteRoute { path: "/clinic/accept-invite", to: AcceptClinicInvitePage }
+page AcceptClinicInvitePage {
+  authRequired: true,
+  component: import AcceptClinicInvitePage from "@src/clinic/AcceptClinicInvitePage"
+}
+
+query getClinicDetails {
+  fn: import { getClinicDetails } from "@src/clinic/operations",
+  entities: [User, Clinic, CoachProfile, ClinicInvitation]
+}
+
+action inviteCoachToClinic {
+  fn: import { inviteCoachToClinic } from "@src/clinic/operations",
+  entities: [User, Clinic, ClinicInvitation]
+}
+
+action acceptClinicInvitation {
+  fn: import { acceptClinicInvitation } from "@src/clinic/operations",
+  entities: [User, CoachProfile, ClinicInvitation, Clinic]
+}
+
+action removeCoachFromClinic {
+  fn: import { removeCoachFromClinic } from "@src/clinic/operations",
+  entities: [User, Clinic, CoachProfile]
+}
+
+action cancelClinicInvitation {
+  fn: import { cancelClinicInvitation } from "@src/clinic/operations",
+  entities: [User, Clinic, ClinicInvitation]
+}
+//#endregion
+
 //#region Demo Pages (for screenshots)
 route DemoBodyMapRoute { path: "/demo-body-map", to: DemoBodyMapPage }
 page DemoBodyMapPage {
