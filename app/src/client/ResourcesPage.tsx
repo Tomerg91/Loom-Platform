@@ -73,7 +73,10 @@ export default function ClientResourcesPage() {
         </p>
       </div>
 
-      <Card variant="glass" className="animate-slide-in-from-bottom animate-delay-100">
+      <Card
+        variant="glass"
+        className="animate-slide-in-from-bottom animate-delay-100"
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
@@ -110,7 +113,9 @@ export default function ClientResourcesPage() {
                         )}
                         <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                           <span>{t("resources.shared")}</span>
-                          <span className="font-medium">{formatRelativeTime(resource.createdAt)}</span>
+                          <span className="font-medium">
+                            {formatRelativeTime(resource.createdAt)}
+                          </span>
                         </div>
                       </div>
                     </div>

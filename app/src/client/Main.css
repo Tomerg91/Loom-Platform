@@ -15,7 +15,7 @@
     --card: 0 0% 100%;
     --card-foreground: 150 10% 15%;
     --card-hover: 35 25% 97%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 150 10% 15%;
 
@@ -47,7 +47,7 @@
     --border: 35 15% 88%;
     --input: 35 15% 92%;
     --ring: 150 30% 35%;
-    
+
     --radius: 1rem; /* More rounded for organic feel */
   }
 
@@ -98,12 +98,17 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground font-body antialiased selection:bg-primary/20 selection:text-primary;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -122,7 +127,7 @@
   .glass-panel {
     @apply bg-white/70 dark:bg-black/40 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-glass;
   }
-  
+
   .glass-button {
     @apply bg-white/50 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/10 hover:bg-white/70 dark:hover:bg-white/20 transition-all duration-300;
   }
@@ -145,16 +150,24 @@
   }
 
   /* Animations */
-  .animate-delay-100 { animation-delay: 100ms; }
-  .animate-delay-200 { animation-delay: 200ms; }
-  .animate-delay-300 { animation-delay: 300ms; }
-  .animate-delay-500 { animation-delay: 500ms; }
-  
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+
   /* Layout */
   .content-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  
+
   .section-padding {
     @apply py-12 md:py-16 lg:py-24;
   }

@@ -143,11 +143,22 @@ export default function SessionHistoryPage({ user }: { user: User }) {
       <div className="w-full">
         <Tabs defaultValue="sessions">
           <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-xl mb-8">
-            <TabsTrigger value="sessions" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="sessions"
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               {t("session.sessionHistory")}
             </TabsTrigger>
-            <TabsTrigger value="files" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">{t("workspace.files")}</TabsTrigger>
-            <TabsTrigger value="actions" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="files"
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              {t("workspace.files")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="actions"
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               {t("workspace.actionItems")}
             </TabsTrigger>
           </TabsList>

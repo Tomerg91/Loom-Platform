@@ -189,7 +189,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
           </div>
 
           {/* Recent Sensations */}
-          <Card variant="glass" className="animate-slide-in-from-bottom animate-delay-200">
+          <Card
+            variant="glass"
+            className="animate-slide-in-from-bottom animate-delay-200"
+          >
             <CardHeader>
               <CardTitle>{t("client.recentSensations")}</CardTitle>
             </CardHeader>
@@ -287,10 +290,9 @@ export default function ClientDashboardPage({ user }: { user: User }) {
                             {Array.from({ length: 10 }, (_, i) => (
                               <div
                                 key={i}
-                                className={`w-1.5 h-4 rounded-full ${i < log.intensity
-                                    ? "bg-primary"
-                                    : "bg-muted"
-                                  }`}
+                                className={`w-1.5 h-4 rounded-full ${
+                                  i < log.intensity ? "bg-primary" : "bg-muted"
+                                }`}
                               />
                             ))}
                           </div>
@@ -313,7 +315,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         </div>
 
         {/* Goals Overview */}
-        <Card variant="glass" className="mt-8 animate-slide-in-from-bottom animate-delay-300">
+        <Card
+          variant="glass"
+          className="mt-8 animate-slide-in-from-bottom animate-delay-300"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-accent" />
@@ -389,7 +394,10 @@ export default function ClientDashboardPage({ user }: { user: User }) {
         </div>
 
         {/* Recent Sessions */}
-        <Card variant="glass" className="mt-8 animate-slide-in-from-bottom animate-delay-500">
+        <Card
+          variant="glass"
+          className="mt-8 animate-slide-in-from-bottom animate-delay-500"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-secondary" />

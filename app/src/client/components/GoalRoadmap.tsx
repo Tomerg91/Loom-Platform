@@ -345,7 +345,10 @@ export default function GoalRoadmap({
       </div>
 
       {/* DASHBOARD OVERVIEW */}
-      <Card variant="glass" className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10">
+      <Card
+        variant="glass"
+        className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/10"
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-primary">
             <TrendingUp className="w-5 h-5" />
@@ -359,13 +362,17 @@ export default function GoalRoadmap({
             </div>
             <div className="space-y-4">
               <div>
-                <div className="text-sm text-muted-foreground mb-2">Active Goals</div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  Active Goals
+                </div>
                 <div className="text-3xl font-bold text-foreground">
                   {goals.length}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground mb-2">Completed</div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  Completed
+                </div>
                 <div className="text-3xl font-bold text-success">
                   {goals.filter((g) => g.status === "COMPLETED").length}
                 </div>
@@ -373,13 +380,17 @@ export default function GoalRoadmap({
             </div>
             <div className="space-y-4">
               <div>
-                <div className="text-sm text-muted-foreground mb-2">In Progress</div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  In Progress
+                </div>
                 <div className="text-3xl font-bold text-primary">
                   {goals.filter((g) => g.status === "IN_PROGRESS").length}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground mb-2">Not Started</div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  Not Started
+                </div>
                 <div className="text-3xl font-bold text-muted-foreground">
                   {goals.filter((g) => g.status === "NOT_STARTED").length}
                 </div>
@@ -393,14 +404,19 @@ export default function GoalRoadmap({
       {onCreateGoal && (
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="w-full md:w-auto gap-2 shadow-soft hover:shadow-soft-lg rounded-full" size="lg">
+            <Button
+              className="w-full md:w-auto gap-2 shadow-soft hover:shadow-soft-lg rounded-full"
+              size="lg"
+            >
               <Plus className="w-4 h-4" />
               Create New Goal
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass-panel border-white/20">
             <DialogHeader>
-              <DialogTitle className="font-display text-2xl">Create a New Goal</DialogTitle>
+              <DialogTitle className="font-display text-2xl">
+                Create a New Goal
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
               {/* Goal Title */}
@@ -436,7 +452,10 @@ export default function GoalRoadmap({
                     setNewGoalData({ ...newGoalData, type: value })
                   }
                 >
-                  <SelectTrigger id="goal-type-select" className="focus-organic">
+                  <SelectTrigger
+                    id="goal-type-select"
+                    className="focus-organic"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -524,7 +543,9 @@ export default function GoalRoadmap({
               No goals yet. Create one to get started!
             </p>
             {onCreateGoal && (
-              <Button variant="outline" className="rounded-full">Create Your First Goal</Button>
+              <Button variant="outline" className="rounded-full">
+                Create Your First Goal
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -562,12 +583,13 @@ export default function GoalRoadmap({
                     <div className="flex flex-wrap items-center gap-3 mb-3">
                       <StatusBadge status={goal.status} />
                       <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${goal.progress >= 75
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                          goal.progress >= 75
                             ? "bg-success/10 text-success"
                             : goal.progress >= 40
                               ? "bg-warning/10 text-warning-foreground"
                               : "bg-muted text-muted-foreground"
-                          }`}
+                        }`}
                       >
                         {getGoalStatusLabel(goal)}
                       </span>
@@ -605,13 +627,17 @@ export default function GoalRoadmap({
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">Status</div>
+                      <div className="text-xs text-muted-foreground">
+                        Status
+                      </div>
                       <div className="font-medium text-foreground">
                         {goal.status}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">Created</div>
+                      <div className="text-xs text-muted-foreground">
+                        Created
+                      </div>
                       <div className="font-medium text-foreground">
                         {format(new Date(goal.createdAt), "MMM d, yyyy")}
                       </div>
@@ -649,10 +675,11 @@ export default function GoalRoadmap({
                               <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                             )}
                             <span
-                              className={`flex-1 text-sm ${milestone.completed
+                              className={`flex-1 text-sm ${
+                                milestone.completed
                                   ? "text-muted-foreground line-through"
                                   : "text-foreground"
-                                }`}
+                              }`}
                             >
                               {milestone.text}
                             </span>

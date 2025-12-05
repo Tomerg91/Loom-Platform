@@ -323,7 +323,7 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
   // ============================================
   const handleRetry = async () => {
     setShowRetryButton(false);
-    await handleSubmit({ preventDefault: () => { } } as React.FormEvent);
+    await handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
   return (
@@ -371,10 +371,11 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
                   key={sensation}
                   type="button"
                   onClick={() => handleSensationChange(sensation)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedSensation === sensation
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedSensation === sensation
                       ? "bg-primary text-primary-foreground shadow-soft-md scale-105"
                       : "bg-secondary/10 text-secondary-foreground hover:bg-secondary/20 hover:scale-105"
-                    }`}
+                  }`}
                   disabled={isSubmitting}
                 >
                   {sensation}
@@ -455,9 +456,11 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               onBlur={() => handleFieldBlur("note")}
               disabled={isSubmitting}
               rows={3}
-              className={`resize-none focus-organic bg-white/50 dark:bg-black/20 ${touched.note && errors.note ? "border-destructive" : ""
-                } ${touched.note && !errors.note && note ? "border-success" : ""
-                }`}
+              className={`resize-none focus-organic bg-white/50 dark:bg-black/20 ${
+                touched.note && errors.note ? "border-destructive" : ""
+              } ${
+                touched.note && !errors.note && note ? "border-success" : ""
+              }`}
             />
           </FormFieldWithValidation>
 
@@ -482,12 +485,14 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
               type="button"
               onClick={() => setSharedWithCoach(!sharedWithCoach)}
               disabled={isSubmitting}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${sharedWithCoach ? "bg-primary" : "bg-muted-foreground"
-                }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                sharedWithCoach ? "bg-primary" : "bg-muted-foreground"
+              }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${sharedWithCoach ? "translate-x-6" : "translate-x-1"
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  sharedWithCoach ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
           </div>
@@ -551,7 +556,11 @@ export default function SomaticLogForm({ onSuccess }: SomaticLogFormProps) {
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button type="submit" disabled={isSubmitting} className="flex-1 shadow-soft hover:shadow-soft-lg transition-all rounded-full">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 shadow-soft hover:shadow-soft-lg transition-all rounded-full"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

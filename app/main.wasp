@@ -77,6 +77,8 @@ app OpenSaaS {
       import { createMissingProfiles } from "@src/server/scripts/createMissingProfiles",
       // Creates test coach and clients with realistic sample data for development
       import { seedTestCoachWithClients } from "@src/server/scripts/dbSeeds",
+      // Creates Admin, Client, Coach, and Clinic users with specific credentials
+      import { createTestUsers } from "@src/server/scripts/createTestUsers",
     ]
   },
 
